@@ -4,14 +4,14 @@ import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
 
 class ParentHomeScreen extends StatelessWidget {
   const ParentHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    /*DioHelper.sendNotification(
+        notification_title: 'Purchase', notification_body: 'notify_body');*/
     return BlocProvider(
       create: (context) => ParentCubit()
         ..createDatabase()
@@ -36,6 +36,14 @@ class ParentHomeScreen extends StatelessWidget {
                       ontap: () {
                         signOut(context);
                       },
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    DrawerItem(
+                      text: 'Clear History',
+                      icon: Icons.clear,
+                      ontap: () => ParentCubit.get(context).clearHistory(),
                     )
                   ]),
                 )),
@@ -59,12 +67,36 @@ class ParentHomeScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Column(
+                        mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Family',
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.bold)),
-                          Row(
+                        ],
+                      ),
+                    ),
+                    ParentCubit.get(context).studentsData.isNotEmpty
+                        ? SizedBox(
+                            height: 180,
+                            width: double.infinity,
+                            child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                physics: NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) =>
+                                    buildFamilyMemberCard(
+                                        ParentCubit.get(context)
+                                            .studentsData[index],
+                                        context),
+                                separatorBuilder: (context, index) => SizedBox(
+                                      width: 10,
+                                    ),
+                                itemCount: ParentCubit.get(context)
+                                    .studentsData
+                                    .length),
+                          )
+                        : Row(
                             children: [
                               Container(
                                 padding: EdgeInsets.zero,
@@ -111,9 +143,6 @@ class ParentHomeScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),

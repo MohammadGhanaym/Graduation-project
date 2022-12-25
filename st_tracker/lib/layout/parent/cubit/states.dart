@@ -25,3 +25,5 @@ class ParentAddNewTranscationSuccessState extends ParentStates {}
 class ParentAddNewTranscationLoadingState extends ParentStates {}
 
 class TransactionDeleteSuccess extends ParentStates {}
+
+class ClearDatabaseSuccess extends ParentStates {}

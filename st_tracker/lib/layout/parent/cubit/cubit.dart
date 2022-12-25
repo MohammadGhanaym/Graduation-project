@@ -1,5 +1,9 @@
+import 'dart:developer';
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
@@ -8,38 +12,14 @@ import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/transactions_model.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
+import 'package:st_tracker/shared/network/remote/dio_helper.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
 
   static ParentCubit get(context) => BlocProvider.of(context);
 
-  List<studentModel?> studentsData = [];
-  void getStudentsData() {
-    studentsData = [];
-    emit(GetStudentDataLoading());
-    if (studentID != null)
-      FirebaseFirestore.instance
-          .collection('students')
-          .doc(studentID)
-          .get()
-          .then((value) {
-        //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
-        studentsData.add(studentModel.fromJson(value.data()));
-        emit(GetStudentDataSuccess());
-        getDataFromTransactionsTable(database);
-      }).catchError((error) {
-        print(error.toString());
-        emit(GetStudentDataError());
-      });
-  }
-
-  void addFamilyMember(String id) {
-    studentID = id;
-    CacheHelper.saveData(key: 'st_id', value: id);
-  }
-
-  late Database database;
+  var database;
 
   void createDatabase() async {
     /*databaseFactory.deleteDatabase('activities.db').then((value) {
@@ -74,6 +54,7 @@ class ParentCubit extends Cubit<ParentStates> {
         });
       },
       onOpen: (db) {
+        database = db;
         print('db opened');
         getDataFromAttendanceDatabase(db);
         getDataFromTransactionsTable(db);
@@ -83,19 +64,64 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
+  void clearHistory() {
+    databaseFactory.deleteDatabase('activities.db').then((value) {
+      print('database deleted');
+    }).then((value) {
+      emit(ClearDatabaseSuccess());
+      getDataFromAttendanceDatabase(database);
+      getDataFromTransactionsTable(database);
+    });
+  }
+
+  List<studentModel?> studentsData = [];
+  void getStudentsData() {
+    studentsData = [];
+
+    studentID = CacheHelper.getData(key: 'st_id');
+    emit(GetStudentDataLoading());
+    if (studentID != null)
+      FirebaseFirestore.instance
+          .collection('students')
+          .doc(studentID)
+          .get()
+          .then((value) {
+        //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
+        studentsData.add(studentModel.fromJson(value.data()));
+        print(studentsData[0]!.image);
+        emit(GetStudentDataSuccess());
+      }).catchError((error) {
+        print(error.toString());
+        emit(GetStudentDataError());
+      });
+  }
+
+  void addFamilyMember(String id) {
+    studentID = id;
+    CacheHelper.saveData(key: 'st_id', value: id);
+  }
+
   void addNewTranscation() {
     studentID = CacheHelper.getData(key: 'st_id');
-    //
+    print('before listener');
     trans_listener = FirebaseFirestore.instance
         .collection('canteen transactions')
         .doc(studentID)
         .collection('transactions')
         .snapshots()
         .listen((event) {
+      print('inside listener');
       print(event.docs.length);
       event.docs.forEach((trans) {
         print(trans.id);
+        int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
         trans['products'].forEach((product) {
+          String notify_body =
+              '${product['name']}      -${product['price']} EGP      ${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+
+          /*DioHelper.sendNotification(
+              notification_title: 'Purchase', notification_body: notify_body);*/
+
           print('*' * 40);
           print(product.toString());
           print('*' * 40);
@@ -123,6 +149,7 @@ class ParentCubit extends Cubit<ParentStates> {
           });
         });
       });
+      print('after listener');
       emit(ParentAddNewTranscationSuccessState());
     });
   }
@@ -135,6 +162,8 @@ class ParentCubit extends Cubit<ParentStates> {
       required DateTime date,
       required String product,
       required dynamic price}) async {
+    Database database = await openDatabase('activities.db');
+
     await database.transaction((txn) async {
       txn
           .rawInsert(
@@ -191,7 +220,7 @@ class ParentCubit extends Cubit<ParentStates> {
       value.forEach((element) {
         canteen_transactions.add(TransactionsModel.fromJson(element));
       });
-      print(canteen_transactions);
+
       emit(ParentGeSchoolTransactionsSuccessState());
     });
   }

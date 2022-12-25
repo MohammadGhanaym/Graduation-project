@@ -2,6 +2,7 @@ class studentModel {
   String? id;
   bool? attendanceStatus;
   String? grade;
+  String? image;
   Map<String, dynamic>? location;
   String? name;
   dynamic pocket_money;
@@ -11,6 +12,7 @@ class studentModel {
     if (json != null) {
       id = json['uid'];
       name = json['name'];
+      image = json['image'];
       grade = json['grade'];
       pocket_money = json['pocket money'];
       location = json['location'];
