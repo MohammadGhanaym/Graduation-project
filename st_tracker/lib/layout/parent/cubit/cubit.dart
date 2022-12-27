@@ -1,9 +1,6 @@
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
@@ -11,15 +8,15 @@ import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/transactions_model.dart';
 import 'package:st_tracker/shared/components/constants.dart';
+import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/network/remote/dio_helper.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
 
   static ParentCubit get(context) => BlocProvider.of(context);
 
-  var database;
+  late Database database;
 
   void createDatabase() async {
     /*databaseFactory.deleteDatabase('activities.db').then((value) {
@@ -65,13 +62,8 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   void clearHistory() {
-    databaseFactory.deleteDatabase('activities.db').then((value) {
-      print('database deleted');
-    }).then((value) {
-      emit(ClearDatabaseSuccess());
-      getDataFromAttendanceDatabase(database);
-      getDataFromTransactionsTable(database);
-    });
+    database.rawDelete('DELETE FROM canteenTransactions');
+    getDataFromTransactionsTable(database);
   }
 
   List<studentModel?> studentsData = [];
@@ -223,5 +215,9 @@ class ParentCubit extends Cubit<ParentStates> {
 
       emit(ParentGeSchoolTransactionsSuccessState());
     });
+  }
+
+  void initBackgroundService() {
+    BackgroundService.initializeService();
   }
 }

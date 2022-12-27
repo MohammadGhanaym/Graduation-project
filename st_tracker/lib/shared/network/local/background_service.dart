@@ -3,9 +3,9 @@ import 'dart:io';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:st_tracker/shared/components/constants.dart';
@@ -47,7 +47,7 @@ class BackgroundService {
 
         // auto start service
         autoStart: true,
-        isForegroundMode: true,
+        isForegroundMode: false,
         notificationChannelId: 'my_foreground',
         foregroundServiceNotificationId: 888,
       ),
@@ -99,8 +99,8 @@ class BackgroundService {
         android: androidPlatformChannelSpecifics,
         iOS: const DarwinNotificationDetails());
 
-    await flutterLocalNotificationsPlugin.show(
-        0, 'Purchase', 'notify_body', notify);
+    /*await flutterLocalNotificationsPlugin.show(
+        0, 'Purchase', 'notify_body', notify);*/
 
     FirebaseFirestore.instance
         .collection('canteen transactions')

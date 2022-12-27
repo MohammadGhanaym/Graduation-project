@@ -1,50 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
+import 'package:st_tracker/modules/parent/nutrition/nutrition.dart';
 import 'package:st_tracker/shared/components/components.dart';
+import 'package:st_tracker/shared/network/local/ioslate.dart';
 
 class ParentHomeScreen extends StatelessWidget {
   const ParentHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    /*DioHelper.sendNotification(
-        notification_title: 'Purchase', notification_body: 'notify_body');*/
     return BlocProvider(
       create: (context) => ParentCubit()
         ..createDatabase()
         ..getStudentsData(),
       child: Builder(builder: (context) {
         ParentCubit.get(context).addNewTranscation();
+        ParentCubit.get(context).initBackgroundService();
         return BlocConsumer<ParentCubit, ParentStates>(
           listener: (context, state) {},
           builder: (context, state) {
             return Scaffold(
-                appBar: AppBar(),
+                appBar: AppBar(
+                  elevation: 0.0,
+                ),
                 drawer: Drawer(
                     child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(30.0),
                   child: ListView(children: [
+                    DrawerHeader(
+                        child: Image(
+                      color: Theme.of(context).primaryColor,
+                      image: AssetImage('assets/images/profile.png'),
+                      fit: BoxFit.scaleDown,
+                    )),
                     SizedBox(
                       height: 50,
                     ),
                     DrawerItem(
+                      text: 'Nutrition',
+                      icon: Icons.food_bank_outlined,
+                      ontap: () => navigateTo(context, NutritionScreen()),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    DrawerItem(
+                      text: 'Pocket Money',
+                      icon: Icons.attach_money_outlined,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    DrawerItem(
+                      text: 'Clear History',
+                      icon: Icons.delete_outlined,
+                      ontap: () => ParentCubit.get(context).clearHistory(),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    DrawerItem(
                       text: 'Sign Out',
-                      icon: Icons.exit_to_app_rounded,
+                      icon: Icons.logout_outlined,
                       ontap: () {
                         signOut(context);
                       },
                     ),
                     SizedBox(
-                      height: 5,
+                      height: 20,
                     ),
-                    DrawerItem(
-                      text: 'Clear History',
-                      icon: Icons.clear,
-                      ontap: () => ParentCubit.get(context).clearHistory(),
-                    )
                   ]),
                 )),
                 body: Column(
@@ -52,14 +80,54 @@ class ParentHomeScreen extends StatelessWidget {
                   children: [
                     Container(
                       padding: EdgeInsets.all(20),
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(
-                        'Welcome, Mohammad',
-                        style: TextStyle(fontSize: 40),
+                      alignment: AlignmentDirectional.topStart,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 170,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Balance',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 40),
+                                    ),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    Text(
+                                      '1000.0 EGP',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 25),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                width: 40,
+                              ),
+                              Image(
+                                color: Colors.white,
+                                image: AssetImage('assets/images/purse.png'),
+                                width: 100,
+                                height: 100,
+                              )
+                            ],
+                          ),
+                        ],
                       ),
                       height: 150,
                       width: double.infinity,
-                      decoration: BoxDecoration(color: Colors.blue[300]),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30)),
+                          color: Theme.of(context).primaryColor),
                     ),
                     SizedBox(
                       height: 15,

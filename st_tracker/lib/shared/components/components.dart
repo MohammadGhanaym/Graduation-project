@@ -110,10 +110,11 @@ class DrawerItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Icon(
             icon,
-            size: 35,
+            size: 20,
           ),
           SizedBox(
             width: 5,

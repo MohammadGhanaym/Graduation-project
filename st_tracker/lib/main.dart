@@ -1,9 +1,8 @@
-import 'package:bloc/bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
@@ -16,11 +15,11 @@ import 'package:st_tracker/shared/bloc_observer.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/network/local/life_cycle_manager.dart';
+import 'package:st_tracker/shared/network/local/ioslate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  BackgroundService.initializeService();
+
   await Firebase.initializeApp();
 
   Bloc.observer = MyBlocObserver();
@@ -61,6 +60,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         home: startScreen,
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(scaffoldBackgroundColor: Colors.grey[200]),
       ),
     );
   }
