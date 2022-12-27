@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/transactions_model.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
+import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 
@@ -96,12 +98,12 @@ void signOut(BuildContext context) {
   if (trans_listener != null) {
     trans_listener!.cancel();
   }
-
+  FlutterBackgroundService().invoke('stopService');
   navigateAndFinish(context, LoginScreen());
 }
 
 class DrawerItem extends StatelessWidget {
-  IconData? icon;
+  dynamic? icon;
   String text;
   void Function()? ontap;
   DrawerItem({required this.text, this.icon, this.ontap, super.key});
@@ -112,10 +114,13 @@ class DrawerItem extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Icon(
+          if (icon is IconData)
+            Icon(
+              icon,
+              size: 20,
+            )
+          else
             icon,
-            size: 20,
-          ),
           SizedBox(
             width: 5,
           ),
@@ -196,55 +201,58 @@ Widget buildActivityItem(TransactionsModel model) => Container(
       ),
     )));
 
-Widget buildFamilyMemberCard(studentModel? model, context) => Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        padding: EdgeInsets.zero,
-        height: 180,
-        width: 130,
-        child: Card(
-          child: Container(
-            width: double.infinity,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-                  CircleAvatar(
-                    radius: 41,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.white,
-                        backgroundImage:
-                            model != null ? NetworkImage(model.image!) : null,
-                        child: model == null
-                            ? IconButton(
-                                onPressed: () {
-                                  navigateTo(
-                                      context,
-                                      BlocProvider.value(
-                                          value: ParentCubit.get(context),
-                                          child: AddMember()));
-                                },
-                                icon: Icon(Icons.add))
-                            : null),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                      width: 80,
-                      child: model != null
-                          ? Center(
-                              child: Text(
-                              '${model.name!.split(' ')[0]}',
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w500),
-                            ))
-                          : Text('Add Family Member'))
-                ]),
+Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
+      onTap: () => navigateTo(context, MemberSettingsScreen(student: model)),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Container(
+          padding: EdgeInsets.zero,
+          height: 180,
+          width: 130,
+          child: Card(
+            child: Container(
+              width: double.infinity,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 20,
+                    ),
+                    CircleAvatar(
+                      radius: 41,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.white,
+                          backgroundImage:
+                              model != null ? NetworkImage(model.image!) : null,
+                          child: model == null
+                              ? IconButton(
+                                  onPressed: () {
+                                    navigateTo(
+                                        context,
+                                        BlocProvider.value(
+                                            value: ParentCubit.get(context),
+                                            child: AddMember()));
+                                  },
+                                  icon: Icon(Icons.add))
+                              : null),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                        width: 80,
+                        child: model != null
+                            ? Center(
+                                child: Text(
+                                '${model.name!.split(' ')[0]}',
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w500),
+                              ))
+                            : Text('Add Family Member'))
+                  ]),
+            ),
           ),
         ),
       ),

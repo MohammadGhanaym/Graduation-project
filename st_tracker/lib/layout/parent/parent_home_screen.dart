@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
-import 'package:st_tracker/modules/parent/nutrition/nutrition.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/network/local/ioslate.dart';
 
 class ParentHomeScreen extends StatelessWidget {
   const ParentHomeScreen({super.key});
@@ -16,10 +13,10 @@ class ParentHomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => ParentCubit()
         ..createDatabase()
-        ..getStudentsData(),
+        ..getStudentsData()
+        ..initBackgroundService(),
       child: Builder(builder: (context) {
         ParentCubit.get(context).addNewTranscation();
-        ParentCubit.get(context).initBackgroundService();
         return BlocConsumer<ParentCubit, ParentStates>(
           listener: (context, state) {},
           builder: (context, state) {
@@ -37,20 +34,10 @@ class ParentHomeScreen extends StatelessWidget {
                       image: AssetImage('assets/images/profile.png'),
                       fit: BoxFit.scaleDown,
                     )),
-                    SizedBox(
-                      height: 50,
-                    ),
                     DrawerItem(
-                      text: 'Nutrition',
-                      icon: Icons.food_bank_outlined,
-                      ontap: () => navigateTo(context, NutritionScreen()),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    DrawerItem(
-                      text: 'Pocket Money',
-                      icon: Icons.attach_money_outlined,
+                      text: 'Add Family Member',
+                      icon: Icons.card_membership,
+                      ontap: () => navigateTo(context, AddMember()),
                     ),
                     SizedBox(
                       height: 20,

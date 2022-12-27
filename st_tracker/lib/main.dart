@@ -24,7 +24,6 @@ void main() async {
 
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
-  //DioHelper.init();
 
   userID = CacheHelper.getData(key: 'id');
   userRole = CacheHelper.getData(key: 'role');

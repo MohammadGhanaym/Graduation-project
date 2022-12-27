@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/models/student_model.dart';
@@ -219,5 +220,16 @@ class ParentCubit extends Cubit<ParentStates> {
 
   void initBackgroundService() {
     BackgroundService.initializeService();
+  }
+
+  void openMap({required double lat, required double long}) async {
+    final availableMaps = await MapLauncher.installedMaps;
+    print(
+        availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
+
+    await availableMaps.first.showMarker(
+      coords: Coords(lat, long),
+      title: "Ocean Beach",
+    );
   }
 }

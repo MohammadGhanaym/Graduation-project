@@ -82,6 +82,20 @@ class BackgroundService {
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
 
+    if (service is AndroidServiceInstance) {
+      service.on('setAsForeground').listen((event) {
+        service.setAsForegroundService();
+      });
+
+      service.on('setAsBackground').listen((event) {
+        service.setAsBackgroundService();
+      });
+    }
+
+    service.on('stopService').listen((event) {
+      service.stopSelf();
+    });
+
     var androidInit = const AndroidInitializationSettings('mipmap/logo');
     var IOSInit = const DarwinInitializationSettings();
     var settingsInit =
@@ -98,9 +112,6 @@ class BackgroundService {
     var notify = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: const DarwinNotificationDetails());
-
-    /*await flutterLocalNotificationsPlugin.show(
-        0, 'Purchase', 'notify_body', notify);*/
 
     FirebaseFirestore.instance
         .collection('canteen transactions')
