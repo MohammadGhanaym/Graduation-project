@@ -1,8 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
@@ -13,9 +11,7 @@ import 'package:st_tracker/modules/login/cubit/cubit.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/shared/bloc_observer.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/network/local/ioslate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

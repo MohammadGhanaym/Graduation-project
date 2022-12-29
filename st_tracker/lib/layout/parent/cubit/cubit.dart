@@ -1,13 +1,10 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
+import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/models/transactions_model.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
@@ -29,10 +26,10 @@ class ParentCubit extends Cubit<ParentStates> {
       onCreate: (db, version) {
         print('db created');
         db.transaction((txn) async {
-          // create schoolAttendance table
+          // create student_activity table
           await txn
               .execute(
-                  'CREATE TABLE schoolAttendance(id TEXT, activity TEXT ,date DATETIME)')
+                  'CREATE TABLE student_activity(id TEXT, activity TEXT ,date DATETIME, trans_id TEXT)')
               .then((value) {
             print('Table Created');
           }).catchError((error) {
@@ -54,8 +51,7 @@ class ParentCubit extends Cubit<ParentStates> {
       onOpen: (db) {
         database = db;
         print('db opened');
-        getDataFromAttendanceDatabase(db);
-        getDataFromTransactionsTable(db);
+        getDataFromActivityTable(db);
       },
     ).then((value) {
       return value;
@@ -63,7 +59,7 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   void clearHistory() {
-    database.rawDelete('DELETE FROM canteenTransactions');
+    database.rawDelete('DELETE FROM student_activity');
     getDataFromTransactionsTable(database);
   }
 
@@ -91,7 +87,9 @@ class ParentCubit extends Cubit<ParentStates> {
 
   void addFamilyMember(String id) {
     studentID = id;
-    CacheHelper.saveData(key: 'st_id', value: id);
+    CacheHelper.saveData(key: 'st_id', value: id).then((value) {
+      emit(AddFamilyMemberSuccess());
+    });
   }
 
   void addNewTranscation() {
@@ -107,39 +105,34 @@ class ParentCubit extends Cubit<ParentStates> {
       print(event.docs.length);
       event.docs.forEach((trans) {
         print(trans.id);
-        int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
+
         trans['products'].forEach((product) {
-          String notify_body =
-              '${product['name']}      -${product['price']} EGP      ${DateFormat('EE, hh:mm a').format(DateTime.now())}';
-
-          /*DioHelper.sendNotification(
-              notification_title: 'Purchase', notification_body: notify_body);*/
-
-          print('*' * 40);
-          print(product.toString());
-          print('*' * 40);
           insertToTransactionsTable(
-                  trans_id: trans.id,
-                  st_id: studentID!,
-                  date: trans['date'].toDate(),
-                  product: product['name'],
-                  price: product['price'])
-              .then((value) {
-            FirebaseFirestore.instance
-                .collection('canteen transactions')
-                .doc(studentID)
-                .collection('transactions')
-                .doc(trans.id)
-                .delete()
-                .then((value) {
-              emit(TransactionDeleteSuccess());
+              trans_id: trans.id,
+              st_id: studentID!,
+              date: trans['date'].toDate(),
+              product: product['name'],
+              price: product['price']);
+        });
 
-              print('transcation deleted');
-              print(studentID);
-            }).catchError((error) {
-              print(error.toString());
-            });
-          });
+        FirebaseFirestore.instance
+            .collection('canteen transactions')
+            .doc(studentID)
+            .collection('transactions')
+            .doc(trans.id)
+            .delete()
+            .then((value) {
+          insertToActivityTable(
+              id: studentID!,
+              activityType: trans['total_price'],
+              date: trans['date'].toDate(),
+              transId: trans.id);
+          emit(TransactionDeleteSuccess());
+
+          print('transcation deleted');
+          print(studentID);
+        }).catchError((error) {
+          print(error.toString());
         });
       });
       print('after listener');
@@ -147,7 +140,39 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  void addNewAttendance() {}
+  void addNewAttendance() {
+    studentID = CacheHelper.getData(key: 'st_id');
+    FirebaseFirestore.instance
+        .collection('students')
+        .doc(studentID)
+        .snapshots()
+        .listen((event) {
+      SchoolAttendanceModel attendanceStatus =
+          SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
+
+      if (attendanceStatus.arrived) {
+        FirebaseFirestore.instance
+            .collection('students')
+            .doc(studentID)
+            .update({
+          'attendance status': {'arrive': false, 'leave': false}
+        }).then((value) {
+          insertToActivityTable(
+              id: studentID!, activityType: 'Arrived', date: DateTime.now());
+        });
+      } else if (attendanceStatus.left) {
+        FirebaseFirestore.instance
+            .collection('students')
+            .doc(studentID)
+            .update({
+          'attendance status': {'arrive': false, 'leave': false}
+        }).then((value) {
+          insertToActivityTable(
+              id: studentID!, activityType: 'Left', date: DateTime.now());
+        });
+      }
+    });
+  }
 
   Future<void> insertToTransactionsTable(
       {required String trans_id,
@@ -171,34 +196,41 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  insertToAttendanceDatabase(
+  insertToActivityTable(
       {required String id,
       required String activityType,
-      required DateTime date}) async {
+      required DateTime date,
+      String? transId}) async {
     await database.transaction((txn) async {
       txn
           .rawInsert(
-              'INSERT INTO schoolAttendance(id, date, activityType) VALUES($id,$date, $activityType)')
+              'INSERT INTO student_activity(id, date, activity, trans_id) VALUES("$id","$date", "$activityType", "$transId")')
           .then((value) {
         print('$value inserted successfully');
-        emit(ParentInsertAttendanceDatabaseSuccessState());
+        emit(ParentInsertActivityTableSuccessState());
 
-        getDataFromAttendanceDatabase(database);
+        getDataFromActivityTable(database);
       }).catchError((err) {
         print(
-            'Error when inserting into schoolAttendance table! ${err.toString()}');
+            'Error when inserting into student_activity table! ${err.toString()}');
       });
     });
   }
 
-  List<TransactionsModel> canteen_transactions = [];
+  List<ActivityModel> activities = [];
 
-  void getDataFromAttendanceDatabase(Database database) async {
+  void getDataFromActivityTable(Database database) async {
     emit(ParentGetDataBaseLoadingState());
     await database
-        .rawQuery('SELECT * FROM schoolAttendance ORDER BY date DESC')
+        .rawQuery('SELECT * FROM student_activity ORDER BY date DESC')
         .then((value) {
-      emit(ParentGeSchoolAttendanceSuccessState());
+      activities = [];
+      value.forEach(
+        (element) {
+          activities.add(ActivityModel.fromJson(element));
+        },
+      );
+      emit(ParentGeStudentActivitySuccessState());
     });
   }
 
@@ -209,10 +241,8 @@ class ParentCubit extends Cubit<ParentStates> {
         .rawQuery('SELECT * FROM canteenTransactions ORDER BY date DESC')
         .then((value) {
       print(value);
-      canteen_transactions = [];
-      value.forEach((element) {
-        canteen_transactions.add(TransactionsModel.fromJson(element));
-      });
+      activities = [];
+      value.forEach((element) {});
 
       emit(ParentGeSchoolTransactionsSuccessState());
     });
@@ -229,7 +259,7 @@ class ParentCubit extends Cubit<ParentStates> {
 
     await availableMaps.first.showMarker(
       coords: Coords(lat, long),
-      title: "Ocean Beach",
+      title: "Location",
     );
   }
 }

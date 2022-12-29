@@ -8,6 +8,7 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 
@@ -112,79 +113,68 @@ class BackgroundService {
     var notify = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: const DarwinNotificationDetails());
+    sendTransNotification(flutterLocalNotificationsPlugin, notify);
+    sendAttendanceNotification(flutterLocalNotificationsPlugin, notify);
+  }
 
+  static void sendTransNotification(
+      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+      var notify) {
     FirebaseFirestore.instance
         .collection('canteen transactions')
         .doc(studentID)
         .collection('transactions')
         .snapshots()
         .listen((event) {
-      event.docs.forEach((trans) {
-        trans['products'].forEach((product) async {
-          String notify_body =
-              '${product['name']}      -${product['price']} EGP      ${DateFormat('EE, hh:mm a').format(DateTime.now())}';
-
-          await flutterLocalNotificationsPlugin.show(
-              0, 'Purchase', notify_body, notify);
+      event.docs.forEach((trans) async {
+        String notify_body =
+            '${trans['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+        FirebaseFirestore.instance
+            .collection('students')
+            .doc(studentID)
+            .get()
+            .then((value) async {
+          await flutterLocalNotificationsPlugin.show(0,
+              '${value['name'].split(' ')[0]} Purchased', notify_body, notify);
         });
       });
     });
   }
-}
 
-
-/*class BackgroundService {
-  static Future<void> initializeService() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    final service = FlutterBackgroundService();
-    await Firebase.initializeApp();
-    await CacheHelper.init();
-    DioHelper.init();
-
-    await service.configure(
-      androidConfiguration: AndroidConfiguration(
-        // this will be executed when app is in foreground or background in separated isolate
-        onStart: onStart,
-
-        // auto start service
-        autoStart: true,
-        isForegroundMode: true,
-        foregroundServiceNotificationId: 888,
-      ),
-      iosConfiguration: IosConfiguration(
-        // auto start service
-        autoStart: true,
-
-        // this will be executed when app is in foreground in separated isolate
-        onForeground: onStart,
-      ),
-    );
-  }
-
-  static void onStart(ServiceInstance service) async {
-    /*FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);*/
-    DartPluginRegistrant.ensureInitialized();
-
-    studentID = CacheHelper.getData(key: 'st_id');
-    //
-    trans_listener = FirebaseFirestore.instance
-        .collection('canteen transactions')
+  static void sendAttendanceNotification(
+      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+      var notify) {
+    FirebaseFirestore.instance
+        .collection('students')
         .doc(studentID)
-        .collection('transactions')
         .snapshots()
         .listen((event) {
-      event.docs.forEach((trans) {
-        print('trans received');
-        /*DioHelper.sendNotification(
-            notification_title: 'Purchase', notification_body: 'notify_body');*/
-      });
+      SchoolAttendanceModel attendanceStatus =
+          SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
+      String notify_body =
+          '${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+
+      if (attendanceStatus.arrived) {
+        FirebaseFirestore.instance
+            .collection('students')
+            .doc(studentID)
+            .update({
+          'attendance status': {'arrive': false, 'leave': false}
+        }).then((value) async {
+          await flutterLocalNotificationsPlugin.show(
+              0, '${event['name'].split(' ')[0]} Arrived', notify_body, notify);
+        });
+      } else if (attendanceStatus.left) {
+        FirebaseFirestore.instance
+            .collection('students')
+            .doc(studentID)
+            .update({
+          'attendance status': {'arrive': false, 'leave': false}
+        }).then((value) async {
+          await flutterLocalNotificationsPlugin.show(
+              0, '${event['name'].split(' ')[0]} Left', notify_body, notify);
+        });
+      }
     });
   }
-
-  /*static Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    print(message.data.toString());
-    print('onBackgroundMessage');
-  }*/
 }
-*/

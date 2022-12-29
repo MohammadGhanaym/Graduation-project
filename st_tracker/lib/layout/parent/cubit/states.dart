@@ -2,6 +2,8 @@ abstract class ParentStates {}
 
 class ParentInitState extends ParentStates {}
 
+class AddFamilyMemberSuccess extends ParentStates {}
+
 class GetStudentDataSuccess extends ParentStates {}
 
 class GetStudentDataLoading extends ParentStates {}
@@ -10,13 +12,13 @@ class GetStudentDataError extends ParentStates {}
 
 class ParentCreateDatabaseState extends ParentStates {}
 
-class ParentInsertAttendanceDatabaseSuccessState extends ParentStates {}
+class ParentInsertActivityTableSuccessState extends ParentStates {}
 
 class ParentInsertTransactionsDatabaseSuccessState extends ParentStates {}
 
 class ParentGetDataBaseLoadingState extends ParentStates {}
 
-class ParentGeSchoolAttendanceSuccessState extends ParentStates {}
+class ParentGeStudentActivitySuccessState extends ParentStates {}
 
 class ParentGeSchoolTransactionsSuccessState extends ParentStates {}
 

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
+import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/transactions_model.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
@@ -135,71 +136,87 @@ class DrawerItem extends StatelessWidget {
   }
 }
 
-Widget buildActivityItem(TransactionsModel model) => Container(
-    height: 80,
-    width: double.infinity,
-    child: Card(
+Widget buildActivityItem(
+    ActivityModel model, List<studentModel?> studentsData) {
+  String? name;
+  print(model.trans_id);
+  studentsData.forEach(
+    (element) {
+      if (model.st_id == element!.id) {
+        name = element.name!.split(' ')[0];
+      }
+    },
+  );
+  return Container(
+      height: 90,
+      width: double.infinity,
+      child: Card(
+          child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Row(
-          children: [
-            Image(
-              image: AssetImage('assets/images/purchase.png'),
-              width: 30,
-              height: 35,
-              fit: BoxFit.scaleDown,
-              alignment: FractionalOffset.center,
-            ),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              Stack(
+                alignment: model.trans_id != 'null'
+                    ? AlignmentDirectional.centerStart
+                    : AlignmentDirectional.center,
                 children: [
-                  SizedBox(
-                    width: 5,
+                  CircleAvatar(
+                    backgroundColor: Colors.grey[300],
                   ),
-                  Text(
-                    'Purchase',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  Image(
+                    image: model.trans_id != 'null'
+                        ? const AssetImage('assets/images/purchase.png')
+                        : const AssetImage('assets/images/movement.png'),
+                    width: 35,
+                    height: 35,
+                    fit: BoxFit.scaleDown,
+                    alignment: FractionalOffset.center,
                   ),
-                  SizedBox(
-                    width: 95,
-                  ),
-                  Text(
-                      '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
                 ],
               ),
               SizedBox(
-                height: 10,
+                width: 10,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Container(
-                    width: 150,
-                    child: Text(
-                      '${model.product_name}',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Text('-${model.price}'),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: Text('EGP'),
-                  ),
-                ],
-              )
-            ])
-          ],
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(
+                  model.trans_id != 'null'
+                      ? '$name Puchased'
+                      : '$name ${model.activity}',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                    '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
+              ]),
+              SizedBox(
+                width: 70,
+              ),
+              model.trans_id != 'null'
+                  ? Text(
+                      '-${model.activity}',
+                      style: TextStyle(fontSize: 15),
+                    )
+                  : Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                        ),
+                        ImageIcon(
+                            color: model.activity == 'Arrived'
+                                ? Colors.green
+                                : Colors.red,
+                            AssetImage('assets/images/${model.activity}.png')),
+                      ],
+                    )
+            ],
+          ),
         ),
-      ),
-    )));
+      )));
+}
 
 Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
       onTap: () => navigateTo(context, MemberSettingsScreen(student: model)),
@@ -207,7 +224,7 @@ Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
         padding: const EdgeInsets.all(10.0),
         child: Container(
           padding: EdgeInsets.zero,
-          height: 180,
+          height: 150,
           width: 130,
           child: Card(
             child: Container(
@@ -216,41 +233,28 @@ Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     CircleAvatar(
                       radius: 41,
                       backgroundColor: Theme.of(context).primaryColor,
                       child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.white,
-                          backgroundImage:
-                              model != null ? NetworkImage(model.image!) : null,
-                          child: model == null
-                              ? IconButton(
-                                  onPressed: () {
-                                    navigateTo(
-                                        context,
-                                        BlocProvider.value(
-                                            value: ParentCubit.get(context),
-                                            child: AddMember()));
-                                  },
-                                  icon: Icon(Icons.add))
-                              : null),
+                        radius: 40,
+                        backgroundColor: Colors.white,
+                        backgroundImage: NetworkImage(model!.image!),
+                      ),
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     Container(
                         width: 80,
-                        child: model != null
-                            ? Center(
-                                child: Text(
-                                '${model.name!.split(' ')[0]}',
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w500),
-                              ))
-                            : Text('Add Family Member'))
+                        child: Center(
+                            child: Text(
+                          '${model.name!.split(' ')[0]}',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500),
+                        )))
                   ]),
             ),
           ),

@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
+//import 'package:dio/dio.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-
+/*
 class DioHelper {
   static late Dio dio;
   static init() {
@@ -42,3 +42,4 @@ class DioHelper {
             title: notification_title, body: notification_body));
   }
 }
+*/

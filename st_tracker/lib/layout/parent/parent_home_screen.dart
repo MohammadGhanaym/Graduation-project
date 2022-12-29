@@ -17,6 +17,7 @@ class ParentHomeScreen extends StatelessWidget {
         ..initBackgroundService(),
       child: Builder(builder: (context) {
         ParentCubit.get(context).addNewTranscation();
+        ParentCubit.get(context).addNewAttendance();
         return BlocConsumer<ParentCubit, ParentStates>(
           listener: (context, state) {},
           builder: (context, state) {
@@ -133,7 +134,7 @@ class ParentHomeScreen extends StatelessWidget {
                     ),
                     ParentCubit.get(context).studentsData.isNotEmpty
                         ? SizedBox(
-                            height: 180,
+                            height: 150,
                             width: double.infinity,
                             child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
@@ -155,7 +156,7 @@ class ParentHomeScreen extends StatelessWidget {
                             children: [
                               Container(
                                 padding: EdgeInsets.zero,
-                                height: 180,
+                                height: 150,
                                 width: 130,
                                 child: Card(
                                   child: Container(
@@ -165,7 +166,7 @@ class ParentHomeScreen extends StatelessWidget {
                                             CrossAxisAlignment.center,
                                         children: [
                                           SizedBox(
-                                            height: 20,
+                                            height: 10,
                                           ),
                                           CircleAvatar(
                                             radius: 41,
@@ -187,7 +188,7 @@ class ParentHomeScreen extends StatelessWidget {
                                                     icon: Icon(Icons.add))),
                                           ),
                                           SizedBox(
-                                            height: 20,
+                                            height: 10,
                                           ),
                                           Container(
                                               width: 80,
@@ -214,14 +215,17 @@ class ParentHomeScreen extends StatelessWidget {
                               child: ListView.separated(
                                   shrinkWrap: true,
                                   itemBuilder: (context, index) =>
-                                      buildActivityItem(ParentCubit.get(context)
-                                          .canteen_transactions[index]),
+                                      buildActivityItem(
+                                          ParentCubit.get(context)
+                                              .activities[index],
+                                          ParentCubit.get(context)
+                                              .studentsData),
                                   separatorBuilder: (context, index) =>
                                       SizedBox(
                                         height: 5,
                                       ),
                                   itemCount: ParentCubit.get(context)
-                                      .canteen_transactions
+                                      .activities
                                       .length),
                             )
                           ],

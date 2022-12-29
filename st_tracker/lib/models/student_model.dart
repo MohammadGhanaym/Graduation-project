@@ -1,6 +1,6 @@
 class studentModel {
   String? id;
-  bool? attendanceStatus;
+  Map<String, dynamic>? attendanceStatus;
   String? grade;
   String? image;
   Map<String, dynamic>? location;
@@ -19,5 +19,14 @@ class studentModel {
       restricted_food = json['restricted food'];
       attendanceStatus = json['attendance status'];
     }
+  }
+}
+
+class SchoolAttendanceModel {
+  late bool arrived;
+  late bool left;
+  SchoolAttendanceModel.fromJson(Map<String, dynamic> json) {
+    arrived = json['arrive'];
+    left = json['leave'];
   }
 }
