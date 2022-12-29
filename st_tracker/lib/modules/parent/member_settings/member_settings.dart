@@ -34,8 +34,8 @@ class MemberSettingsScreen extends StatelessWidget {
                           Row(
                             children: [
                               Image(
-                                  width: 30,
-                                  height: 30,
+                                  width: 25,
+                                  height: 25,
                                   image: AssetImage('assets/images/map.png')),
                               SizedBox(
                                 width: 10,
@@ -53,7 +53,7 @@ class MemberSettingsScreen extends StatelessWidget {
                           Row(
                             children: [
                               SizedBox(
-                                width: 10,
+                                width: 40,
                               ),
                               OutlinedButton(
                                 onPressed: () => ParentCubit.get(context)
@@ -62,11 +62,11 @@ class MemberSettingsScreen extends StatelessWidget {
                                         long: student!.location!['longtitude']),
                                 child: Text(
                                   'Find ${student!.name!.split(' ')[0]}',
-                                  style: TextStyle(fontSize: 20),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               SizedBox(
-                                width: 50,
+                                width: 30,
                               ),
                               Text(
                                 'Last Seen',

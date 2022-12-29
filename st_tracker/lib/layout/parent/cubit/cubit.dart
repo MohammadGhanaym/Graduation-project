@@ -60,7 +60,7 @@ class ParentCubit extends Cubit<ParentStates> {
 
   void clearHistory() {
     database.rawDelete('DELETE FROM student_activity');
-    getDataFromTransactionsTable(database);
+    getDataFromActivityTable(database);
   }
 
   List<studentModel?> studentsData = [];

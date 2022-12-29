@@ -130,7 +130,7 @@ class BackgroundService {
       int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
       event.docs.forEach((trans) async {
         String notify_body =
-            '\t\t\t\t${-trans['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+            '-${trans['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
         FirebaseFirestore.instance
             .collection('students')
             .doc(studentID)
