@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/models/transactions_model.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
-import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
+import 'package:st_tracker/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
+import 'package:st_tracker/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 
@@ -136,8 +134,8 @@ class DrawerItem extends StatelessWidget {
   }
 }
 
-Widget buildActivityItem(
-    ActivityModel model, List<studentModel?> studentsData) {
+Widget buildActivityItem(BuildContext context, ActivityModel model,
+    List<studentModel?> studentsData) {
   String? name;
   print(model.trans_id);
   studentsData.forEach(
@@ -147,75 +145,94 @@ Widget buildActivityItem(
       }
     },
   );
-  return Container(
-      height: 90,
-      width: double.infinity,
-      child: Card(
+  return InkWell(
+    onTap: () => model.trans_id != 'null'
+        ? navigateTo(
+            context,
+            TransactionDetailsScreen(
+              trans: model,
+            ))
+        : navigateTo(
+            context,
+            AttendanceHistoryScreen(
+              model: model,
+            )),
+    child: Container(
+        height: 90,
+        width: double.infinity,
+        child: Card(
+            child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-            children: [
-              Stack(
-                alignment: model.trans_id != 'null'
-                    ? AlignmentDirectional.centerStart
-                    : AlignmentDirectional.center,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.grey[300],
-                  ),
-                  Image(
-                    image: model.trans_id != 'null'
-                        ? const AssetImage('assets/images/purchase.png')
-                        : const AssetImage('assets/images/movement.png'),
-                    width: 35,
-                    height: 35,
-                    fit: BoxFit.scaleDown,
-                    alignment: FractionalOffset.center,
-                  ),
-                ],
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
-                  model.trans_id != 'null'
-                      ? '$name Puchased'
-                      : '$name ${model.activity}',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                Stack(
+                  alignment: model.trans_id != 'null'
+                      ? AlignmentDirectional.centerStart
+                      : AlignmentDirectional.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: Colors.grey[300],
+                    ),
+                    Image(
+                      image: model.trans_id != 'null'
+                          ? const AssetImage('assets/images/purchase.png')
+                          : const AssetImage('assets/images/movement.png'),
+                      width: 55,
+                      height: 35,
+                      fit: BoxFit.scaleDown,
+                    ),
+                  ],
                 ),
                 SizedBox(
-                  height: 10,
+                  width: 10,
                 ),
-                Text(
-                    '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
-              ]),
-              SizedBox(
-                width: 70,
-              ),
-              model.trans_id != 'null'
-                  ? Text(
-                      '-${model.activity}',
-                      style: TextStyle(fontSize: 15),
-                    )
-                  : Row(
-                      children: [
-                        SizedBox(
-                          width: 20,
-                        ),
-                        ImageIcon(
-                            color: model.activity == 'Arrived'
-                                ? Colors.green
-                                : Colors.red,
-                            AssetImage('assets/images/${model.activity}.png')),
-                      ],
-                    )
-            ],
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    model.trans_id != 'null'
+                        ? '$name Puchased'
+                        : '$name ${model.activity}',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                      '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
+                ]),
+                SizedBox(
+                  width: 70,
+                ),
+                model.trans_id != 'null'
+                    ? Text(
+                        '-${model.activity}',
+                        style: TextStyle(fontSize: 16),
+                      )
+                    : Row(
+                        children: [
+                          model.activity == 'Arrived'
+                              ? SizedBox(
+                                  width: 20,
+                                )
+                              : SizedBox(
+                                  width: 30,
+                                ),
+                          ImageIcon(
+                              size: 30,
+                              color: model.activity == 'Arrived'
+                                  ? Colors.green
+                                  : Colors.red,
+                              AssetImage(
+                                  'assets/images/${model.activity}.png')),
+                        ],
+                      )
+              ],
+            ),
           ),
-        ),
-      )));
+        ))),
+  );
 }
 
 Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(

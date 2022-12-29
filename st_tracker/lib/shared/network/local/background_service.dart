@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'dart:io';
 import 'dart:async';
@@ -126,15 +127,16 @@ class BackgroundService {
         .collection('transactions')
         .snapshots()
         .listen((event) {
+      int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
       event.docs.forEach((trans) async {
         String notify_body =
-            '${trans['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+            '\t\t\t\t${-trans['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
         FirebaseFirestore.instance
             .collection('students')
             .doc(studentID)
             .get()
             .then((value) async {
-          await flutterLocalNotificationsPlugin.show(0,
+          await flutterLocalNotificationsPlugin.show(notify_id,
               '${value['name'].split(' ')[0]} Purchased', notify_body, notify);
         });
       });
@@ -148,32 +150,20 @@ class BackgroundService {
         .collection('students')
         .doc(studentID)
         .snapshots()
-        .listen((event) {
+        .listen((event) async {
+      int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
+
       SchoolAttendanceModel attendanceStatus =
           SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
       String notify_body =
           '${DateFormat('EE, hh:mm a').format(DateTime.now())}';
 
       if (attendanceStatus.arrived) {
-        FirebaseFirestore.instance
-            .collection('students')
-            .doc(studentID)
-            .update({
-          'attendance status': {'arrive': false, 'leave': false}
-        }).then((value) async {
-          await flutterLocalNotificationsPlugin.show(
-              0, '${event['name'].split(' ')[0]} Arrived', notify_body, notify);
-        });
+        await flutterLocalNotificationsPlugin.show(notify_id,
+            '${event['name'].split(' ')[0]} Arrived', notify_body, notify);
       } else if (attendanceStatus.left) {
-        FirebaseFirestore.instance
-            .collection('students')
-            .doc(studentID)
-            .update({
-          'attendance status': {'arrive': false, 'leave': false}
-        }).then((value) async {
-          await flutterLocalNotificationsPlugin.show(
-              0, '${event['name'].split(' ')[0]} Left', notify_body, notify);
-        });
+        await flutterLocalNotificationsPlugin.show(notify_id,
+            '${event['name'].split(' ')[0]} Left', notify_body, notify);
       }
     });
   }

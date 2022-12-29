@@ -216,6 +216,7 @@ class ParentHomeScreen extends StatelessWidget {
                                   shrinkWrap: true,
                                   itemBuilder: (context, index) =>
                                       buildActivityItem(
+                                          context,
                                           ParentCubit.get(context)
                                               .activities[index],
                                           ParentCubit.get(context)

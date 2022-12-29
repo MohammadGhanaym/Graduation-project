@@ -105,16 +105,6 @@ class ParentCubit extends Cubit<ParentStates> {
       print(event.docs.length);
       event.docs.forEach((trans) {
         print(trans.id);
-
-        trans['products'].forEach((product) {
-          insertToTransactionsTable(
-              trans_id: trans.id,
-              st_id: studentID!,
-              date: trans['date'].toDate(),
-              product: product['name'],
-              price: product['price']);
-        });
-
         FirebaseFirestore.instance
             .collection('canteen transactions')
             .doc(studentID)
@@ -127,6 +117,15 @@ class ParentCubit extends Cubit<ParentStates> {
               activityType: trans['total_price'],
               date: trans['date'].toDate(),
               transId: trans.id);
+
+          trans['products'].forEach((product) {
+            insertToTransactionsTable(
+                trans_id: trans.id,
+                st_id: studentID!,
+                date: trans['date'].toDate(),
+                product: product['name'],
+                price: product['price']);
+          });
           emit(TransactionDeleteSuccess());
 
           print('transcation deleted');
@@ -201,14 +200,13 @@ class ParentCubit extends Cubit<ParentStates> {
       required String activityType,
       required DateTime date,
       String? transId}) async {
+    Database database = await openDatabase('activities.db');
     await database.transaction((txn) async {
       txn
           .rawInsert(
               'INSERT INTO student_activity(id, date, activity, trans_id) VALUES("$id","$date", "$activityType", "$transId")')
           .then((value) {
         print('$value inserted successfully');
-        emit(ParentInsertActivityTableSuccessState());
-
         getDataFromActivityTable(database);
       }).catchError((err) {
         print(
@@ -241,7 +239,6 @@ class ParentCubit extends Cubit<ParentStates> {
         .rawQuery('SELECT * FROM canteenTransactions ORDER BY date DESC')
         .then((value) {
       print(value);
-      activities = [];
       value.forEach((element) {});
 
       emit(ParentGeSchoolTransactionsSuccessState());

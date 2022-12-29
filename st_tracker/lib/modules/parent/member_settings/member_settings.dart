@@ -31,13 +31,43 @@ class MemberSettingsScreen extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Find Location',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                          Row(
+                            children: [
+                              Image(
+                                  width: 30,
+                                  height: 30,
+                                  image: AssetImage('assets/images/map.png')),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                'Location',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
                           ),
                           Row(
                             children: [
+                              SizedBox(
+                                width: 10,
+                              ),
+                              OutlinedButton(
+                                onPressed: () => ParentCubit.get(context)
+                                    .openMap(
+                                        lat: student!.location!['latitude'],
+                                        long: student!.location!['longtitude']),
+                                child: Text(
+                                  'Find ${student!.name!.split(' ')[0]}',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 50,
+                              ),
                               Text(
                                 'Last Seen',
                                 style: TextStyle(
@@ -51,20 +81,6 @@ class MemberSettingsScreen extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.w300),
                               ),
-                              SizedBox(
-                                width: 60,
-                              ),
-                              MaterialButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: () => ParentCubit.get(context)
-                                    .openMap(
-                                        lat: student!.location!['latitude'],
-                                        long: student!.location!['longtitude']),
-                                child: Image(
-                                    width: 50,
-                                    height: 50,
-                                    image: AssetImage('assets/images/map.png')),
-                              )
                             ],
                           ),
                         ],
