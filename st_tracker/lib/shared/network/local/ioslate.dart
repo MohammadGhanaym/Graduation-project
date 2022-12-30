@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-
+/*
 class MyIsolate {
   static void isolate(String arg) async {
     print('start ioslate');
@@ -13,7 +13,7 @@ class MyIsolate {
     CacheHelper.init();
     await Firebase.initializeApp();
     print('before studentID');
-    studentID = CacheHelper.getData(key: 'st_id');
+    //studentID = CacheHelper.getData(key: 'st_id');
     print('after studentID');
     // For flutter prior to version 3.0.0
     // We have to register the plugin manually
@@ -60,3 +60,4 @@ class MyIsolate {
     });
   }
 }
+*/

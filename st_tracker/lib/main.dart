@@ -20,6 +20,7 @@ void main() async {
 
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
+  //CacheHelper.removeData(key: 'IDsList');
 
   userID = CacheHelper.getData(key: 'id');
   userRole = CacheHelper.getData(key: 'role');

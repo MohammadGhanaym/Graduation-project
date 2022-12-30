@@ -136,12 +136,15 @@ class DrawerItem extends StatelessWidget {
 
 Widget buildActivityItem(BuildContext context, ActivityModel model,
     List<studentModel?> studentsData) {
+  print('studentsdata');
+  print(studentsData);
   String? name;
   print(model.trans_id);
   studentsData.forEach(
     (element) {
       if (model.st_id == element!.id) {
         name = element.name!.split(' ')[0];
+        print(name);
       }
     },
   );
@@ -162,74 +165,77 @@ Widget buildActivityItem(BuildContext context, ActivityModel model,
         width: double.infinity,
         child: Card(
             child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                Stack(
-                  alignment: model.trans_id != 'null'
-                      ? AlignmentDirectional.centerStart
-                      : AlignmentDirectional.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.grey[300],
-                    ),
-                    Image(
-                      image: model.trans_id != 'null'
-                          ? const AssetImage('assets/images/purchase.png')
-                          : const AssetImage('assets/images/movement.png'),
-                      width: 55,
-                      height: 35,
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ],
-                ),
+          padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
+          child: Row(
+            children: [
+              Stack(
+                alignment: model.trans_id != 'null'
+                    ? AlignmentDirectional.centerStart
+                    : AlignmentDirectional.center,
+                children: [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: Colors.grey[300],
+                  ),
+                  Image(
+                    image: model.trans_id != 'null'
+                        ? const AssetImage('assets/images/purchase.png')
+                        : const AssetImage('assets/images/movement.png'),
+                    width: 45,
+                    height: 35,
+                    fit: BoxFit.scaleDown,
+                  ),
+                ],
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 SizedBox(
-                  width: 10,
+                  height: 5,
                 ),
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(
+                Container(
+                  width: 160,
+                  child: Text(
                     model.trans_id != 'null'
                         ? '$name Puchased'
                         : '$name ${model.activity}',
+                    maxLines: 2,
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                      '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
-                ]),
-                SizedBox(
-                  width: 70,
                 ),
-                model.trans_id != 'null'
-                    ? Text(
-                        '-${model.activity}',
-                        style: TextStyle(fontSize: 16),
-                      )
-                    : Row(
-                        children: [
-                          model.activity == 'Arrived'
-                              ? SizedBox(
-                                  width: 20,
-                                )
-                              : SizedBox(
-                                  width: 30,
-                                ),
-                          ImageIcon(
-                              size: 30,
-                              color: model.activity == 'Arrived'
-                                  ? Colors.green
-                                  : Colors.red,
-                              AssetImage(
-                                  'assets/images/${model.activity}.png')),
-                        ],
-                      )
-              ],
-            ),
+                SizedBox(
+                  height: 15,
+                ),
+                Text(
+                    '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
+              ]),
+              SizedBox(
+                width: 10,
+              ),
+              model.trans_id != 'null'
+                  ? Text(
+                      '-${model.activity}',
+                      style: TextStyle(fontSize: 16),
+                    )
+                  : Row(
+                      children: [
+                        model.activity == 'Arrived'
+                            ? SizedBox(
+                                width: 10,
+                              )
+                            : SizedBox(
+                                width: 20,
+                              ),
+                        ImageIcon(
+                            size: 30,
+                            color: model.activity == 'Arrived'
+                                ? Colors.green
+                                : Colors.red,
+                            AssetImage('assets/images/${model.activity}.png')),
+                      ],
+                    )
+            ],
           ),
         ))),
   );
@@ -237,43 +243,41 @@ Widget buildActivityItem(BuildContext context, ActivityModel model,
 
 Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
       onTap: () => navigateTo(context, MemberSettingsScreen(student: model)),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Container(
-          padding: EdgeInsets.zero,
-          height: 150,
-          width: 130,
-          child: Card(
-            child: Container(
-              width: double.infinity,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 10,
+      child: Container(
+        padding: EdgeInsets.zero,
+        height: 140,
+        width: 130,
+        child: Card(
+          child: Container(
+            width: double.infinity,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 10,
+                  ),
+                  CircleAvatar(
+                    radius: 41,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      backgroundImage: NetworkImage(model!.image!),
                     ),
-                    CircleAvatar(
-                      radius: 41,
-                      backgroundColor: Theme.of(context).primaryColor,
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.white,
-                        backgroundImage: NetworkImage(model!.image!),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                        width: 80,
-                        child: Center(
-                            child: Text(
-                          '${model.name!.split(' ')[0]}',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w500),
-                        )))
-                  ]),
-            ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                      width: 80,
+                      child: Center(
+                          child: Text(
+                        '${model.name!.split(' ')[0]}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w500),
+                      )))
+                ]),
           ),
         ),
       ),

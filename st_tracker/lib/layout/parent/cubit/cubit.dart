@@ -64,36 +64,54 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<studentModel?> studentsData = [];
-  void getStudentsData() {
-    studentsData = [];
-
-    studentID = CacheHelper.getData(key: 'st_id');
+  void getStudentsData(String studentID) {
+    //studentID = CacheHelper.getData(key: 'st_id');
     emit(GetStudentDataLoading());
-    if (studentID != null)
-      FirebaseFirestore.instance
-          .collection('students')
-          .doc(studentID)
-          .get()
-          .then((value) {
-        //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
-        studentsData.add(studentModel.fromJson(value.data()));
-        print(studentsData[0]!.image);
-        emit(GetStudentDataSuccess());
-      }).catchError((error) {
-        print(error.toString());
-        emit(GetStudentDataError());
-      });
-  }
-
-  void addFamilyMember(String id) {
-    studentID = id;
-    CacheHelper.saveData(key: 'st_id', value: id).then((value) {
-      emit(AddFamilyMemberSuccess());
+    FirebaseFirestore.instance
+        .collection('students')
+        .doc(studentID)
+        .get()
+        .then((value) {
+      //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
+      studentsData.add(studentModel.fromJson(value.data()));
+      print(studentsData[0]!.image);
+      emit(GetStudentDataSuccess());
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetStudentDataError());
     });
   }
 
-  void addNewTranscation() {
-    studentID = CacheHelper.getData(key: 'st_id');
+  void test() {
+    studentsData = [];
+    if (CacheHelper.getData(key: 'IDsList') != null) {
+      IDs = CacheHelper.getData(key: 'IDsList');
+      if (IDs.isNotEmpty) {
+        IDs.forEach((id) {
+          addNewTranscation(id);
+          addNewAttendance(id);
+          getStudentsData(id);
+        });
+      }
+    }
+  }
+
+  void addFamilyMember(String id) {
+    List<String> ids_lst = [];
+    if (CacheHelper.getData(key: 'IDsList') != null) {
+      ids_lst = CacheHelper.getData(key: 'IDsList');
+    }
+    ids_lst.add(id);
+    CacheHelper.saveData(key: 'IDsList', value: ids_lst).then((value) {
+      emit(AddFamilyMemberSuccess());
+      getStudentsData(id);
+      addNewAttendance(id);
+      addNewTranscation(id);
+    });
+  }
+
+  void addNewTranscation(String studentID) {
+    //studentID = CacheHelper.getData(key: 'st_id');
     print('before listener');
     trans_listener = FirebaseFirestore.instance
         .collection('canteen transactions')
@@ -113,7 +131,7 @@ class ParentCubit extends Cubit<ParentStates> {
             .delete()
             .then((value) {
           insertToActivityTable(
-              id: studentID!,
+              id: studentID,
               activityType: trans['total_price'],
               date: trans['date'].toDate(),
               transId: trans.id);
@@ -121,7 +139,7 @@ class ParentCubit extends Cubit<ParentStates> {
           trans['products'].forEach((product) {
             insertToTransactionsTable(
                 trans_id: trans.id,
-                st_id: studentID!,
+                st_id: studentID,
                 date: trans['date'].toDate(),
                 product: product['name'],
                 price: product['price']);
@@ -139,8 +157,9 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  void addNewAttendance() {
-    studentID = CacheHelper.getData(key: 'st_id');
+  void addNewAttendance(String studentID) {
+    //studentID = CacheHelper.getData(key: 'st_id');
+
     FirebaseFirestore.instance
         .collection('students')
         .doc(studentID)
@@ -157,7 +176,7 @@ class ParentCubit extends Cubit<ParentStates> {
           'attendance status': {'arrive': false, 'leave': false}
         }).then((value) {
           insertToActivityTable(
-              id: studentID!, activityType: 'Arrived', date: DateTime.now());
+              id: studentID, activityType: 'Arrived', date: DateTime.now());
         });
       } else if (attendanceStatus.left) {
         FirebaseFirestore.instance
@@ -167,7 +186,7 @@ class ParentCubit extends Cubit<ParentStates> {
           'attendance status': {'arrive': false, 'leave': false}
         }).then((value) {
           insertToActivityTable(
-              id: studentID!, activityType: 'Left', date: DateTime.now());
+              id: studentID, activityType: 'Left', date: DateTime.now());
         });
       }
     });

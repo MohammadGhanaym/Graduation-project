@@ -52,7 +52,6 @@ class AddMember extends StatelessWidget {
                               onPressed: () {
                                 ParentCubit.get(context)
                                     .addFamilyMember(idController.text);
-                                ParentCubit.get(context).getStudentsData();
                               },
                               child: Text(
                                 'Confirm',

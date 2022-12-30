@@ -13,11 +13,9 @@ class ParentHomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => ParentCubit()
         ..createDatabase()
-        ..getStudentsData()
         ..initBackgroundService(),
       child: Builder(builder: (context) {
-        ParentCubit.get(context).addNewTranscation();
-        ParentCubit.get(context).addNewAttendance();
+        ParentCubit.get(context).test();
         return BlocConsumer<ParentCubit, ParentStates>(
           listener: (context, state) {},
           builder: (context, state) {
@@ -133,67 +131,77 @@ class ParentHomeScreen extends StatelessWidget {
                       ),
                     ),
                     ParentCubit.get(context).studentsData.isNotEmpty
-                        ? SizedBox(
-                            height: 150,
-                            width: double.infinity,
-                            child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                physics: NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) =>
-                                    buildFamilyMemberCard(
-                                        ParentCubit.get(context)
-                                            .studentsData[index],
-                                        context),
-                                separatorBuilder: (context, index) => SizedBox(
-                                      width: 10,
-                                    ),
-                                itemCount: ParentCubit.get(context)
-                                    .studentsData
-                                    .length),
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: SizedBox(
+                              height: 140,
+                              width: double.infinity,
+                              child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) =>
+                                      buildFamilyMemberCard(
+                                          ParentCubit.get(context)
+                                              .studentsData[index],
+                                          context),
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                  itemCount: ParentCubit.get(context)
+                                      .studentsData
+                                      .length),
+                            ),
                           )
                         : Row(
                             children: [
-                              Container(
-                                padding: EdgeInsets.zero,
-                                height: 150,
-                                width: 130,
-                                child: Card(
-                                  child: Container(
-                                    width: double.infinity,
-                                    child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          CircleAvatar(
-                                            radius: 41,
-                                            backgroundColor:
-                                                Theme.of(context).primaryColor,
-                                            child: CircleAvatar(
-                                                radius: 40,
-                                                backgroundColor: Colors.white,
-                                                child: IconButton(
-                                                    onPressed: () {
-                                                      navigateTo(
-                                                          context,
-                                                          BlocProvider.value(
-                                                              value: ParentCubit
-                                                                  .get(context),
-                                                              child:
-                                                                  AddMember()));
-                                                    },
-                                                    icon: Icon(Icons.add))),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                              width: 80,
-                                              child: Text('Add Family Member'))
-                                        ]),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: Container(
+                                  padding: EdgeInsets.zero,
+                                  height: 150,
+                                  width: 130,
+                                  child: Card(
+                                    child: Container(
+                                      width: double.infinity,
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            CircleAvatar(
+                                              radius: 36,
+                                              backgroundColor: Theme.of(context)
+                                                  .primaryColor,
+                                              child: CircleAvatar(
+                                                  radius: 35,
+                                                  backgroundColor: Colors.white,
+                                                  child: IconButton(
+                                                      onPressed: () {
+                                                        navigateTo(
+                                                            context,
+                                                            BlocProvider.value(
+                                                                value: ParentCubit
+                                                                    .get(
+                                                                        context),
+                                                                child:
+                                                                    AddMember()));
+                                                      },
+                                                      icon: Icon(Icons.add))),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Container(
+                                                width: 80,
+                                                child:
+                                                    Text('Add Family Member'))
+                                          ]),
+                                    ),
                                   ),
                                 ),
                               ),

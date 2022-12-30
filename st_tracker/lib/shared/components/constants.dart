@@ -5,9 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 String? userID;
 String? userRole;
-List<String>? studentIDs;
-String? studentID;
 
+var IDs = [];
+//String? studentID;
+int? count = 0;
 StreamSubscription<QuerySnapshot<Object?>>? trans_listener;
 //StreamSubscription<QuerySnapshot<Object?>>? background_trans_listener;
 var random =

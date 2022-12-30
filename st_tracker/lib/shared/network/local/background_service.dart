@@ -75,7 +75,7 @@ class BackgroundService {
     DartPluginRegistrant.ensureInitialized();
     CacheHelper.init();
     await Firebase.initializeApp();
-    studentID = CacheHelper.getData(key: 'st_id');
+    //studentID = CacheHelper.getData(key: 'st_id');
 
     // For flutter prior to version 3.0.0
     // We have to register the plugin manually
@@ -114,11 +114,22 @@ class BackgroundService {
     var notify = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: const DarwinNotificationDetails());
-    sendTransNotification(flutterLocalNotificationsPlugin, notify);
-    sendAttendanceNotification(flutterLocalNotificationsPlugin, notify);
+
+    if (CacheHelper.getData(key: 'IDsList') != null) {
+      IDs = CacheHelper.getData(key: 'IDsList');
+      if (IDs.isNotEmpty) {
+        IDs.forEach((studentID) {
+          sendTransNotification(
+              studentID, flutterLocalNotificationsPlugin, notify);
+          sendAttendanceNotification(
+              studentID, flutterLocalNotificationsPlugin, notify);
+        });
+      }
+    }
   }
 
   static void sendTransNotification(
+      studentID,
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       var notify) {
     FirebaseFirestore.instance
@@ -144,27 +155,29 @@ class BackgroundService {
   }
 
   static void sendAttendanceNotification(
+      studentID,
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       var notify) {
-    FirebaseFirestore.instance
-        .collection('students')
-        .doc(studentID)
-        .snapshots()
-        .listen((event) async {
-      int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
+    if (studentID != null)
+      FirebaseFirestore.instance
+          .collection('students')
+          .doc(studentID)
+          .snapshots()
+          .listen((event) async {
+        int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
 
-      SchoolAttendanceModel attendanceStatus =
-          SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
-      String notify_body =
-          '${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+        SchoolAttendanceModel attendanceStatus =
+            SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
+        String notify_body =
+            '${DateFormat('EE, hh:mm a').format(DateTime.now())}';
 
-      if (attendanceStatus.arrived) {
-        await flutterLocalNotificationsPlugin.show(notify_id,
-            '${event['name'].split(' ')[0]} Arrived', notify_body, notify);
-      } else if (attendanceStatus.left) {
-        await flutterLocalNotificationsPlugin.show(notify_id,
-            '${event['name'].split(' ')[0]} Left', notify_body, notify);
-      }
-    });
+        if (attendanceStatus.arrived) {
+          await flutterLocalNotificationsPlugin.show(notify_id,
+              '${event['name'].split(' ')[0]} Arrived', notify_body, notify);
+        } else if (attendanceStatus.left) {
+          await flutterLocalNotificationsPlugin.show(notify_id,
+              '${event['name'].split(' ')[0]} Left', notify_body, notify);
+        }
+      });
   }
 }

@@ -23,67 +23,57 @@ class MemberSettingsScreen extends StatelessWidget {
             body: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
+                  Column(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Image(
-                                  width: 25,
-                                  height: 25,
-                                  image: AssetImage('assets/images/map.png')),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Location',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          Image(
+                              width: 25,
+                              height: 25,
+                              image: AssetImage('assets/images/map.png')),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Location',
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.w500),
                           ),
                           SizedBox(
-                            height: 5,
+                            width: 60,
                           ),
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 40,
-                              ),
-                              OutlinedButton(
-                                onPressed: () => ParentCubit.get(context)
-                                    .openMap(
-                                        lat: student!.location!['latitude'],
-                                        long: student!.location!['longtitude']),
-                                child: Text(
-                                  'Find ${student!.name!.split(' ')[0]}',
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 30,
-                              ),
-                              Text(
-                                'Last Seen',
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w300),
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "${student!.location!['time']}",
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w300),
-                              ),
-                            ],
+                          Text(
+                            'Last Seen',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w300),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "${student!.location!['time']}",
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w300),
                           ),
                         ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        width: 150,
+                        height: 40,
+                        child: OutlinedButton(
+                          onPressed: () => ParentCubit.get(context).openMap(
+                              lat: student!.location!['latitude'],
+                              long: student!.location!['longtitude']),
+                          child: Text(
+                            'Find ${student!.name!.split(' ')[0]}',
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ),
                       ),
                     ],
                   ),
