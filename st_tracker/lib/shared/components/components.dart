@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
+import 'package:st_tracker/models/product_model.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
@@ -94,11 +96,25 @@ Color chooseToastColor(ToastStates State) {
 void signOut(BuildContext context) {
   CacheHelper.removeData(key: 'id');
   CacheHelper.removeData(key: 'role');
-  if (trans_listener != null) {
-    trans_listener!.cancel();
-  }
+  cancelListeners();
   FlutterBackgroundService().invoke('stopService');
   navigateAndFinish(context, LoginScreen());
+}
+
+void cancelListeners() {
+  if (trans_listeners.isNotEmpty) {
+    trans_listeners.forEach((listener) {
+      listener.cancel();
+    });
+    trans_listeners = [];
+  }
+
+  if (attend_listeners.isNotEmpty) {
+    attend_listeners.forEach((listener) {
+      listener.cancel();
+    });
+    attend_listeners = [];
+  }
 }
 
 class DrawerItem extends StatelessWidget {
@@ -207,8 +223,7 @@ Widget buildActivityItem(BuildContext context, ActivityModel model,
                 SizedBox(
                   height: 15,
                 ),
-                Text(
-                    '${DateFormat('EE, hh:mm a').format(DateTime.parse(model.date))}')
+                Text('${getDate(model.date)}')
               ]),
               SizedBox(
                 width: 10,
@@ -283,8 +298,101 @@ Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
       ),
     );
 
+dynamic getDate(date, {format = 'EE, hh:mm a'}) {
+  return DateFormat(format).format(DateTime.parse(date));
+}
 
+class ProductItem extends StatelessWidget {
+  ProductModel product;
+  ProductItem({super.key, required this.product});
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 100,
+      height: 70,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+              product.product_name,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Row(
+              children: [
+                Text('Price:',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  product.price,
+                  style: TextStyle(fontSize: 15),
+                ),
+              ],
+            )
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class AttendanceHistoryItem extends StatelessWidget {
+  ActivityModel model;
+  AttendanceHistoryItem({super.key, required this.model});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: screen_width * 0.6,
+      height: screen_height * 0.1,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${getDate(model.date, format: 'EEEE')}',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: screen_height * 0.01,
+                  ),
+                  Text('${getDate(model.date, format: 'yyyy-MM-dd')}',
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
+                ],
+              ),
+              VerticalDivider(
+                color: Theme.of(context).primaryColor,
+                thickness: 0.5,
+              ),
+              SizedBox(width: screen_width * 0.05),
+              Text('${getDate(model.date, format: 'hh:mm:ss')}'),
+              model.activity == 'Arrived'
+                  ? SizedBox(width: screen_width * 0.16)
+                  : SizedBox(width: screen_width * 0.18),
+              ImageIcon(AssetImage('assets/images/${model.activity}.png'),
+                  color:
+                      model.activity == 'Arrived' ? Colors.green : Colors.red)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 /*Row(
                               children: [
                                 Container(

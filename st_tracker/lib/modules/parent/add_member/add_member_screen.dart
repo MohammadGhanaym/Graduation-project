@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
+import 'package:st_tracker/layout/parent/parent_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 
 class AddMember extends StatelessWidget {
@@ -16,7 +17,13 @@ class AddMember extends StatelessWidget {
         return GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
           child: Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(
+              leading: IconButton(
+                  onPressed: () {
+                    navigateTo(context, ParentHomeScreen());
+                  },
+                  icon: Icon(Icons.arrow_back)),
+            ),
             body: Center(
               child: SingleChildScrollView(
                 child: Padding(

@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
+import 'package:st_tracker/models/product_model.dart';
+import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
@@ -39,7 +42,7 @@ class ParentCubit extends Cubit<ParentStates> {
           // create canteenTransactions table
           await txn
               .execute(
-                  'CREATE TABLE canteenTransactions(trans_id TEXT, st_id TEXT, date DATETIME, product TEXT, price )')
+                  'CREATE TABLE products(trans_id TEXT, product TEXT, price )')
               .then((value) {
             print('Table Created');
           }).catchError((error) {
@@ -51,16 +54,15 @@ class ParentCubit extends Cubit<ParentStates> {
       onOpen: (db) {
         database = db;
         print('db opened');
-        getDataFromActivityTable(db);
       },
-    ).then((value) {
-      return value;
-    });
+    );
   }
 
   void clearHistory() {
     database.rawDelete('DELETE FROM student_activity');
-    getDataFromActivityTable(database);
+    database.rawDelete('DELETE FROM products');
+
+    getDataFromActivityTable();
   }
 
   List<studentModel?> studentsData = [];
@@ -74,6 +76,7 @@ class ParentCubit extends Cubit<ParentStates> {
         .then((value) {
       //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
       studentsData.add(studentModel.fromJson(value.data()));
+      print(studentsData);
       print(studentsData[0]!.image);
       emit(GetStudentDataSuccess());
     }).catchError((error) {
@@ -82,38 +85,41 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  void test() {
+  void getData() {
     studentsData = [];
+    cancelListeners();
     if (CacheHelper.getData(key: 'IDsList') != null) {
       IDs = CacheHelper.getData(key: 'IDsList');
       if (IDs.isNotEmpty) {
-        IDs.forEach((id) {
+        IDs.forEach((id) async {
           addNewTranscation(id);
           addNewAttendance(id);
           getStudentsData(id);
+          getDataFromActivityTable();
         });
       }
     }
   }
 
-  void addFamilyMember(String id) {
+  void addFamilyMember(String id) async {
     List<String> ids_lst = [];
+
     if (CacheHelper.getData(key: 'IDsList') != null) {
-      ids_lst = CacheHelper.getData(key: 'IDsList');
+      ids_lst = List<String>.from(CacheHelper.getData(key: 'IDsList'));
     }
     ids_lst.add(id);
     CacheHelper.saveData(key: 'IDsList', value: ids_lst).then((value) {
       emit(AddFamilyMemberSuccess());
-      getStudentsData(id);
-      addNewAttendance(id);
-      addNewTranscation(id);
     });
+    // stop service and then start it to listen to changes
+    FlutterBackgroundService().invoke('stopService');
   }
 
   void addNewTranscation(String studentID) {
     //studentID = CacheHelper.getData(key: 'st_id');
     print('before listener');
-    trans_listener = FirebaseFirestore.instance
+
+    trans_listeners.add(FirebaseFirestore.instance
         .collection('canteen transactions')
         .doc(studentID)
         .collection('transactions')
@@ -139,8 +145,6 @@ class ParentCubit extends Cubit<ParentStates> {
           trans['products'].forEach((product) {
             insertToTransactionsTable(
                 trans_id: trans.id,
-                st_id: studentID,
-                date: trans['date'].toDate(),
                 product: product['name'],
                 price: product['price']);
           });
@@ -154,13 +158,12 @@ class ParentCubit extends Cubit<ParentStates> {
       });
       print('after listener');
       emit(ParentAddNewTranscationSuccessState());
-    });
+    }));
   }
 
   void addNewAttendance(String studentID) {
     //studentID = CacheHelper.getData(key: 'st_id');
-
-    FirebaseFirestore.instance
+    attend_listeners.add(FirebaseFirestore.instance
         .collection('students')
         .doc(studentID)
         .snapshots()
@@ -189,27 +192,23 @@ class ParentCubit extends Cubit<ParentStates> {
               id: studentID, activityType: 'Left', date: DateTime.now());
         });
       }
-    });
+    }));
   }
 
   Future<void> insertToTransactionsTable(
       {required String trans_id,
-      required String st_id,
-      required DateTime date,
       required String product,
       required dynamic price}) async {
-    Database database = await openDatabase('activities.db');
+    Database insert_database = await openDatabase('activities.db');
 
-    await database.transaction((txn) async {
+    await insert_database.transaction((txn) async {
       txn
           .rawInsert(
-              'INSERT INTO canteenTransactions(trans_id, st_id, date, product, price) VALUES("$trans_id","$st_id","$date", "$product", "$price")')
+              'INSERT INTO products(trans_id, product, price) VALUES("$trans_id", "$product", "$price")')
           .then((value) {
         print('$value inserted successfully');
-        getDataFromTransactionsTable(database);
       }).catchError((err) {
-        print(
-            'Error when inserting into canteenTransactions table! ${err.toString()}');
+        print('Error when inserting into products table! ${err.toString()}');
       });
     });
   }
@@ -219,14 +218,14 @@ class ParentCubit extends Cubit<ParentStates> {
       required String activityType,
       required DateTime date,
       String? transId}) async {
-    Database database = await openDatabase('activities.db');
-    await database.transaction((txn) async {
+    Database insert_database = await openDatabase('activities.db');
+    await insert_database.transaction((txn) async {
       txn
           .rawInsert(
               'INSERT INTO student_activity(id, date, activity, trans_id) VALUES("$id","$date", "$activityType", "$transId")')
           .then((value) {
         print('$value inserted successfully');
-        getDataFromActivityTable(database);
+        getDataFromActivityTable();
       }).catchError((err) {
         print(
             'Error when inserting into student_activity table! ${err.toString()}');
@@ -236,9 +235,10 @@ class ParentCubit extends Cubit<ParentStates> {
 
   List<ActivityModel> activities = [];
 
-  void getDataFromActivityTable(Database database) async {
+  void getDataFromActivityTable() async {
+    Database activity_database = await openDatabase('activities.db');
     emit(ParentGetDataBaseLoadingState());
-    await database
+    await activity_database
         .rawQuery('SELECT * FROM student_activity ORDER BY date DESC')
         .then((value) {
       activities = [];
@@ -251,21 +251,28 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  void getDataFromTransactionsTable(Database database) async {
+  List<ProductModel> products = [];
+  void getDataFromTransactionsTable(String trans_id) async {
+    Database product_database = await openDatabase('activities.db');
     emit(ParentGetDataBaseLoadingState());
-
-    await database
-        .rawQuery('SELECT * FROM canteenTransactions ORDER BY date DESC')
-        .then((value) {
+    //SELECT * FROM canteenTransactions ORDER BY date DESC'
+    await product_database.query('products',
+        where: 'trans_id = ?', whereArgs: [trans_id]).then((value) {
       print(value);
-      value.forEach((element) {});
+      products = [];
+      value.forEach((element) {
+        products.add(ProductModel.fromJson(element));
+      });
 
       emit(ParentGeSchoolTransactionsSuccessState());
     });
   }
 
-  void initBackgroundService() {
-    BackgroundService.initializeService();
+  void initBackgroundService() async {
+    final isRunning = await FlutterBackgroundService().isRunning();
+    if (!isRunning) {
+      await BackgroundService.initializeService();
+    }
   }
 
   void openMap({required double lat, required double long}) async {
@@ -277,5 +284,24 @@ class ParentCubit extends Cubit<ParentStates> {
       coords: Coords(lat, long),
       title: "Location",
     );
+  }
+
+  List<ActivityModel> attendance_history = [];
+  void getAttendanceHistory(st_id) async {
+    Database database = await openDatabase('activities.db');
+    emit(AttendanceHistoryLoading());
+    await database.query(
+      'student_activity',
+      orderBy: 'date DESC',
+      where: 'trans_id = "null" AND id=?',
+      whereArgs: [st_id],
+    ).then((value) {
+      print(value);
+      attendance_history = [];
+      value.forEach((element) {
+        attendance_history.add(ActivityModel.fromJson(element));
+      });
+      emit(AttendanceHistorySuccess());
+    });
   }
 }

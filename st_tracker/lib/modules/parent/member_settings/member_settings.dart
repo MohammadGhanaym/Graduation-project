@@ -27,15 +27,10 @@ class MemberSettingsScreen extends StatelessWidget {
                   Column(
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Image(
-                              width: 25,
-                              height: 25,
-                              image: AssetImage('assets/images/map.png')),
-                          SizedBox(
-                            width: 10,
-                          ),
                           Text(
                             'Location',
                             style: TextStyle(
@@ -63,15 +58,27 @@ class MemberSettingsScreen extends StatelessWidget {
                         height: 10,
                       ),
                       Container(
-                        width: 150,
+                        width: 190,
                         height: 40,
                         child: OutlinedButton(
                           onPressed: () => ParentCubit.get(context).openMap(
                               lat: student!.location!['latitude'],
                               long: student!.location!['longtitude']),
-                          child: Text(
-                            'Find ${student!.name!.split(' ')[0]}',
-                            style: TextStyle(fontSize: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image(
+                                  width: 20,
+                                  height: 20,
+                                  image: AssetImage('assets/images/map.png')),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                'Find ${student!.name!.split(' ')[0]}',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -80,10 +87,8 @@ class MemberSettingsScreen extends StatelessWidget {
                   SizedBox(
                     height: 10,
                   ),
-                  Container(
-                    height: 1,
-                    width: double.infinity,
-                    color: Colors.grey[500],
+                  Divider(
+                    thickness: 1,
                   )
                 ],
               ),

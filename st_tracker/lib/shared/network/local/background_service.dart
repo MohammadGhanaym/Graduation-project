@@ -61,7 +61,6 @@ class BackgroundService {
         onForeground: onStart,
       ),
     );
-
     service.startService();
   }
 
@@ -114,7 +113,7 @@ class BackgroundService {
     var notify = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: const DarwinNotificationDetails());
-
+    print('********* Inside Background **********');
     if (CacheHelper.getData(key: 'IDsList') != null) {
       IDs = CacheHelper.getData(key: 'IDsList');
       if (IDs.isNotEmpty) {
