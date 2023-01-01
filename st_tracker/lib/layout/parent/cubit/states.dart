@@ -20,6 +20,8 @@ class ParentGetDataBaseLoadingState extends ParentStates {}
 
 class ParentGeStudentActivitySuccessState extends ParentStates {}
 
+class ParentGeStudentActivityErrorState extends ParentStates {}
+
 class ParentGeSchoolTransactionsSuccessState extends ParentStates {}
 
 class ParentAddNewTranscationSuccessState extends ParentStates {}
@@ -33,3 +35,7 @@ class ClearDatabaseSuccess extends ParentStates {}
 class AttendanceHistoryLoading extends ParentStates {}
 
 class AttendanceHistorySuccess extends ParentStates {}
+
+class DeactivateDigitalIDSuccess extends ParentStates {}
+
+class showSettingsState extends ParentStates {}

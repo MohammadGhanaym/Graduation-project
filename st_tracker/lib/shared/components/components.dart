@@ -102,18 +102,18 @@ void signOut(BuildContext context) {
 }
 
 void cancelListeners() {
-  if (trans_listeners.isNotEmpty) {
-    trans_listeners.forEach((listener) {
-      listener.cancel();
+  if (transListeners.isNotEmpty) {
+    transListeners.forEach((key, value) {
+      value.cancel();
     });
-    trans_listeners = [];
+    transListeners = {};
   }
 
-  if (attend_listeners.isNotEmpty) {
-    attend_listeners.forEach((listener) {
-      listener.cancel();
+  if (attendListeners.isNotEmpty) {
+    attendListeners.forEach((key, value) {
+      value.cancel();
     });
-    attend_listeners = [];
+    attendListeners = {};
   }
 }
 

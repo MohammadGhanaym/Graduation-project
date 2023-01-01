@@ -66,36 +66,41 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<studentModel?> studentsData = [];
-  void getStudentsData(String studentID) {
-    //studentID = CacheHelper.getData(key: 'st_id');
+  void getStudentsData() {
+    studentsData = [];
     emit(GetStudentDataLoading());
-    FirebaseFirestore.instance
-        .collection('students')
-        .doc(studentID)
-        .get()
-        .then((value) {
-      //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
-      studentsData.add(studentModel.fromJson(value.data()));
-      print(studentsData);
-      print(studentsData[0]!.image);
-      emit(GetStudentDataSuccess());
-    }).catchError((error) {
-      print(error.toString());
-      emit(GetStudentDataError());
-    });
+    if (CacheHelper.getData(key: 'IDsList') != null) {
+      IDs = List<String>.from(CacheHelper.getData(key: 'IDsList'));
+      if (IDs.isNotEmpty) {
+        IDs.forEach((studentID) {
+          FirebaseFirestore.instance
+              .collection('students')
+              .doc(studentID)
+              .get()
+              .then((value) {
+            //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
+            studentsData.add(studentModel.fromJson(value.data()));
+            print(studentsData);
+            print(studentsData[0]!.image);
+            emit(GetStudentDataSuccess());
+          }).catchError((error) {
+            print(error.toString());
+            emit(GetStudentDataError());
+          });
+        });
+      }
+    }
   }
 
+  List<String> IDs = [];
   void getData() {
-    studentsData = [];
     cancelListeners();
     if (CacheHelper.getData(key: 'IDsList') != null) {
-      IDs = CacheHelper.getData(key: 'IDsList');
+      IDs = List<String>.from(CacheHelper.getData(key: 'IDsList'));
       if (IDs.isNotEmpty) {
         IDs.forEach((id) async {
           addNewTranscation(id);
           addNewAttendance(id);
-          getStudentsData(id);
-          getDataFromActivityTable();
         });
       }
     }
@@ -112,14 +117,19 @@ class ParentCubit extends Cubit<ParentStates> {
       emit(AddFamilyMemberSuccess());
     });
     // stop service and then start it to listen to changes
-    FlutterBackgroundService().invoke('stopService');
+    initBackgroundService();
+    addNewTranscation(id);
+    addNewAttendance(id);
+    getStudentsData();
+    getDataFromActivityTable();
+    FlutterBackgroundService().startService();
   }
 
   void addNewTranscation(String studentID) {
     //studentID = CacheHelper.getData(key: 'st_id');
     print('before listener');
 
-    trans_listeners.add(FirebaseFirestore.instance
+    transListeners[studentID] = FirebaseFirestore.instance
         .collection('canteen transactions')
         .doc(studentID)
         .collection('transactions')
@@ -158,12 +168,12 @@ class ParentCubit extends Cubit<ParentStates> {
       });
       print('after listener');
       emit(ParentAddNewTranscationSuccessState());
-    }));
+    });
   }
 
   void addNewAttendance(String studentID) {
     //studentID = CacheHelper.getData(key: 'st_id');
-    attend_listeners.add(FirebaseFirestore.instance
+    attendListeners[studentID] = FirebaseFirestore.instance
         .collection('students')
         .doc(studentID)
         .snapshots()
@@ -192,7 +202,7 @@ class ParentCubit extends Cubit<ParentStates> {
               id: studentID, activityType: 'Left', date: DateTime.now());
         });
       }
-    }));
+    });
   }
 
   Future<void> insertToTransactionsTable(
@@ -236,10 +246,15 @@ class ParentCubit extends Cubit<ParentStates> {
   List<ActivityModel> activities = [];
 
   void getDataFromActivityTable() async {
+    print('getDataFromActivityTable');
     Database activity_database = await openDatabase('activities.db');
     emit(ParentGetDataBaseLoadingState());
+    //SELECT * FROM student_activity ORDER BY date DESC
     await activity_database
-        .rawQuery('SELECT * FROM student_activity ORDER BY date DESC')
+        .query('student_activity',
+            orderBy: 'date DESC',
+            where: "id IN (${IDs.map((_) => '?').join(', ')})",
+            whereArgs: IDs)
         .then((value) {
       activities = [];
       value.forEach(
@@ -248,6 +263,9 @@ class ParentCubit extends Cubit<ParentStates> {
         },
       );
       emit(ParentGeStudentActivitySuccessState());
+    }).catchError((error) {
+      activities = [];
+      emit(ParentGeStudentActivityErrorState());
     });
   }
 
@@ -269,8 +287,13 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   void initBackgroundService() async {
-    final isRunning = await FlutterBackgroundService().isRunning();
+    final service = FlutterBackgroundService();
+    final isRunning = await service.isRunning();
+
     if (!isRunning) {
+      await BackgroundService.initializeService();
+    } else {
+      service.invoke('stopService');
       await BackgroundService.initializeService();
     }
   }
@@ -302,6 +325,25 @@ class ParentCubit extends Cubit<ParentStates> {
         attendance_history.add(ActivityModel.fromJson(element));
       });
       emit(AttendanceHistorySuccess());
+    });
+  }
+
+  bool isActivated = true; // child settings
+  void showSettings() {
+    isActivated = !isActivated;
+    emit(showSettingsState());
+  }
+
+  Future<void> deactivateDigitalID(String id) async {
+    transListeners[id].cancel();
+    attendListeners[id].cancel();
+    IDs.remove(id);
+    print(IDs);
+    await CacheHelper.saveData(key: 'IDsList', value: IDs).then((value) {
+      initBackgroundService();
+      getStudentsData();
+      getDataFromActivityTable();
+      emit(DeactivateDigitalIDSuccess());
     });
   }
 }

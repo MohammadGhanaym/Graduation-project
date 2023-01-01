@@ -6,12 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 String? userID;
 String? userRole;
 
-var IDs = [];
 //String? studentID;
 int? count = 0;
 //StreamSubscription<QuerySnapshot<Object?>>? trans_listener;
-List<dynamic> trans_listeners = [];
-List<dynamic> attend_listeners = [];
+Map<String, dynamic> transListeners = {};
+Map<String, dynamic> attendListeners = {};
 
 var random =
     Random(); // keep this somewhere in a static variable. Just make sure to initialize only once.

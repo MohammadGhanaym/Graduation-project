@@ -115,6 +115,7 @@ class BackgroundService {
         iOS: const DarwinNotificationDetails());
     print('********* Inside Background **********');
     if (CacheHelper.getData(key: 'IDsList') != null) {
+      var IDs = [];
       IDs = CacheHelper.getData(key: 'IDsList');
       if (IDs.isNotEmpty) {
         IDs.forEach((studentID) {

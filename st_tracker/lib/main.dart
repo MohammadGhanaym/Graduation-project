@@ -25,38 +25,43 @@ void main() async {
   userID = CacheHelper.getData(key: 'id');
   userRole = CacheHelper.getData(key: 'role');
   Widget startScreen = LoginScreen();
-  Cubit mainCubit = LoginCubit();
   if (userID != null) {
     if (userRole == 'teacher') {
       startScreen = TeacherHomeScreen();
-      mainCubit = TeacherCubit();
     } else if (userRole == 'parent') {
       startScreen = ParentHomeScreen();
-      mainCubit = ParentCubit();
     } else {
       startScreen = CanteenHomeScreen();
-      mainCubit = CanteenCubit();
     }
   }
   runApp(MyApp(
     startScreen: startScreen,
-    cubit: mainCubit,
   ));
 }
 
 class MyApp extends StatelessWidget {
   Widget startScreen;
-  Cubit cubit;
-  MyApp({required this.startScreen, required this.cubit});
+  MyApp({required this.startScreen});
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return MultiBlocProvider(
-      providers: [BlocProvider.value(value: ParentCubit())],
+      providers: [
+        if (userRole == 'parent')
+          BlocProvider(
+              create: (context) => ParentCubit()
+                ..createDatabase()
+                ..getStudentsData()
+                ..initBackgroundService()
+                ..getData()
+                ..getDataFromActivityTable()),
+      ],
       child: MaterialApp(
         home: startScreen,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+          appBarTheme: AppBarTheme(color: Colors.blueAccent),
+          primaryColor: Colors.blueAccent,
           scaffoldBackgroundColor: Colors.grey[200],
         ),
       ),

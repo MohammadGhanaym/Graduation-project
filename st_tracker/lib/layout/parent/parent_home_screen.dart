@@ -11,9 +11,10 @@ class ParentHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
-      ParentCubit.get(context).createDatabase();
-      ParentCubit.get(context).initBackgroundService();
-      ParentCubit.get(context).getData();
+      //ParentCubit.get(context).createDatabase();
+      //ParentCubit.get(context).initBackgroundService();
+      //ParentCubit.get(context).getData();
+
       return BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -142,8 +143,7 @@ class ParentHomeScreen extends StatelessWidget {
                                         ParentCubit.get(context)
                                             .studentsData[index],
                                         context),
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(
+                                separatorBuilder: (context, index) => SizedBox(
                                       width: 5,
                                     ),
                                 itemCount: ParentCubit.get(context)
@@ -154,8 +154,8 @@ class ParentHomeScreen extends StatelessWidget {
                       : Row(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               child: Container(
                                 padding: EdgeInsets.zero,
                                 height: 150,
@@ -172,8 +172,8 @@ class ParentHomeScreen extends StatelessWidget {
                                           ),
                                           CircleAvatar(
                                             radius: 36,
-                                            backgroundColor: Theme.of(context)
-                                                .primaryColor,
+                                            backgroundColor:
+                                                Theme.of(context).primaryColor,
                                             child: CircleAvatar(
                                                 radius: 35,
                                                 backgroundColor: Colors.white,
@@ -183,8 +183,7 @@ class ParentHomeScreen extends StatelessWidget {
                                                           context,
                                                           BlocProvider.value(
                                                               value: ParentCubit
-                                                                  .get(
-                                                                      context),
+                                                                  .get(context),
                                                               child:
                                                                   AddMember()));
                                                     },
@@ -195,8 +194,7 @@ class ParentHomeScreen extends StatelessWidget {
                                           ),
                                           Container(
                                               width: 80,
-                                              child:
-                                                  Text('Add Family Member'))
+                                              child: Text('Add Family Member'))
                                         ]),
                                   ),
                                 ),
@@ -224,15 +222,12 @@ class ParentHomeScreen extends StatelessWidget {
                                         context,
                                         ParentCubit.get(context)
                                             .activities[index],
-                                        ParentCubit.get(context)
-                                            .studentsData),
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(
+                                        ParentCubit.get(context).studentsData),
+                                separatorBuilder: (context, index) => SizedBox(
                                       height: 5,
                                     ),
-                                itemCount: ParentCubit.get(context)
-                                    .activities
-                                    .length),
+                                itemCount:
+                                    ParentCubit.get(context).activities.length),
                           )
                         ],
                       ),
