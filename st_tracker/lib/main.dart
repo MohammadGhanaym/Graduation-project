@@ -47,14 +47,9 @@ class MyApp extends StatelessWidget {
     // TODO: implement build
     return MultiBlocProvider(
       providers: [
-        if (userRole == 'parent')
-          BlocProvider(
-              create: (context) => ParentCubit()
-                ..createDatabase()
-                ..getStudentsData()
-                ..initBackgroundService()
-                ..getData()
-                ..getDataFromActivityTable()),
+        BlocProvider(
+          create: (context) => ParentCubit(),
+        )
       ],
       child: MaterialApp(
         home: startScreen,

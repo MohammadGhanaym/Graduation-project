@@ -11,10 +11,12 @@ class ParentHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
-      //ParentCubit.get(context).createDatabase();
-      //ParentCubit.get(context).initBackgroundService();
-      //ParentCubit.get(context).getData();
-
+      ParentCubit.get(context).createDatabase();
+      ParentCubit.get(context).getStudentsData();
+      ParentCubit.get(context).initBackgroundService();
+      ParentCubit.get(context).getData();
+      ParentCubit.get(context).getDataFromActivityTable();
+      print('builder');
       return BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -38,7 +40,7 @@ class ParentHomeScreen extends StatelessWidget {
                     ontap: () => navigateTo(context, AddMember()),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   DrawerItem(
                     text: 'Clear History',
@@ -46,17 +48,38 @@ class ParentHomeScreen extends StatelessWidget {
                     ontap: () => ParentCubit.get(context).clearHistory(),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   DrawerItem(
                     text: 'Sign Out',
                     icon: Icons.logout_outlined,
                     ontap: () {
-                      signOut(context);
+                      showDialog(context: context, builder:(context) => AlertDialog(
+                            title: Text(
+                              'Are you sure?',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            content: Text(
+                                'Are you sure you want to log out?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    signOut(context);
+                                  },
+                                  child: Text("LOG OUT")),
+                              TextButton(
+                                  onPressed: () {
+                                   
+                                   Navigator.of(context).pop();
+                                  },
+                                  child: Text("NEVERMIND"))
+                            ],
+                          ));
+                      
                     },
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                 ]),
               )),
@@ -139,10 +162,10 @@ class ParentHomeScreen extends StatelessWidget {
                                 scrollDirection: Axis.horizontal,
                                 shrinkWrap: true,
                                 itemBuilder: (context, index) =>
-                                    buildFamilyMemberCard(
-                                        ParentCubit.get(context)
-                                            .studentsData[index],
-                                        context),
+                                    FamilyMemberCard(
+                                      ParentCubit.get(context)
+                                          .studentsData[index],
+                                    ),
                                 separatorBuilder: (context, index) => SizedBox(
                                       width: 5,
                                     ),
@@ -217,11 +240,10 @@ class ParentHomeScreen extends StatelessWidget {
                           Expanded(
                             child: ListView.separated(
                                 shrinkWrap: true,
-                                itemBuilder: (context, index) =>
-                                    buildActivityItem(
-                                        context,
-                                        ParentCubit.get(context)
-                                            .activities[index],
+                                itemBuilder: (context, index) => ActivityItem(
+                                    model: ParentCubit.get(context)
+                                        .activities[index],
+                                    studentsData:
                                         ParentCubit.get(context).studentsData),
                                 separatorBuilder: (context, index) => SizedBox(
                                       height: 5,

@@ -4,6 +4,10 @@ class ParentInitState extends ParentStates {}
 
 class AddFamilyMemberSuccess extends ParentStates {}
 
+class AddFamilyMemberLoading extends ParentStates {}
+
+class AddFamilyMemberError extends ParentStates {}
+
 class GetStudentDataSuccess extends ParentStates {}
 
 class GetStudentDataLoading extends ParentStates {}
@@ -38,4 +42,4 @@ class AttendanceHistorySuccess extends ParentStates {}
 
 class DeactivateDigitalIDSuccess extends ParentStates {}
 
-class showSettingsState extends ParentStates {}
+class ShowSettingsState extends ParentStates {}

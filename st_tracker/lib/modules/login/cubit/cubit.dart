@@ -46,10 +46,10 @@ class LoginCubit extends Cubit<LoginStates> {
       if (value.docs.isNotEmpty) {
         user = userModel.fromJson(value.docs[0].data());
         print(user!.id);
-        emit(LoginSuccessState());
+        emit(LoginSuccessState(user!.id!));
       }
     }).catchError((error) {
-      emit(LoginErrorState());
+      emit(LoginErrorState(error.toString()));
       print(error.toString());
     });
   }

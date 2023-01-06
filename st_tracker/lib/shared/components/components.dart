@@ -12,6 +12,7 @@ import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
 import 'package:st_tracker/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
+import 'package:st_tracker/shared/styles/Themes.dart';
 
 class DefaultFormField extends StatelessWidget {
   TextEditingController controller;
@@ -126,31 +127,149 @@ class DrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          if (icon is IconData)
-            Icon(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            if (icon is IconData)
+              Icon(
+                icon,
+                size: 20,
+              )
+            else
               icon,
-              size: 20,
+            SizedBox(
+              width: 5,
+            ),
+            Text(
+              text,
+              style: TextStyle(fontSize: 20),
             )
-          else
-            icon,
-          SizedBox(
-            width: 5,
-          ),
-          Text(
-            text,
-            style: TextStyle(fontSize: 20),
-          )
-        ],
+          ],
+        ),
       ),
       onTap: ontap,
+      highlightColor: defaultColor.withOpacity(0.5),
+      borderRadius: BorderRadius.circular(5),
+
     );
   }
 }
 
-Widget buildActivityItem(BuildContext context, ActivityModel model,
+class ActivityItem extends StatelessWidget {
+  ActivityModel model;
+  List<studentModel?> studentsData;
+  ActivityItem({required this.model, required this.studentsData, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    String? name;
+    studentsData.forEach(
+      (element) {
+        if (model.st_id == element!.id) {
+          name = element.name!.split(' ')[0];
+        }
+      },
+    );
+    return InkWell(
+      onTap: () => model.trans_id != 'null'
+          ? navigateTo(
+              context,
+              TransactionDetailsScreen(
+                trans: model,
+              ))
+          : navigateTo(
+              context,
+              AttendanceHistoryScreen(
+                model: model,
+              )),
+      child: Container(
+          height: 90,
+          width: double.infinity,
+          child: Card(
+              child: Padding(
+            padding:
+                const EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
+            child: Row(
+              children: [
+                Stack(
+                  alignment: model.trans_id != 'null'
+                      ? AlignmentDirectional.centerStart
+                      : AlignmentDirectional.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.grey[300],
+                    ),
+                    Image(
+                      image: model.trans_id != 'null'
+                          ? const AssetImage('assets/images/purchase.png')
+                          : const AssetImage('assets/images/movement.png'),
+                      width: 45,
+                      height: 35,
+                      fit: BoxFit.scaleDown,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Container(
+                    width: 160,
+                    child: Text(
+                      model.trans_id != 'null'
+                          ? '$name Puchased'
+                          : '$name ${model.activity}',
+                      maxLines: 2,
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text('${getDate(model.date)}')
+                ]),
+                SizedBox(
+                  width: 10,
+                ),
+                model.trans_id != 'null'
+                    ? Text(
+                        '-${model.activity}',
+                        style: TextStyle(fontSize: 16),
+                      )
+                    : Row(
+                        children: [
+                          model.activity == 'Arrived'
+                              ? SizedBox(
+                                  width: 10,
+                                )
+                              : SizedBox(
+                                  width: 20,
+                                ),
+                          ImageIcon(
+                              size: 30,
+                              color: model.activity == 'Arrived'
+                                  ? Colors.green
+                                  : Colors.red,
+                              AssetImage(
+                                  'assets/images/${model.activity}.png')),
+                        ],
+                      )
+              ],
+            ),
+          ))),
+    );
+    ;
+  }
+}
+
+/*Widget buildActivityItem(BuildContext context, ActivityModel model,
     List<studentModel?> studentsData) {
   print('studentsdata');
   print(studentsData);
@@ -254,6 +373,56 @@ Widget buildActivityItem(BuildContext context, ActivityModel model,
           ),
         ))),
   );
+}*/
+
+class FamilyMemberCard extends StatelessWidget {
+  studentModel? model;
+  FamilyMemberCard(this.model, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => navigateTo(context, MemberSettingsScreen(student: model)),
+      child: Container(
+        padding: EdgeInsets.zero,
+        height: 140,
+        width: 130,
+        child: Card(
+          child: Container(
+            width: double.infinity,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 10,
+                  ),
+                  CircleAvatar(
+                    radius: 41,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      backgroundImage: NetworkImage(model!.image!),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                      width: 80,
+                      child: Center(
+                          child: Text(
+                        '${model!.name!.split(' ')[0]}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w500),
+                      )))
+                ]),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(

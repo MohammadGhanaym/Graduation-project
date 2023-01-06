@@ -6,8 +6,14 @@ class RadioButtonSelected extends LoginStates {}
 
 class ChangePasswordVisibilityState extends LoginStates {}
 
-class LoginSuccessState extends LoginStates {}
+class LoginSuccessState extends LoginStates {
+  String userID;
+  LoginSuccessState(this.userID);
+}
 
 class LoginLoadingState extends LoginStates {}
 
-class LoginErrorState extends LoginStates {}
+class LoginErrorState extends LoginStates {
+  String error;
+  LoginErrorState(this.error);
+}

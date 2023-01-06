@@ -4,6 +4,7 @@ import 'package:st_tracker/modules/login/cubit/cubit.dart';
 import 'package:st_tracker/modules/login/cubit/states.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
+import 'package:st_tracker/shared/styles/Themes.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -121,6 +122,7 @@ class LoginScreen extends StatelessWidget {
                             Container(
                               width: 140,
                               child: RadioListTile<String>(
+                                activeColor: defaultColor,
                                 value: 'parent',
                                 groupValue: LoginCubit.get(context).role,
                                 onChanged: (value) {
@@ -142,6 +144,7 @@ class LoginScreen extends StatelessWidget {
                               child: RadioListTile<String>(
                                 value: 'teacher',
                                 groupValue: LoginCubit.get(context).role,
+                                activeColor: defaultColor,
                                 onChanged: (value) {
                                   print(value);
                                   LoginCubit.get(context).isSelected(value);
@@ -163,6 +166,7 @@ class LoginScreen extends StatelessWidget {
                           child: RadioListTile<String>(
                             value: 'canteen worker',
                             groupValue: LoginCubit.get(context).role,
+                            activeColor: defaultColor,
                             onChanged: (value) {
                               print(value);
                               LoginCubit.get(context).isSelected(value);
@@ -184,25 +188,30 @@ class LoginScreen extends StatelessWidget {
                     height: 20,
                   ),
                   // sign in button
-                  Container(
-                    width: 200,
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: MaterialButton(
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          LoginCubit.get(context).userLogin(
-                              IdController.text, passwordController.text);
-                        }
-                      },
-                      child: Text(
-                        'SIGN IN',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ),
-                    ),
-                  )
+                  state is LoginLoadingState
+                      ? CircularProgressIndicator()
+                      : Container(
+                          width: 200,
+                          height: 50,
+                          decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: MaterialButton(
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                LoginCubit.get(context).userLogin(
+                                    IdController.text, passwordController.text);
+                              }
+                            },
+                            child: Text(
+                              'SIGN IN',
+                              style:
+                                  TextStyle(fontSize: 20, color: Colors.white),
+                            ),
+                          ),
+                        )
                 ],
               ),
             ),

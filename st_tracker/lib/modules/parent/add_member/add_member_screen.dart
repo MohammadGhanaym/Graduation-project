@@ -12,18 +12,19 @@ class AddMember extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ParentCubit, ParentStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is AddFamilyMemberSuccess) {
+          ShowToast(
+              message: 'Member is added successfully',
+              state: ToastStates.SUCCESS);
+        }
+        
+      },
       builder: (context, state) {
         return GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
           child: Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                  onPressed: () {
-                    navigateTo(context, ParentHomeScreen());
-                  },
-                  icon: Icon(Icons.arrow_back)),
-            ),
+            appBar: AppBar(),
             body: Center(
               child: SingleChildScrollView(
                 child: Padding(
@@ -34,7 +35,7 @@ class AddMember extends StatelessWidget {
                           Text(
                             'Find your family member',
                             style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w600),
+                                fontSize: 25, fontWeight: FontWeight.w600),
                           ),
                           SizedBox(
                             height: 30,
@@ -50,23 +51,26 @@ class AddMember extends StatelessWidget {
                           SizedBox(
                             height: 20,
                           ),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                                color: Colors.greenAccent,
-                                borderRadius: BorderRadius.circular(20)),
-                            child: MaterialButton(
-                              onPressed: () {
-                                ParentCubit.get(context)
-                                    .addFamilyMember(idController.text);
-                              },
-                              child: Text(
-                                'Confirm',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w400),
-                              ),
-                            ),
-                          ),
+                          state is AddFamilyMemberLoading
+                              ? CircularProgressIndicator()
+                              : Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: Colors.greenAccent,
+                                      borderRadius: BorderRadius.circular(20)),
+                                  child: MaterialButton(
+                                    onPressed: () {
+                                      ParentCubit.get(context)
+                                          .addFamilyMember(idController.text);
+                                    },
+                                    child: Text(
+                                      'Confirm',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ),
+                                ),
                           SizedBox(
                             height: 20,
                           ),
