@@ -111,23 +111,41 @@ class ParentCubit extends Cubit<ParentStates> {
 
   void addFamilyMember(String id) async {
     emit(AddFamilyMemberLoading());
-    List<String> ids_lst = [];
-
-    if (CacheHelper.getData(key: 'IDsList') != null) {
-      ids_lst = List<String>.from(CacheHelper.getData(key: 'IDsList'));
-    }
-    ids_lst.add(id);
-    await CacheHelper.saveData(key: 'IDsList', value: ids_lst)
-        .then((value) {
-    initBackgroundService();
-    addNewTranscation(id);
-    addNewAttendance(id);
-    getStudentsData();
-    getDataFromActivityTable();
-      emit(AddFamilyMemberSuccess());
-    }).catchError((error) {
-      emit(AddFamilyMemberError());
+    int inSchool = 0;
+    await FirebaseFirestore.instance
+        .collection('students')
+        .where('uid', isEqualTo: id)
+        .count()
+        .get()
+        .then((value) async {
+      inSchool = value.count;
+      if (inSchool == 1) {
+        List<String> ids_lst = [];
+        if (CacheHelper.getData(key: 'IDsList') != null) {
+          ids_lst = List<String>.from(CacheHelper.getData(key: 'IDsList'));
+        }
+        if (ids_lst.contains(id)) {
+          emit(FamilyMemberAlreadyExisted('You added this member before'));
+        } else {
+          ids_lst.add(id);
+          await CacheHelper.saveData(key: 'IDsList', value: ids_lst)
+              .then((value) {
+            initBackgroundService();
+            addNewTranscation(id);
+            addNewAttendance(id);
+            getStudentsData();
+            getDataFromActivityTable();
+            emit(AddFamilyMemberSuccess());
+          }).catchError((error) {
+            emit(AddFamilyMemberError());
+          });
+        }
+      } else {
+        emit(IDNotFound(
+            "Oops! We couldn't find anyone matching student ID $id"));
+      }
     });
+
     // stop service and then start it to listen to changes
     //initBackgroundService();
     //addNewTranscation(id);
@@ -364,5 +382,24 @@ class ParentCubit extends Cubit<ParentStates> {
     await CacheHelper.saveData(key: 'IDsList', value: IDs).then((value) {
       emit(DeactivateDigitalIDSuccess());
     });
+  }
+
+  double balance = 0.00;
+  void getBalance() {
+    emit(GetBalanceLoading());
+    if (userID != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .where('UID', isEqualTo: userID)
+          .get()
+          .then((value) {
+        print(value.docs[0].data());
+        balance = value.docs[0].data()['balance'];
+        emit(GetBalanceSuccess());
+      }).catchError((error) {
+        print(error.toString());
+        emit(GetBalanceError());
+      });
+    }
   }
 }

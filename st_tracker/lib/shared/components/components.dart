@@ -140,11 +140,11 @@ class DrawerItem extends StatelessWidget {
             else
               icon,
             SizedBox(
-              width: 5,
+              width: 10,
             ),
             Text(
               text,
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             )
           ],
         ),

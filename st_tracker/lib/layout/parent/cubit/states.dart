@@ -4,6 +4,16 @@ class ParentInitState extends ParentStates {}
 
 class AddFamilyMemberSuccess extends ParentStates {}
 
+class FamilyMemberAlreadyExisted extends ParentStates {
+  String? message;
+  FamilyMemberAlreadyExisted(this.message);
+}
+
+class IDNotFound extends ParentStates {
+  String? message;
+  IDNotFound(this.message);
+}
+
 class AddFamilyMemberLoading extends ParentStates {}
 
 class AddFamilyMemberError extends ParentStates {}
@@ -13,6 +23,12 @@ class GetStudentDataSuccess extends ParentStates {}
 class GetStudentDataLoading extends ParentStates {}
 
 class GetStudentDataError extends ParentStates {}
+
+class GetBalanceSuccess extends ParentStates {}
+
+class GetBalanceLoading extends ParentStates {}
+
+class GetBalanceError extends ParentStates {}
 
 class ParentCreateDatabaseState extends ParentStates {}
 

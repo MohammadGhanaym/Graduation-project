@@ -17,8 +17,11 @@ class AddMember extends StatelessWidget {
           ShowToast(
               message: 'Member is added successfully',
               state: ToastStates.SUCCESS);
+        } else if (state is FamilyMemberAlreadyExisted) {
+          ShowToast(message: state.message!, state: ToastStates.WARNING);
+        } else if (state is IDNotFound) {
+          ShowToast(message: state.message!, state: ToastStates.ERROR);
         }
-        
       },
       builder: (context, state) {
         return GestureDetector(

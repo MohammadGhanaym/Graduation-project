@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
@@ -16,6 +18,7 @@ class ParentHomeScreen extends StatelessWidget {
       ParentCubit.get(context).initBackgroundService();
       ParentCubit.get(context).getData();
       ParentCubit.get(context).getDataFromActivityTable();
+      ParentCubit.get(context).getBalance();
       print('builder');
       return BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {},
@@ -30,13 +33,18 @@ class ParentHomeScreen extends StatelessWidget {
                 child: ListView(children: [
                   DrawerHeader(
                       child: Image(
-                    color: Theme.of(context).primaryColor,
-                    image: AssetImage('assets/images/profile.png'),
-                    fit: BoxFit.scaleDown,
-                  )),
+                        image: AssetImage('assets/images/settings.png'),
+                        fit: BoxFit.scaleDown,
+                      ),
+                      padding:
+                          const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0)),
                   DrawerItem(
                     text: 'Add Family Member',
-                    icon: Icons.card_membership,
+                    icon: Image(
+                      image: AssetImage('assets/images/member.png'),
+                      width: 30,
+                      height: 30,
+                    ),
                     ontap: () => navigateTo(context, AddMember()),
                   ),
                   SizedBox(
@@ -44,7 +52,10 @@ class ParentHomeScreen extends StatelessWidget {
                   ),
                   DrawerItem(
                     text: 'Clear History',
-                    icon: Icons.delete_outlined,
+                    icon: Image(
+                        image: AssetImage('assets/images/delete.png'),
+                        width: 30,
+                        height: 30),
                     ontap: () => ParentCubit.get(context).clearHistory(),
                   ),
                   SizedBox(
@@ -52,30 +63,35 @@ class ParentHomeScreen extends StatelessWidget {
                   ),
                   DrawerItem(
                     text: 'Sign Out',
-                    icon: Icons.logout_outlined,
+                    icon: Image(
+                        image: AssetImage('assets/images/signout.png'),
+                        width: 30,
+                        height: 30),
                     ontap: () {
-                      showDialog(context: context, builder:(context) => AlertDialog(
-                            title: Text(
-                              'Are you sure?',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            content: Text(
-                                'Are you sure you want to log out?'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    signOut(context);
-                                  },
-                                  child: Text("LOG OUT")),
-                              TextButton(
-                                  onPressed: () {
-                                   
-                                   Navigator.of(context).pop();
-                                  },
-                                  child: Text("NEVERMIND"))
-                            ],
-                          ));
-                      
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: Text(
+                                  'Are you sure?',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                                content: Text(
+                                  'Are you sure you want to log out?',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        signOut(context);
+                                      },
+                                      child: Text("LOG OUT")),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("NEVERMIND"))
+                                ],
+                              ));
                     },
                   ),
                   SizedBox(
@@ -86,6 +102,7 @@ class ParentHomeScreen extends StatelessWidget {
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // balance
                   Container(
                     padding: EdgeInsets.all(20),
                     alignment: AlignmentDirectional.topStart,
@@ -107,7 +124,7 @@ class ParentHomeScreen extends StatelessWidget {
                                     height: 5,
                                   ),
                                   Text(
-                                    '1000.0 EGP',
+                                    '${ParentCubit.get(context).balance.toStringAsFixed(2)}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -140,6 +157,7 @@ class ParentHomeScreen extends StatelessWidget {
                   SizedBox(
                     height: 15,
                   ),
+                  // family
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
@@ -237,20 +255,55 @@ class ParentHomeScreen extends StatelessWidget {
                           SizedBox(
                             height: 5,
                           ),
-                          Expanded(
-                            child: ListView.separated(
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) => ActivityItem(
-                                    model: ParentCubit.get(context)
-                                        .activities[index],
-                                    studentsData:
-                                        ParentCubit.get(context).studentsData),
-                                separatorBuilder: (context, index) => SizedBox(
-                                      height: 5,
+                          ParentCubit.get(context).activities.isNotEmpty
+                              ? Expanded(
+                                  child: ListView.separated(
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) =>
+                                          ActivityItem(
+                                              model:
+                                                  ParentCubit.get(context)
+                                                      .activities[index],
+                                              studentsData:
+                                                  ParentCubit.get(context)
+                                                      .studentsData),
+                                      separatorBuilder: (context, index) =>
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                      itemCount: ParentCubit.get(context)
+                                          .activities
+                                          .length),
+                                )
+                              : Center(
+                                  child: Container(
+                                    width: 200,
+                                    height: 230,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image(
+                                          height: 130,
+                                          width: 130,
+                                          image: AssetImage(
+                                              'assets/images/searching.png'),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          'No activity Found',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
                                     ),
-                                itemCount:
-                                    ParentCubit.get(context).activities.length),
-                          )
+                                  ),
+                                )
                         ],
                       ),
                     ),

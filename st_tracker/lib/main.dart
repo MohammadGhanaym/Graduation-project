@@ -15,7 +15,6 @@ import 'package:st_tracker/shared/network/local/cache_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp();
 
   Bloc.observer = MyBlocObserver();
