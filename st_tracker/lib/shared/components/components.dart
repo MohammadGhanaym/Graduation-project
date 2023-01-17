@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/product_model.dart';
@@ -152,7 +154,6 @@ class DrawerItem extends StatelessWidget {
       onTap: ontap,
       highlightColor: defaultColor.withOpacity(0.5),
       borderRadius: BorderRadius.circular(5),
-
     );
   }
 }
@@ -562,6 +563,99 @@ class AttendanceHistoryItem extends StatelessWidget {
     );
   }
 }
+
+class SettingsCard extends StatelessWidget {
+  List<Widget> children = const <Widget>[];
+  double? card_width;
+  double? card_height;
+  SettingsCard(
+      {super.key, required this.children, this.card_width, this.card_height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadiusDirectional.all(Radius.circular(10))),
+      width: card_width,
+      height: card_height,
+      child: Card(
+        elevation: 0.0,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SliderBuilder extends StatelessWidget {
+  late var scaffoldKey;
+  SliderBuilder({super.key, required this.scaffoldKey});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          SliderSideLabel(
+            value: 0,
+            type: 'min',
+          ),
+          SliderTheme(
+            data: SliderThemeData(trackHeight: 3),
+            child: Expanded(
+              child: Slider(
+                value: ParentCubit.get(context).pocket_money,
+                min: 0,
+                max: 500,
+                divisions: (500 / 5).toInt(),
+                onChanged: (value) {
+                  if (value <= ParentCubit.get(context).balance) {
+                    ParentCubit.get(context).setPocketMoney(money: value);
+                  }
+                },
+                onChangeStart: (value) {
+                  ParentCubit.get(context).showBottomSheet();
+                },
+              ),
+            ),
+          ),
+          SliderSideLabel(
+            value: 500,
+            type: 'max',
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class SliderSideLabel extends StatelessWidget {
+  var value;
+  var type;
+  SliderSideLabel({super.key, required this.value, required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        alignment: type == 'min'
+            ? AlignmentDirectional.centerEnd
+            : AlignmentDirectional.centerStart,
+        width: 35,
+        child: Text(
+          '${value.round()}',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+        ));
+  }
+}
+
+
+
 /*Row(
                               children: [
                                 Container(
@@ -675,4 +769,88 @@ class AttendanceHistoryItem extends StatelessWidget {
                     ],
                   ),
                 )*/
-                
+
+/*Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadiusDirectional.all(
+                                    Radius.circular(10))),
+                            width: screen_width,
+                            height: screen_height * 0.15,
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Image(
+                                            width: screen_width * 0.07,
+                                            height: screen_height * 0.03,
+                                            image: AssetImage(
+                                                'assets/images/map.png')),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          'Location',
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        SizedBox(
+                                          width: 60,
+                                        ),
+                                        Text(
+                                          'Last Seen',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w300),
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          "${student!.location!['time']}",
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w300),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Container(
+                                      width: 190,
+                                      height: 40,
+                                      child: OutlinedButton(
+                                        onPressed: () =>
+                                            ParentCubit.get(context).openMap(
+                                                lat: student!
+                                                    .location!['latitude'],
+                                                long: student!
+                                                    .location!['longtitude']),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Find ${student!.name!.split(' ')[0]}',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: defaultColor),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ), */

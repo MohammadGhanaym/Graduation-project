@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
@@ -52,5 +52,88 @@ class LoginCubit extends Cubit<LoginStates> {
       emit(LoginErrorState(error.toString()));
       print(error.toString());
     });
+  }
+
+  void login({required name, required var email}) async {
+    emit(LoginLoadingState());
+    var mAuth = FirebaseAuth.instance;
+    /*if (mAuth.currentUser != null) {
+      emit(LoginSuccessState(mAuth.currentUser!.uid));
+    } else {
+      await mAuth.signInAnonymously().then((value) async {
+        if (email != mAuth.currentUser!.email) {
+          await mAuth.currentUser!.updateEmail(email).then((value) async {
+            Map<String, dynamic> data = {};
+            data['name'] = name;
+            data['role'] = role;
+            data['email'] = email;
+            if (role == 'parent' || role == 'canteen worker') {
+              data['balance'] = 0.0;
+            }
+
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(mAuth.currentUser!.uid)
+                .set(data);
+            emit(LoginSuccessState(mAuth.currentUser!.uid));
+            print(mAuth.currentUser!.uid);
+          }).catchError((error) {
+            emit(LoginErrorState(error.toString()));
+            print(error);
+          });
+        }
+      });
+    }*/
+
+    if (mAuth.currentUser != null) {
+      emit(LoginSuccessState(mAuth.currentUser!.uid));
+    } else {
+      await mAuth.signInAnonymously().then((value) async {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(mAuth.currentUser!.uid)
+            .get()
+            .then((value) async {
+          print('THIS IS LOGIN PAGE TEST');
+          print(value.data());
+          if (value.data() == null) {
+            await mAuth.currentUser!.updateEmail(email).then((value) async {
+              Map<String, dynamic> data = {};
+              data['name'] = name;
+              data['role'] = role;
+              data['email'] = email;
+              if (role == 'parent' || role == 'canteen worker') {
+                data['balance'] = 0.0;
+              }
+
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(mAuth.currentUser!.uid)
+                  .set(data);
+              emit(LoginSuccessState(mAuth.currentUser!.uid));
+              print(mAuth.currentUser!.uid);
+            }).catchError((error) {
+              emit(LoginErrorState(error.toString()));
+              print(error);
+            });
+          } else {
+            emit(LoginSuccessState(mAuth.currentUser!.uid));
+          }
+        });
+      });
+    }
+  }
+
+  Future<void> verifyEmail() async {
+    var user = FirebaseAuth.instance.currentUser;
+    print(user!.emailVerified);
+    if (user.emailVerified == false) {
+      await user.sendEmailVerification().then((value) {
+        emit(EmailVerificationSendSuccess());
+      }).catchError((error) {
+        print(error.toString());
+        emit(EmailVerificationSendError());
+      });
+    }
   }
 }

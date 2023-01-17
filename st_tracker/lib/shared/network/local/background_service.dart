@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:st_tracker/models/student_model.dart';
@@ -17,16 +16,16 @@ class BackgroundService {
     final service = FlutterBackgroundService();
 
     /// OPTIONAL, using custom notification channel id
-    /*const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'child_activity', // id
       'Activity Channel', // title
       description:
           'This channel is used for important notifications.', // description
       importance: Importance.high, // importance must be at low or higher level
-    );*/
+    );
 
-    /*final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();*/
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
     /*
     if (Platform.isIOS) {
       await flutterLocalNotificationsPlugin.initialize(
@@ -34,20 +33,21 @@ class BackgroundService {
           iOS: DarwinInitializationSettings(),
         ),
       );
-    }
+    }*/
 
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
-    */
+
     await service.configure(
       androidConfiguration: AndroidConfiguration(
         // this will be executed when app is in foreground or background in separated isolate
         onStart: onStart,
 
         // auto start service
-        autoStart: true,autoStartOnBoot : true,
+        autoStart: true,
+        autoStartOnBoot: true,
         isForegroundMode: false,
         //notificationChannelId: 'child_activity',
         foregroundServiceNotificationId: 888,
@@ -81,16 +81,6 @@ class BackgroundService {
 
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
-
-    if (service is AndroidServiceInstance) {
-      service.on('setAsForeground').listen((event) {
-        service.setAsForegroundService();
-      });
-
-      service.on('setAsBackground').listen((event) {
-        service.setAsBackgroundService();
-      });
-    }
 
     service.on('stopService').listen((event) {
       service.stopSelf();
@@ -157,8 +147,7 @@ class BackgroundService {
       studentID,
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       var notify) {
-    if (studentID != null)
-    {
+    if (studentID != null) {
       FirebaseFirestore.instance
           .collection('students')
           .doc(studentID)
@@ -168,8 +157,7 @@ class BackgroundService {
 
         SchoolAttendanceModel attendanceStatus =
             SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
-        String notify_body =
-            '${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+        String notify_body = DateFormat('EE, hh:mm a').format(DateTime.now());
 
         if (attendanceStatus.arrived) {
           await flutterLocalNotificationsPlugin.show(notify_id,
@@ -180,6 +168,5 @@ class BackgroundService {
         }
       });
     }
-      
   }
 }

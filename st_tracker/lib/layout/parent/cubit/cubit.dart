@@ -110,6 +110,8 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   void addFamilyMember(String id) async {
+    userID ??= CacheHelper.getData(key: 'id');
+
     emit(AddFamilyMemberLoading());
     int inSchool = 0;
     await FirebaseFirestore.instance
@@ -127,15 +129,20 @@ class ParentCubit extends Cubit<ParentStates> {
         if (ids_lst.contains(id)) {
           emit(FamilyMemberAlreadyExisted('You added this member before'));
         } else {
-          ids_lst.add(id);
-          await CacheHelper.saveData(key: 'IDsList', value: ids_lst)
-              .then((value) {
-            initBackgroundService();
-            addNewTranscation(id);
-            addNewAttendance(id);
-            getStudentsData();
-            getDataFromActivityTable();
-            emit(AddFamilyMemberSuccess());
+          FirebaseFirestore.instance.collection('students').doc(id).set(
+              {'parent': userID}, SetOptions(merge: true)).then((value) async {
+            ids_lst.add(id);
+            await CacheHelper.saveData(key: 'IDsList', value: ids_lst)
+                .then((value) {
+              initBackgroundService();
+              addNewTranscation(id);
+              addNewAttendance(id);
+              getStudentsData();
+              getDataFromActivityTable();
+              emit(AddFamilyMemberSuccess());
+            }).catchError((error) {
+              emit(AddFamilyMemberError());
+            });
           }).catchError((error) {
             emit(AddFamilyMemberError());
           });
@@ -213,7 +220,7 @@ class ParentCubit extends Cubit<ParentStates> {
             .collection('students')
             .doc(studentID)
             .update({
-          'attendance status': {'arrive': false, 'leave': false}
+          'attendance status': {'arrive': false, 'leave': attendanceStatus.left}
         }).then((value) {
           insertToActivityTable(
               id: studentID, activityType: 'Arrived', date: DateTime.now());
@@ -223,7 +230,10 @@ class ParentCubit extends Cubit<ParentStates> {
             .collection('students')
             .doc(studentID)
             .update({
-          'attendance status': {'arrive': false, 'leave': false}
+          'attendance status': {
+            'arrive': attendanceStatus.arrived,
+            'leave': false
+          }
         }).then((value) {
           insertToActivityTable(
               id: studentID, activityType: 'Left', date: DateTime.now());
@@ -321,7 +331,7 @@ class ParentCubit extends Cubit<ParentStates> {
       await BackgroundService.initializeService();
     } else {
       service.invoke('stopService');
-      await BackgroundService.initializeService();
+      await service.startService();
     }
   }
 
@@ -390,16 +400,72 @@ class ParentCubit extends Cubit<ParentStates> {
     if (userID != null) {
       FirebaseFirestore.instance
           .collection('users')
-          .where('UID', isEqualTo: userID)
+          .doc(userID)
           .get()
           .then((value) {
-        print(value.docs[0].data());
-        balance = value.docs[0].data()['balance'];
+        print(value.data());
+        balance = value['balance'].toDouble();
         emit(GetBalanceSuccess());
       }).catchError((error) {
         print(error.toString());
         emit(GetBalanceError());
       });
     }
+  }
+
+  void updateBalance() {
+    emit(UpdateBalanceSuccess());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userID)
+        .update({'balance': balance}).then((value) {
+      emit(UpdateBalanceLoading());
+    }).catchError((error) {
+      emit(UpdateBalanceError());
+    });
+  }
+
+  double pocket_money = 0.0;
+  void setPocketMoney({required double money}) {
+    pocket_money = money.roundToDouble();
+    emit(ChangeSliderState());
+  }
+
+  void updatePocketMoney({required var id}) {
+    emit(SetPocketMoneyLoadingState());
+    if (pocket_money < balance) {
+      FirebaseFirestore.instance
+          .collection('students')
+          .doc(id)
+          .update({'pocket money': pocket_money}).then((value) {
+        CacheHelper.saveData(key: '$id-pocket_money', value: pocket_money)
+            .then((value) {
+          balance = balance - pocket_money;
+          updateBalance();
+          emit(SetPocketMoneySuccessState());
+        });
+      }).catchError((error) {
+        emit(SetPocketMoneyErrorState());
+      });
+    }
+  }
+
+  void getMaxPocketMoney({required var id}) {
+    pocket_money = 0.0;
+
+    if (CacheHelper.getData(key: '$id-pocket_money') != null) {
+      pocket_money = CacheHelper.getData(key: '$id-pocket_money');
+    }
+  }
+
+  bool isBottomSheetShown = false;
+  void showBottomSheet() {
+    isBottomSheetShown = true;
+    emit(ShowBottomSheetState());
+  }
+
+  void hideBottomSheet() {
+    isBottomSheetShown = false;
+    emit(ShowBottomSheetState());
   }
 }

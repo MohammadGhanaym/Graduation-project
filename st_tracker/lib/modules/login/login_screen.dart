@@ -9,8 +9,8 @@ import 'package:st_tracker/shared/styles/Themes.dart';
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  var IdController = TextEditingController();
-  var passwordController = TextEditingController();
+  var nameController = TextEditingController();
+  var emailController = TextEditingController();
   var formKey = GlobalKey<FormState>();
 
   @override
@@ -22,9 +22,7 @@ class LoginScreen extends StatelessWidget {
           if (state is LoginSuccessState) {
             CacheHelper.saveData(
                 key: 'role', value: LoginCubit.get(context).role);
-            CacheHelper.saveData(
-                    key: 'id', value: LoginCubit.get(context).user!.id)
-                .then((value) {
+            CacheHelper.saveData(key: 'id', value: state.userID).then((value) {
               navigateAndFinish(
                   context,
                   LoginCubit.get(context)
@@ -79,36 +77,30 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         DefaultFormField(
-                            controller: IdController,
+                            controller: nameController,
                             type: TextInputType.text,
                             validate: (value) {
                               if (value!.isEmpty) {
-                                return 'Enter correct ID';
+                                return 'Name must not be empty';
                               }
                               return null;
                             },
-                            label: 'ID',
+                            label: 'Name',
                             prefix: Icons.perm_identity_outlined),
                         SizedBox(
                           height: 15,
                         ),
                         DefaultFormField(
-                            controller: passwordController,
-                            type: TextInputType.visiblePassword,
-                            suffix: LoginCubit.get(context).suffix,
-                            isPassword: LoginCubit.get(context).isPassword,
-                            changeObscured: (() {
-                              LoginCubit.get(context)
-                                  .changePasswordVisibility();
-                            }),
+                            controller: emailController,
+                            type: TextInputType.emailAddress,
                             validate: (value) {
                               if (value!.isEmpty) {
-                                return 'Enter correct password';
+                                return 'Email must not be empty';
                               }
                               return null;
                             },
-                            label: 'Password',
-                            prefix: Icons.lock_outline),
+                            label: 'Email',
+                            prefix: Icons.email_outlined),
                       ],
                     ),
                   ),
@@ -201,8 +193,11 @@ class LoginScreen extends StatelessWidget {
                           child: MaterialButton(
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
-                                LoginCubit.get(context).userLogin(
-                                    IdController.text, passwordController.text);
+                                LoginCubit.get(context).login(
+                                    name: nameController.text,
+                                    email: emailController.text);
+                                nameController.clear();
+                                emailController.clear();
                               }
                             },
                             child: Text(

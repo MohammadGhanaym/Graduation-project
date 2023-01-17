@@ -30,6 +30,12 @@ class GetBalanceLoading extends ParentStates {}
 
 class GetBalanceError extends ParentStates {}
 
+class UpdateBalanceSuccess extends ParentStates {}
+
+class UpdateBalanceLoading extends ParentStates {}
+
+class UpdateBalanceError extends ParentStates {}
+
 class ParentCreateDatabaseState extends ParentStates {}
 
 class ParentInsertActivityTableSuccessState extends ParentStates {}
@@ -59,3 +65,19 @@ class AttendanceHistorySuccess extends ParentStates {}
 class DeactivateDigitalIDSuccess extends ParentStates {}
 
 class ShowSettingsState extends ParentStates {}
+
+class SetPocketMoneySuccessState extends ParentStates {}
+
+class SetPocketMoneyLoadingState extends ParentStates {}
+
+class SetPocketMoneyErrorState extends ParentStates {}
+
+class GetPocketMoneySuccessState extends ParentStates {}
+
+class GetPocketMoneyLoadingState extends ParentStates {}
+
+class GetPocketMoneyErrorState extends ParentStates {}
+
+class ChangeSliderState extends ParentStates {}
+
+class ShowBottomSheetState extends ParentStates {}
