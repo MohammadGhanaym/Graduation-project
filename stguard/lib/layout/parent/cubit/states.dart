@@ -90,6 +90,28 @@ class RechargeSuccessState extends ParentStates {
 class RechargeLoadingState extends ParentStates {}
 
 class RechargeErrorState extends ParentStates {
-  late String error;
+  dynamic error;
   RechargeErrorState(this.error);
+}
+
+class GetAllergiesSucessState extends ParentStates {}
+
+class GetAllergiesLoadingState extends ParentStates {}
+
+class GetAllergiesErrorState extends ParentStates {
+  dynamic error;
+  GetAllergiesErrorState(this.error);
+}
+
+class AddAllergenState extends ParentStates {}
+
+class RemoveAllergenState extends ParentStates {}
+
+class UpdateAllergiesSuccessState extends ParentStates {}
+
+class UpdateAllergiesLoadingState extends ParentStates {}
+
+class UpdateAllergiesErrorState extends ParentStates {
+  var error;
+  UpdateAllergiesErrorState(this.error);
 }

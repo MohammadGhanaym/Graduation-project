@@ -52,14 +52,9 @@ class CashScreen extends StatelessWidget {
                     height: screen_height * 0.03,
                   ),
                   state is RechargeLoadingState
-                      ? Container(
+                      ? LoadingOnWaiting(
                           height: screen_height * 0.07,
-                          width: double.infinity,
-                          
-                          decoration: BoxDecoration(
-                            color: defaultColor.withOpacity(0.8),
-                            borderRadius: BorderRadiusDirectional.circular(10)),
-                          child: Center(child: const CircularProgressIndicator(color: Colors.white,)))
+                          color: defaultColor.withOpacity(0.8))
                       : DefaultButton(
                           height: screen_height * 0.07,
                           text: 'Recharge',

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +23,7 @@ class MemberSettingsScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         ParentCubit.get(context).getMaxPocketMoney(id: student!.id);
+        ParentCubit.get(context).getAllergies(student!.id);
         return BlocConsumer<ParentCubit, ParentStates>(
           listener: (context, state) {},
           builder: (context, state) {
@@ -32,7 +34,10 @@ class MemberSettingsScreen extends StatelessWidget {
                       Navigator.pop(context);
                       ParentCubit.get(context).hideBottomSheet();
                     },
-                    child: Icon(Icons.arrow_back_outlined, color: Colors.white,),
+                    child: Icon(
+                      Icons.arrow_back_outlined,
+                      color: Colors.white,
+                    ),
                   ),
                   title: Text("${student!.name!.split(' ')[0]}'s settings"),
                 ),
@@ -233,9 +238,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(
-                                height: 5,
-                              ),
+                              SizedBox(height: screen_height * 0.01),
                               SettingsCard(
                                   card_width: screen_width,
                                   card_height: screen_height * 0.18,
@@ -311,6 +314,62 @@ class MemberSettingsScreen extends StatelessWidget {
                                     SliderBuilder(
                                       scaffoldKey: scaffoldKey,
                                     )
+                                  ]),
+                              SizedBox(
+                                height: screen_height * 0.01,
+                              ),
+                              SettingsCard(
+                                  card_width: screen_width,
+                                  card_height: screen_height * 0.22,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/blood-drop.png'),
+                                          size: screen_width * 0.09,
+                                          color: defaultColor,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          'Allergens',
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.w500),
+                                        )
+                                      ],
+                                    ),
+                                    Text(
+                                      'By adding allergens, your child will not be able to purchase anything that marked by a vendor containing them',
+                                      style: TextStyle(
+                                          color: Colors.black54,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Expanded(
+                                        child: ListView.separated(
+                                            scrollDirection: Axis.horizontal,
+                                            itemBuilder: (context, index) =>
+                                                AllergenItem(
+                                                    id: student!.id,
+                                                    width: screen_width * 0.18,
+                                                    height:
+                                                        screen_height * 0.04,
+                                                    icon:
+                                                        ParentCubit.get(context)
+                                                            .allergens
+                                                            .reversed
+                                                            .toList()[index],
+                                                    context: context),
+                                            separatorBuilder: (context,
+                                                    index) =>
+                                                SizedBox(
+                                                  width: screen_width * 0.01,
+                                                ),
+                                            itemCount: ParentCubit.get(context)
+                                                .allergens
+                                                .length))
                                   ])
                             ],
                           ),

@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -11,6 +13,7 @@ import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
+import 'package:st_tracker/shared/styles/Themes.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
@@ -502,5 +505,56 @@ class ParentCubit extends Cubit<ParentStates> {
   void hideBottomSheet() {
     isBottomSheetShown = false;
     emit(ShowBottomSheetState());
+  }
+
+  List<dynamic> selectedAllergens = [];
+  void addAllergen(value) {
+    selectedAllergens.add(value);
+    emit(AddAllergenState());
+  }
+
+  void removeAllergen(value) {
+    selectedAllergens.remove(value);
+    emit(RemoveAllergenState());
+  }
+
+  List<dynamic> allergens = [];
+  void getAllergies(id) async {
+    selectedAllergens = [];
+    allergens = [Icons.add];
+    emit(GetAllergiesLoadingState());
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(id)
+        .get()
+        .then((value) {
+      emit(GetAllergiesSucessState());
+      print(value.data());
+      if (value['allergens'] != null) {
+        value['allergens'].forEach((element) {
+          allergens.add(element);
+          selectedAllergens.add(element);
+        });
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetAllergiesErrorState(error.toString()));
+    });
+  }
+
+  Future<void> updateAllergens(id) async{
+    emit(UpdateAllergiesLoadingState());
+
+    FirebaseFirestore.instance.collection('students').doc(id).update({
+      'allergens': selectedAllergens.isNotEmpty
+          ? selectedAllergens
+          : null
+    }).then((value) {
+      emit(UpdateAllergiesSuccessState());
+      getAllergies(id);
+    }).catchError((error) {
+      print(error);
+      emit(UpdateAllergiesErrorState(error.toString()));
+    });
   }
 }

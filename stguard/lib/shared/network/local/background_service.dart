@@ -104,6 +104,7 @@ class BackgroundService {
         iOS: const DarwinNotificationDetails());
     if (CacheHelper.getData(key: 'IDsList') != null) {
       var IDs = [];
+      print('*****Background Service On*****');
       IDs = CacheHelper.getData(key: 'IDsList');
       if (IDs.isNotEmpty) {
         IDs.forEach((studentID) {
@@ -126,6 +127,7 @@ class BackgroundService {
         .collection('transactions')
         .snapshots()
         .listen((event) {
+      print('sendTransNotification');
       int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
       event.docs.forEach((trans) async {
         String notify_body =
@@ -152,6 +154,7 @@ class BackgroundService {
           .doc(studentID)
           .snapshots()
           .listen((event) async {
+        print('sendAttendanceNotification');
         int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
 
         SchoolAttendanceModel attendanceStatus =

@@ -8,6 +8,7 @@ import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/product_model.dart';
+import 'package:st_tracker/modules/allergens/allergens_screen.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
@@ -307,112 +308,6 @@ class ActivityItem extends StatelessWidget {
   }
 }
 
-/*Widget buildActivityItem(BuildContext context, ActivityModel model,
-    List<studentModel?> studentsData) {
-  print('studentsdata');
-  print(studentsData);
-  String? name;
-  print(model.trans_id);
-  studentsData.forEach(
-    (element) {
-      if (model.st_id == element!.id) {
-        name = element.name!.split(' ')[0];
-        print(name);
-      }
-    },
-  );
-  return InkWell(
-    onTap: () => model.trans_id != 'null'
-        ? navigateTo(
-            context,
-            TransactionDetailsScreen(
-              trans: model,
-            ))
-        : navigateTo(
-            context,
-            AttendanceHistoryScreen(
-              model: model,
-            )),
-    child: Container(
-        height: 90,
-        width: double.infinity,
-        child: Card(
-            child: Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
-          child: Row(
-            children: [
-              Stack(
-                alignment: model.trans_id != 'null'
-                    ? AlignmentDirectional.centerStart
-                    : AlignmentDirectional.center,
-                children: [
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundColor: Colors.grey[300],
-                  ),
-                  Image(
-                    image: model.trans_id != 'null'
-                        ? const AssetImage('assets/images/purchase.png')
-                        : const AssetImage('assets/images/movement.png'),
-                    width: 45,
-                    height: 35,
-                    fit: BoxFit.scaleDown,
-                  ),
-                ],
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                SizedBox(
-                  height: 5,
-                ),
-                Container(
-                  width: 160,
-                  child: Text(
-                    model.trans_id != 'null'
-                        ? '$name Puchased'
-                        : '$name ${model.activity}',
-                    maxLines: 2,
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                  ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Text('${getDate(model.date)}')
-              ]),
-              SizedBox(
-                width: 10,
-              ),
-              model.trans_id != 'null'
-                  ? Text(
-                      '-${model.activity}',
-                      style: TextStyle(fontSize: 16),
-                    )
-                  : Row(
-                      children: [
-                        model.activity == 'Arrived'
-                            ? SizedBox(
-                                width: 10,
-                              )
-                            : SizedBox(
-                                width: 20,
-                              ),
-                        ImageIcon(
-                            size: 30,
-                            color: model.activity == 'Arrived'
-                                ? Colors.green
-                                : Colors.red,
-                            AssetImage('assets/images/${model.activity}.png')),
-                      ],
-                    )
-            ],
-          ),
-        ))),
-  );
-}*/
-
 class FamilyMemberCard extends StatelessWidget {
   studentModel? model;
   FamilyMemberCard(this.model, {super.key});
@@ -462,48 +357,6 @@ class FamilyMemberCard extends StatelessWidget {
     );
   }
 }
-
-Widget buildFamilyMemberCard(studentModel? model, context) => InkWell(
-      onTap: () => navigateTo(context, MemberSettingsScreen(student: model)),
-      child: Container(
-        padding: EdgeInsets.zero,
-        height: 140,
-        width: 130,
-        child: Card(
-          child: Container(
-            width: double.infinity,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 10,
-                  ),
-                  CircleAvatar(
-                    radius: 41,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      backgroundImage: NetworkImage(model!.image!),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                      width: 80,
-                      child: Center(
-                          child: Text(
-                        '${model.name!.split(' ')[0]}',
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w500),
-                      )))
-                ]),
-          ),
-        ),
-      ),
-    );
 
 dynamic getDate(date, {format = 'EE, hh:mm a'}) {
   return DateFormat(format).format(DateTime.parse(date));
@@ -739,6 +592,140 @@ class RechargeItem extends StatelessWidget {
   }
 }
 
+class AllergenItem extends StatelessWidget {
+  dynamic icon;
+  double width;
+  double height;
+  var id;
+  BuildContext context;
+  AllergenItem(
+      {super.key,
+      required this.icon,
+      required this.id,
+      required this.context,
+      required this.width,
+      required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      child: Card(
+          child: icon is String
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image(
+                    image:
+                        AssetImage('assets/images/${icon.toLowerCase()}.png'),
+                    width: width * 0.05,
+                    color: defaultColor,
+                    height: height * 0.05,
+                    fit: BoxFit.scaleDown,
+                  ),
+                )
+              : IconButton(
+                  onPressed: () async {
+                    navigateTo(
+                        context,
+                        AllergensScreen(
+                          student_id: id,
+                        ));
+                  },
+                  icon: Icon(
+                    icon,
+                    color: defaultColor,
+                  ))),
+    );
+  }
+}
+
+class AllergenSelectionItem extends StatelessWidget {
+  dynamic icon;
+  double width;
+  double height;
+  BuildContext context;
+  AllergenSelectionItem(
+      {super.key,
+      required this.icon,
+      required this.context,
+      required this.width,
+      required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        if (ParentCubit.get(context).selectedAllergens.contains(icon)) {
+          ParentCubit.get(context).removeAllergen(icon);
+        } else {
+          ParentCubit.get(context).addAllergen(icon);
+        }
+        print(ParentCubit.get(context).selectedAllergens);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadiusDirectional.circular(10),
+            border: Border.all(
+                width: width * 0.01,
+                color: ParentCubit.get(context).selectedAllergens.contains(icon)
+                    ? defaultColor
+                    : Theme.of(context).scaffoldBackgroundColor)),
+        width: width * 0.1,
+        height: height * 0.01,
+        child: Card(
+            child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image(
+                  image: AssetImage('assets/images/${icon.toLowerCase()}.png'),
+                  width: width * 0.15,
+                  color: defaultColor,
+                  height: height * 0.06,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(
+                  height: height * 0.01,
+                ),
+                Text(
+                  '$icon',
+                  style: TextStyle(
+                      fontSize: width * 0.05, fontWeight: FontWeight.w500),
+                )
+              ],
+            ),
+          ),
+        )),
+      ),
+    );
+  }
+}
+
+class LoadingOnWaiting extends StatelessWidget {
+  double height;
+  double? width;
+  Color? color;
+  double? radius;
+  LoadingOnWaiting({super.key, this.color=defaultColor,required this.height,
+   this.radius=10,this.width=double.infinity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: screen_height * 0.07,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: defaultColor.withOpacity(0.8),
+            borderRadius: BorderRadiusDirectional.circular(10)),
+        child: Center(
+            child: const CircularProgressIndicator(
+          color: Colors.white,
+        )));
+  }
+}
 /*Row(
                               children: [
                                 Container(
