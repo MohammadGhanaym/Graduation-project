@@ -24,6 +24,8 @@ class AllergensScreen extends StatelessWidget {
     screen_height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
+                bottom: PreferredSize(child: Divider(), preferredSize: Size(0.5, 0.5)),
+
           title: Text('Allergens'),
           titleSpacing: screen_width * 0.25,
           titleTextStyle: TextStyle(
@@ -47,7 +49,7 @@ class AllergensScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                Divider(),
+                
                 SizedBox(
                   height: screen_height * 0.01,
                 ),

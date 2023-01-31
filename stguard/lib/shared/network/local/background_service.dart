@@ -102,19 +102,24 @@ class BackgroundService {
     var notify = NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: const DarwinNotificationDetails());
-    if (CacheHelper.getData(key: 'IDsList') != null) {
-      var IDs = [];
-      print('*****Background Service On*****');
-      IDs = CacheHelper.getData(key: 'IDsList');
-      if (IDs.isNotEmpty) {
-        IDs.forEach((studentID) {
+
+    print('*****Background Service On*****');
+    userID = CacheHelper.getData(key: 'id');
+
+    await FirebaseFirestore.instance
+        .collection('students')
+        .where('parent', isEqualTo: userID)
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        value.docs.forEach((st) {
           sendTransNotification(
-              studentID, flutterLocalNotificationsPlugin, notify);
+              st['uid'], flutterLocalNotificationsPlugin, notify);
           sendAttendanceNotification(
-              studentID, flutterLocalNotificationsPlugin, notify);
+              st['uid'], flutterLocalNotificationsPlugin, notify);
         });
       }
-    }
+    });
   }
 
   static void sendTransNotification(
@@ -127,7 +132,6 @@ class BackgroundService {
         .collection('transactions')
         .snapshots()
         .listen((event) {
-      print('sendTransNotification');
       int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
       event.docs.forEach((trans) async {
         String notify_body =

@@ -70,45 +70,42 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<studentModel?> studentsData = [];
-  void getStudentsData() {
+  List<String> studentIDs = [];
+
+  void getStudentsData() async {
     studentsData = [];
+    studentIDs = [];
     emit(GetStudentDataLoading());
-    if (CacheHelper.getData(key: 'IDsList') != null) {
-      IDs = List<String>.from(CacheHelper.getData(key: 'IDsList'));
-      if (IDs.isNotEmpty) {
-        IDs.forEach((studentID) async {
-          await FirebaseFirestore.instance
-              .collection('students')
-              .doc(studentID)
-              .get()
-              .then((value) {
-            //print(DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()));
-            studentsData.add(studentModel.fromJson(value.data()));
-            print(studentsData);
-            print(studentsData[0]!.image);
-            emit(GetStudentDataSuccess());
-          }).catchError((error) {
-            print(error.toString());
-            emit(GetStudentDataError());
-          });
+    await FirebaseFirestore.instance
+        .collection('students')
+        .where('parent', isEqualTo: userID)
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        value.docs.forEach((student) {
+          studentsData.add(studentModel.fromJson(student.data()));
+          studentIDs.add(student['uid']);
         });
+        emit(GetStudentDataSuccess());
+        listentoNewData();
       }
-    }
+      getDataFromActivityTable();
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetStudentDataError());
+      
+    });
   }
 
-  List<String> IDs = [];
-  void getData() {
+  void listentoNewData() {
     cancelListeners();
     transListeners = {};
     attendListeners = {};
-    if (CacheHelper.getData(key: 'IDsList') != null) {
-      IDs = List<String>.from(CacheHelper.getData(key: 'IDsList'));
-      if (IDs.isNotEmpty) {
-        IDs.forEach((id) async {
-          addNewTranscation(id);
-          addNewAttendance(id);
-        });
-      }
+    if (studentIDs.isNotEmpty) {
+      studentIDs.forEach((ID) {
+        addNewTranscation(ID);
+        addNewAttendance(ID);
+      });
     }
   }
 
@@ -117,51 +114,45 @@ class ParentCubit extends Cubit<ParentStates> {
 
     emit(AddFamilyMemberLoading());
     int inSchool = 0;
-    await FirebaseFirestore.instance
-        .collection('students')
-        .where('uid', isEqualTo: id)
-        .count()
-        .get()
-        .then((value) async {
-      inSchool = value.count;
-      if (inSchool == 1) {
-        List<String> ids_lst = [];
-        if (CacheHelper.getData(key: 'IDsList') != null) {
-          ids_lst = List<String>.from(CacheHelper.getData(key: 'IDsList'));
-        }
-        if (ids_lst.contains(id)) {
-          emit(FamilyMemberAlreadyExisted('You added this member before'));
-        } else {
-          FirebaseFirestore.instance.collection('students').doc(id).set(
-              {'parent': userID}, SetOptions(merge: true)).then((value) async {
-            ids_lst.add(id);
-            await CacheHelper.saveData(key: 'IDsList', value: ids_lst)
-                .then((value) {
-              initBackgroundService(action: 'refresh');
-              addNewTranscation(id);
-              addNewAttendance(id);
-              getStudentsData();
+    FirebaseFirestore db = FirebaseFirestore.instance;
 
-              emit(AddFamilyMemberSuccess());
-            }).catchError((error) {
-              emit(AddFamilyMemberError());
+    db.runTransaction((transaction) async {
+      await db
+          .collection('students')
+          .where('uid', isEqualTo: id)
+          .count()
+          .get()
+          .then((value) async {
+        inSchool = value.count;
+        if (inSchool == 1) {
+          if (studentIDs.contains(id)) {
+            print(studentIDs);
+            emit(FamilyMemberAlreadyExisted('You added this member before'));
+          } else {
+            db
+                .collection('students')
+                .doc(id)
+                .update({'parent': userID}).then((value) async {
+              db.collection('students').doc(id).update({'active': true}).then(
+                (value) {
+                  initBackgroundService(action: 'refresh');
+                  getStudentsData();
+                  getDataFromActivityTable();
+                  print(studentIDs);
+                  emit(AddFamilyMemberSuccess());
+                },
+              );
             });
-          }).catchError((error) {
-            emit(AddFamilyMemberError());
-          });
+          }
+        } else {
+          emit(IDNotFound(
+              "Oops! We couldn't find anyone matching student ID $id"));
         }
-      } else {
-        emit(IDNotFound(
-            "Oops! We couldn't find anyone matching student ID $id"));
-      }
+      }).catchError((error) {
+        print(error.toString());
+        emit(AddFamilyMemberError());
+      });
     });
-
-    // stop service and then start it to listen to changes
-    //initBackgroundService();
-    //addNewTranscation(id);
-    //addNewAttendance(id);
-    //getStudentsData();
-    //getDataFromActivityTable();
   }
 
   void addNewTranscation(String studentID) {
@@ -293,8 +284,8 @@ class ParentCubit extends Cubit<ParentStates> {
     await activity_database
         .query('student_activity',
             orderBy: 'date DESC',
-            where: "id IN (${IDs.map((_) => '?').join(', ')})",
-            whereArgs: IDs)
+            where: "id IN (${studentIDs.map((_) => '?').join(', ')})",
+            whereArgs: studentIDs)
         .then((value) {
       activities = [];
       value.forEach(
@@ -302,6 +293,8 @@ class ParentCubit extends Cubit<ParentStates> {
           activities.add(ActivityModel.fromJson(element));
         },
       );
+      print('student activities 2023');
+      print(activities);
       emit(ParentGeStudentActivitySuccessState());
     }).catchError((error) {
       activities = [];
@@ -337,6 +330,10 @@ class ParentCubit extends Cubit<ParentStates> {
       FlutterBackgroundService().invoke('stopService');
       await BackgroundService.initializeService();
     }
+
+    if (action == 'stop') {
+      FlutterBackgroundService().invoke('stopService');
+    }
   }
 
   void openMap({required double lat, required double long}) async {
@@ -369,7 +366,7 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  bool isActivated = true; // child settings
+  bool isPaired = true; // child settings
   bool settingsVisibility = true;
   void changeSettingsVisibility() {
     settingsVisibility = !settingsVisibility;
@@ -378,23 +375,60 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   void showSettings() {
-    isActivated = !isActivated;
+    isPaired = !isPaired;
     print('showSettings');
-    print(isActivated);
+    print(isPaired);
     emit(ShowSettingsState());
   }
 
-  Future<void> deactivateDigitalID(String id) async {
-    transListeners[id].cancel();
-    attendListeners[id].cancel();
-
-    transListeners.remove(id);
-    attendListeners.remove(id);
-
-    IDs.remove(id);
-    print(IDs);
-    await CacheHelper.saveData(key: 'IDsList', value: IDs).then((value) {
+  bool active = false;
+  void changeDigitalIDState(String id) {
+    active = !active;
+    FirebaseFirestore.instance
+        .collection('students')
+        .doc(id)
+        .update({'active': active}).then((value) {
       emit(DeactivateDigitalIDSuccess());
+    }).catchError((error) {
+      print(error.toString());
+      emit(DeactivateDigitalIDError());
+    });
+  }
+
+  void getActiveState(String id) async{
+   await FirebaseFirestore.instance
+        .collection('students')
+        .doc(id)
+        .get()
+        .then((value) {
+      if (value.data() != null) {
+        active = value['active'];
+      }
+    }).catchError((error) {
+      print(error.toString());
+    });
+  }
+
+  void unpairDigitalID(String id) async {
+    initBackgroundService(action: 'stop');
+
+   await FirebaseFirestore.instance
+        .collection('students')
+        .doc(id)
+        .update({'parent': null, 'active': false}).then((value) {
+      active = false;
+      studentIDs.remove(id);
+      print('unpairDigitalID');
+      print(studentIDs);
+      transListeners[id].cancel();
+      attendListeners[id].cancel();
+
+      transListeners.remove(id);
+      attendListeners.remove(id);
+      emit(UnpairDigitalIDSuccess());
+    }).catchError((error) {
+      print(error.toString());
+      emit(UnpairDigitalIDError());
     });
   }
 
@@ -471,29 +505,35 @@ class ParentCubit extends Cubit<ParentStates> {
 
   void updatePocketMoney({required var id}) {
     emit(SetPocketMoneyLoadingState());
+
     if (pocket_money < balance) {
       FirebaseFirestore.instance
           .collection('students')
           .doc(id)
           .update({'pocket money': pocket_money}).then((value) {
-        CacheHelper.saveData(key: '$id-pocket_money', value: pocket_money)
-            .then((value) {
-          balance = balance - pocket_money;
-          updateBalance();
-          emit(SetPocketMoneySuccessState());
-        });
+        emit(SetPocketMoneySuccessState());
       }).catchError((error) {
         emit(SetPocketMoneyErrorState());
       });
     }
   }
 
-  void getMaxPocketMoney({required var id}) {
+  void getMaxPocketMoney({required var id})async {
     pocket_money = 0.0;
 
-    if (CacheHelper.getData(key: '$id-pocket_money') != null) {
-      pocket_money = CacheHelper.getData(key: '$id-pocket_money');
-    }
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(id)
+        .get()
+        .then((value) {
+      if (value.data() != null) {
+        pocket_money = value['pocket money'];
+      }
+
+      emit(SetPocketMoneySuccessState());
+    }).catchError((error) {
+      emit(SetPocketMoneyErrorState());
+    });
   }
 
   bool isBottomSheetShown = false;
@@ -542,13 +582,11 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  Future<void> updateAllergens(id) async{
+  Future<void> updateAllergens(id) async {
     emit(UpdateAllergiesLoadingState());
 
     FirebaseFirestore.instance.collection('students').doc(id).update({
-      'allergens': selectedAllergens.isNotEmpty
-          ? selectedAllergens
-          : null
+      'allergens': selectedAllergens.isNotEmpty ? selectedAllergens : null
     }).then((value) {
       emit(UpdateAllergiesSuccessState());
       getAllergies(id);

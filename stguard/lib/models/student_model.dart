@@ -7,7 +7,7 @@ class studentModel {
   String? name;
   dynamic pocket_money;
   List<dynamic>? restricted_food;
-
+  String? parent;
   studentModel.fromJson(Map<String, dynamic>? json) {
     if (json != null) {
       id = json['uid'];
@@ -18,6 +18,7 @@ class studentModel {
       location = json['location'];
       restricted_food = json['restricted food'];
       attendanceStatus = json['attendance status'];
+      parent = json['parent'];
     }
   }
 }

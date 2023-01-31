@@ -28,6 +28,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
   }
 
   void userRegister({
+        required var name,
+
     required var email,
     required var password,
   }) async {
@@ -35,7 +37,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
     FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      createUser(uid: value.user!.uid, email: email, password: password);
+      createUser(uid: value.user!.uid,name:name, email: email, password: password);
     }).catchError((error) {
       emit(RegisterErrorState(error.toString().split('] ').last));
       print(error.toString());
@@ -43,8 +45,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
   }
 
   void createUser(
-      {required var uid, required var email, required var password}) {
-    userModel user = userModel(id: uid, email: email, role: role);
+      {required var uid,required var name, required var email, required var password}) {
+    userModel user = userModel(id: uid,name:name, email: email, role: role!);
     FirebaseFirestore.instance
         .collection('users')
         .doc(uid)

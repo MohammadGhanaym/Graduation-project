@@ -4,6 +4,7 @@ import 'package:st_tracker/modules/login/cubit/cubit.dart';
 import 'package:st_tracker/modules/login/cubit/states.dart';
 import 'package:st_tracker/modules/register/register_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
+import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
@@ -16,6 +17,8 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    screen_width = MediaQuery.of(context).size.width;
+    screen_height = MediaQuery.of(context).size.height;
     return BlocProvider<LoginCubit>(
       create: (context) => LoginCubit(),
       child: BlocConsumer<LoginCubit, LoginStates>(
@@ -24,16 +27,16 @@ class LoginScreen extends StatelessWidget {
             CacheHelper.saveData(
                 key: 'role', value: LoginCubit.get(context).role);
             CacheHelper.saveData(key: 'id', value: state.userID).then((value) {
+              userID = state.userID;
               navigateAndFinish(
-                  context,
-                  LoginCubit.get(context)
-                      .homeScreens[LoginCubit.get(context).role]);
+                  context, homeScreens[LoginCubit.get(context).role]);
             });
           } else if (state is LoginErrorState) {
             ShowToast(message: state.error, state: ToastStates.ERROR);
           }
         },
         builder: (context, state) {
+
           return Scaffold(
               body: SafeArea(
             child: SingleChildScrollView(
@@ -109,6 +112,16 @@ class LoginScreen extends StatelessWidget {
                                 .changePasswordVisibility(),
                             prefix: Icons.password_outlined,
                             suffix: LoginCubit.get(context).suffix,
+                            onSubmit: (p0) {
+                              if (formKey.currentState!.validate()) {
+                                LoginCubit.get(context).login(
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                );
+                                passwordController.clear();
+                                emailController.clear();
+                              }
+                            },
                           ),
                         ],
                       ),
@@ -206,32 +219,22 @@ class LoginScreen extends StatelessWidget {
                     ),
                     // sign in button
                     state is LoginLoadingState
-                        ? CircularProgressIndicator()
-                        : Container(
-                            width: 200,
-                            height: 50,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .primaryColor
-                                    .withOpacity(0.8),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: MaterialButton(
-                              onPressed: () {
-                                if (formKey.currentState!.validate()) {
-                                  LoginCubit.get(context).login(
-                                    email: emailController.text,
-                                    password: passwordController.text,
-                                  );
-                                  passwordController.clear();
-                                  emailController.clear();
-                                }
-                              },
-                              child: Text(
-                                'SIGN IN',
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
-                              ),
-                            ),
+                        ? LoadingOnWaiting(height: screen_height * 0.07, width: screen_width * 0.5,
+                        color: defaultColor.withOpacity(0.8),)
+                        : DefaultButton(
+                            text: 'SIGN IN',
+                         height: screen_height * 0.07, width: screen_width * 0.5,
+                            color: defaultColor.withOpacity(0.8),
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                LoginCubit.get(context).login(
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                );
+                                passwordController.clear();
+                                emailController.clear();
+                              }
+                            },
                           )
                   ],
                 ),

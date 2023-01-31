@@ -9,9 +9,10 @@ import 'package:st_tracker/shared/styles/Themes.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
-
+  var nameController = TextEditingController();
   var passwordController = TextEditingController();
   var emailController = TextEditingController();
+
   var formKey = GlobalKey<FormState>();
 
   @override
@@ -21,6 +22,7 @@ class RegisterScreen extends StatelessWidget {
       child: BlocConsumer<RegisterCubit, RegisterStates>(
         listener: (context, state) {
           if (state is RegisterSuccessState) {
+            ShowToast(message: 'Success', state: ToastStates.SUCCESS);
             navigateAndFinish(context, LoginScreen());
           } else if (state is RegisterErrorState) {
             ShowToast(message: state.error, state: ToastStates.ERROR);
@@ -69,6 +71,20 @@ class RegisterScreen extends StatelessWidget {
                         child: Column(
                           children: [
                             DefaultFormField(
+                                controller: nameController,
+                                type: TextInputType.text,
+                                validate: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Name must not be empty';
+                                  }
+                                  return null;
+                                },
+                                label: 'Name',
+                                prefix: Icons.person_outlined),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            DefaultFormField(
                                 controller: emailController,
                                 type: TextInputType.emailAddress,
                                 validate: (value) {
@@ -97,6 +113,18 @@ class RegisterScreen extends StatelessWidget {
                                   .changePasswordVisibility(),
                               prefix: Icons.password_outlined,
                               suffix: RegisterCubit.get(context).suffix,
+                              onSubmit: (p0) {
+                                if (formKey.currentState!.validate()) {
+                                  RegisterCubit.get(context).userRegister(
+                                    name: nameController.text,
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                  );
+                                  nameController.clear();
+                                  passwordController.clear();
+                                  emailController.clear();
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -198,9 +226,11 @@ class RegisterScreen extends StatelessWidget {
                                 onPressed: () {
                                   if (formKey.currentState!.validate()) {
                                     RegisterCubit.get(context).userRegister(
+                                      name: nameController.text,
                                       email: emailController.text,
                                       password: passwordController.text,
                                     );
+                                    nameController.clear();
                                     passwordController.clear();
                                     emailController.clear();
                                   }

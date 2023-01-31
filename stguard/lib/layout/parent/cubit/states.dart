@@ -62,7 +62,18 @@ class AttendanceHistoryLoading extends ParentStates {}
 
 class AttendanceHistorySuccess extends ParentStates {}
 
+class UnpairDigitalIDSuccess extends ParentStates {}
+
+class UnpairDigitalIDError extends ParentStates {}
+
+
 class DeactivateDigitalIDSuccess extends ParentStates {}
+
+class DeactivateDigitalIDError extends ParentStates {}
+
+class ActivateDigitalIDSuccess extends ParentStates {}
+
+class ActivateDigitalIDError extends ParentStates {}
 
 class ShowSettingsState extends ParentStates {}
 

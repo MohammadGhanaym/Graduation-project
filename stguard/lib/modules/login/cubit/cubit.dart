@@ -27,13 +27,6 @@ class LoginCubit extends Cubit<LoginStates> {
     emit(ChangePasswordVisibilityState());
   }
 
-  userModel? user;
-  Map<String, Widget> homeScreens = {
-    'parent': ParentHomeScreen(),
-    'teacher': TeacherHomeScreen(),
-    'canteen worker': CanteenHomeScreen()
-  };
-
   void login({
     required var email,
     required var password,
@@ -109,7 +102,22 @@ class LoginCubit extends Cubit<LoginStates> {
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      emit(LoginSuccessState(value.user!.uid));
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(value.user!.uid)
+          .get()
+          .then((user) {
+        if (user.data() != null) {
+          if (role != user['role']) {
+            emit(LoginErrorState('You are not a $role'));
+          }
+          else
+          {
+            emit(LoginSuccessState(value.user!.uid));
+          }
+        }
+      });
+      
     }).catchError((error) {
       emit(LoginErrorState(error.toString().split('] ').last));
       print(error.toString().split('] ').last);

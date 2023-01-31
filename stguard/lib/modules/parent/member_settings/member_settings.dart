@@ -12,7 +12,6 @@ import 'package:st_tracker/shared/styles/Themes.dart';
 
 class MemberSettingsScreen extends StatelessWidget {
   studentModel? student;
-  var scaffoldKey = GlobalKey<ScaffoldState>();
   MemberSettingsScreen({required this.student, super.key});
 
   @override
@@ -24,8 +23,15 @@ class MemberSettingsScreen extends StatelessWidget {
       builder: (context) {
         ParentCubit.get(context).getMaxPocketMoney(id: student!.id);
         ParentCubit.get(context).getAllergies(student!.id);
+        ParentCubit.get(context).getActiveState(student!.id!);
         return BlocConsumer<ParentCubit, ParentStates>(
-          listener: (context, state) {},
+          listener: (context, state) {
+            if (state is UnpairDigitalIDSuccess) {
+              navigateAndFinish(context, ParentHomeScreen());
+              ParentCubit.get(context).showSettings();
+              ParentCubit.get(context).changeSettingsVisibility();
+            }
+          },
           builder: (context, state) {
             return Scaffold(
                 appBar: AppBar(
@@ -53,7 +59,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                       .updatePocketMoney(id: student!.id);
                                   ParentCubit.get(context).hideBottomSheet();
                                 },
-                                child: Text('Save',
+                                child: Text('Give',
                                     style: TextStyle(
                                         fontSize: 20,
                                         color: Colors.white,
@@ -70,10 +76,11 @@ class MemberSettingsScreen extends StatelessWidget {
                         width: screen_width,
                         height: screen_height * 0.15,
                         child: Card(
-                          color: ParentCubit.get(context).isActivated &&
-                                  ParentCubit.get(context)
-                                      .IDs
-                                      .contains(student!.id)
+                          color: ParentCubit.get(context).isPaired &&
+                                      ParentCubit.get(context)
+                                          .studentIDs
+                                          .contains(student!.id) &&
+                                  ParentCubit.get(context).active
                               ? defaultColor
                               : Colors.red,
                           child: Padding(
@@ -108,10 +115,10 @@ class MemberSettingsScreen extends StatelessWidget {
                                         width: screen_width * 0.5,
                                         child: Text(
                                           ParentCubit.get(context)
-                                                      .isActivated &&
+                                                      .isPaired &&
                                                   ParentCubit.get(context)
-                                                      .IDs
-                                                      .contains(student!.id)
+                                                      .studentIDs
+                                                      .contains(student!.id) && ParentCubit.get(context).active
                                               ? 'Activated'
                                               : 'Deactivated',
                                           style: TextStyle(
@@ -126,11 +133,14 @@ class MemberSettingsScreen extends StatelessWidget {
                                       activeColor: defaultColor.shade700,
                                       activeTrackColor: defaultColor.shade100,
                                       value: ParentCubit.get(context)
-                                              .isActivated &&
+                                              .isPaired &&
                                           ParentCubit.get(context)
-                                              .IDs
-                                              .contains(student!.id),
-                                      onChanged: (value) {},
+                                              .studentIDs
+                                              .contains(student!.id) && ParentCubit.get(context).active,
+                                      onChanged: (value) {
+                                        ParentCubit.get(context)
+                                            .changeDigitalIDState(student!.id!);
+                                      },
                                     )
                                   ],
                                 )
@@ -147,9 +157,9 @@ class MemberSettingsScreen extends StatelessWidget {
                         maintainState: true,
                         maintainAnimation: true,
                         child: AnimatedOpacity(
-                          opacity: (ParentCubit.get(context).isActivated &&
+                          opacity: (ParentCubit.get(context).isPaired &&
                                   ParentCubit.get(context)
-                                      .IDs
+                                      .studentIDs
                                       .contains(student!.id))
                               ? 1
                               : 0.0,
@@ -258,7 +268,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                           width: 5,
                                         ),
                                         Text(
-                                          'Pocket Money',
+                                          'Spending Limits',
                                           style: TextStyle(
                                               fontSize: 25,
                                               fontWeight: FontWeight.w500),
@@ -299,21 +309,12 @@ class MemberSettingsScreen extends StatelessWidget {
                                         SizedBox(
                                           width: 5,
                                         ),
-                                        Text(
-                                          'Resets every midnight',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey),
-                                        ),
                                       ],
                                     ),
                                     SizedBox(
                                       height: screen_height * 0.01,
                                     ),
-                                    SliderBuilder(
-                                      scaffoldKey: scaffoldKey,
-                                    )
+                                    SliderBuilder()
                                   ]),
                               SizedBox(
                                 height: screen_height * 0.01,
@@ -410,15 +411,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                   TextButton(
                                       onPressed: () {
                                         ParentCubit.get(context)
-                                            .deactivateDigitalID(student!.id!)
-                                            .then((value) {
-                                          navigateAndFinish(
-                                              context, ParentHomeScreen());
-                                          ParentCubit.get(context)
-                                              .showSettings();
-                                          ParentCubit.get(context)
-                                              .changeSettingsVisibility();
-                                        });
+                                            .unpairDigitalID(student!.id!);
                                       },
                                       child: Text("YES, I'M SURE"))
                                 ],

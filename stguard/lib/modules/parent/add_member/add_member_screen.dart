@@ -5,12 +5,16 @@ import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/layout/parent/parent_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
+import 'package:st_tracker/shared/components/constants.dart';
+import 'package:st_tracker/shared/styles/Themes.dart';
 
 class AddMember extends StatelessWidget {
   AddMember({super.key});
   var idController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    screen_width = MediaQuery.of(context).size.width;
+    screen_height = MediaQuery.of(context).size.height;
     return BlocConsumer<ParentCubit, ParentStates>(
       listener: (context, state) {
         if (state is AddFamilyMemberSuccess) {
@@ -50,38 +54,25 @@ class AddMember extends StatelessWidget {
                                 if (value!.isEmpty) return 'Enter student ID';
                                 return null;
                               },
+                              onSubmit: (p0) => ParentCubit.get(context)
+                                        .addFamilyMember(p0),
                               label: 'Student ID'),
                           SizedBox(
                             height: 20,
                           ),
-                          Container(
-                            width: double.infinity,
-                            height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.greenAccent,
-                                borderRadius: BorderRadius.circular(20)),
-                            child: state is! AddFamilyMemberLoading
-                                ? MaterialButton(
-                                    onPressed: () {
-                                      ParentCubit.get(context)
-                                          .addFamilyMember(idController.text);
-                                    },
-                                    child: Text(
-                                      'Confirm',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  )
-                                : Container(
-                                    width: 5,
-                                    height: 5,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
-                                  ),
-                          ),
+                          state is! AddFamilyMemberLoading
+                              ? DefaultButton(
+                                  text: 'Confirm',
+                                  height: screen_height * 0.07,
+                                  color: defaultColor.withOpacity(0.8),
+                                  onPressed: () {
+                                    ParentCubit.get(context)
+                                        .addFamilyMember(idController.text);
+                                  },
+                                )
+                              : LoadingOnWaiting(
+                                  height: screen_height * 0.07,color: defaultColor.withOpacity(0.8),
+                                ),
                           SizedBox(
                             height: 20,
                           ),

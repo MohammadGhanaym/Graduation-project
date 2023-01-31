@@ -15,11 +15,9 @@ class ParentHomeScreen extends StatelessWidget {
     return Builder(builder: (context) {
       ParentCubit.get(context).createDatabase();
       ParentCubit.get(context).getStudentsData();
-      ParentCubit.get(context).getData();
-      ParentCubit.get(context).getDataFromActivityTable();
       ParentCubit.get(context).initBackgroundService(action: 'start');
       ParentCubit.get(context).getBalance();
-      print('builder');
+      
       return BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -184,7 +182,7 @@ class ParentHomeScreen extends StatelessWidget {
                   ),
                   //family
                   ConditionalBuilder(
-                      condition: state is! GetStudentDataLoading,
+                      condition: ParentCubit.get(context).studentsData.isNotEmpty,
                       builder: (context) => ParentCubit.get(context)
                               .studentsData
                               .isNotEmpty

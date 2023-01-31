@@ -1,9 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/parent_home_screen.dart';
+import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/shared/bloc_observer.dart';
@@ -16,19 +15,12 @@ void main() async {
 
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
-  //CacheHelper.removeData(key: 'IDsList');
 
   userID = CacheHelper.getData(key: 'id');
   userRole = CacheHelper.getData(key: 'role');
   Widget startScreen = LoginScreen();
   if (userID != null) {
-    if (userRole == 'teacher') {
-      startScreen = TeacherHomeScreen();
-    } else if (userRole == 'parent') {
-      startScreen = ParentHomeScreen();
-    } else {
-      startScreen = CanteenHomeScreen();
-    }
+    startScreen = homeScreens[userRole]!;
   }
   runApp(MyApp(
     startScreen: startScreen,
@@ -45,10 +37,13 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => ParentCubit(),
+        ),
+        BlocProvider(
+          create: (context) => TeacherCubit()..initDatabase(),
         )
       ],
       child: MaterialApp(
-        home: startScreen,
+        home: TeacherHomeScreen(),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           appBarTheme: AppBarTheme(color: Colors.blueAccent),

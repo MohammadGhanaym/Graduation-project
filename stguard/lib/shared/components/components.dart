@@ -5,10 +5,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
+import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
+import 'package:st_tracker/models/student_attendance.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/product_model.dart';
-import 'package:st_tracker/modules/allergens/allergens_screen.dart';
+import 'package:st_tracker/modules/parent/allergens/allergens_screen.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
@@ -359,7 +361,11 @@ class FamilyMemberCard extends StatelessWidget {
 }
 
 dynamic getDate(date, {format = 'EE, hh:mm a'}) {
-  return DateFormat(format).format(DateTime.parse(date));
+  if (date is String) {
+    return DateFormat(format).format(DateTime.parse(date));
+  } else {
+    return DateFormat(format).format(date);
+  }
 }
 
 class ProductItem extends StatelessWidget {
@@ -482,8 +488,7 @@ class SettingsCard extends StatelessWidget {
 }
 
 class SliderBuilder extends StatelessWidget {
-  late var scaffoldKey;
-  SliderBuilder({super.key, required this.scaffoldKey});
+  SliderBuilder({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -502,6 +507,7 @@ class SliderBuilder extends StatelessWidget {
                 value: ParentCubit.get(context).pocket_money,
                 min: 0,
                 max: 500,
+                label: '${ParentCubit.get(context).pocket_money}',
                 divisions: (500 / 5).toInt(),
                 onChanged: (value) {
                   if (value <= ParentCubit.get(context).balance) {
@@ -709,14 +715,18 @@ class LoadingOnWaiting extends StatelessWidget {
   double? width;
   Color? color;
   double? radius;
-  LoadingOnWaiting({super.key, this.color=defaultColor,required this.height,
-   this.radius=10,this.width=double.infinity});
+  LoadingOnWaiting(
+      {super.key,
+      this.color = defaultColor,
+      required this.height,
+      this.radius = 10,
+      this.width = double.infinity});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: screen_height * 0.07,
-        width: double.infinity,
+        height: height,
+        width: width,
         decoration: BoxDecoration(
             color: defaultColor.withOpacity(0.8),
             borderRadius: BorderRadiusDirectional.circular(10)),
@@ -726,201 +736,208 @@ class LoadingOnWaiting extends StatelessWidget {
         )));
   }
 }
-/*Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.zero,
-                                  height: 180,
-                                  width: 130,
-                                  child: Card(
-                                    child: Container(
-                                      width: double.infinity,
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 20,
-                                            ),
-                                            CircleAvatar(
-                                              radius: 41,
-                                              backgroundColor: Theme.of(context)
-                                                  .primaryColor,
-                                              child: CircleAvatar(
-                                                  radius: 40,
-                                                  backgroundColor: Colors.white,
-                                                  child: IconButton(
-                                                      onPressed: () {
-                                                        navigateTo(
-                                                            context,
-                                                            BlocProvider.value(
-                                                                value: ParentCubit
-                                                                    .get(
-                                                                        context),
-                                                                child:
-                                                                    AddMember()));
-                                                      },
-                                                      icon: Icon(Icons.add))),
-                                            ),
-                                            SizedBox(
-                                              height: 20,
-                                            ),
-                                            Container(
-                                                width: 80,
-                                                child:
-                                                    Text('Add Family Member'))
-                                          ]),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )*/
-/*Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 150,
-                        child: RadioListTile<String>(
-                          value: 'Parent',
-                          groupValue: LoginCubit.get(context).role,
-                          onChanged: (value) {
-                            print(value);
-                            LoginCubit.get(context).isSelected(value);
-                          },
-                          contentPadding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.grey[500]!),
-                              borderRadius: BorderRadius.circular(10)),
-                          title: Text('Parent'),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Container(
-                        width: 150,
-                        child: RadioListTile<String>(
-                          value: 'Teacher',
-                          groupValue: LoginCubit.get(context).role,
-                          onChanged: (value) {
-                            print(value);
-                            LoginCubit.get(context).isSelected(value);
-                          },
-                          title: Text('Teacher'),
-                          contentPadding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.grey[500]!),
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Container(
-                        width: 150,
-                        child: RadioListTile<String>(
-                          value: 'Canteen Worker',
-                          groupValue: LoginCubit.get(context).role,
-                          onChanged: (value) {
-                            print(value);
-                            LoginCubit.get(context).isSelected(value);
-                          },
-                          title: Text('Canteen Worker'),
-                          contentPadding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.grey[500]!),
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                    ],
-                  ),
-                )*/
 
-/*Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadiusDirectional.all(
-                                    Radius.circular(10))),
-                            width: screen_width,
-                            height: screen_height * 0.15,
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.baseline,
-                                      textBaseline: TextBaseline.alphabetic,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Image(
-                                            width: screen_width * 0.07,
-                                            height: screen_height * 0.03,
-                                            image: AssetImage(
-                                                'assets/images/map.png')),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          'Location',
-                                          style: TextStyle(
-                                              fontSize: 25,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        SizedBox(
-                                          width: 60,
-                                        ),
-                                        Text(
-                                          'Last Seen',
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w300),
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          "${student!.location!['time']}",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w300),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Container(
-                                      width: 190,
-                                      height: 40,
-                                      child: OutlinedButton(
-                                        onPressed: () =>
-                                            ParentCubit.get(context).openMap(
-                                                lat: student!
-                                                    .location!['latitude'],
-                                                long: student!
-                                                    .location!['longtitude']),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'Find ${student!.name!.split(' ')[0]}',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: defaultColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ), */
+class MyDropdown extends StatelessWidget {
+  double width;
+  double height;
+  double radius;
+  Color borderColor;
+  MyDropdown(
+      {super.key,
+      required this.width,
+      required this.height,
+      required this.radius,
+      required this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    print(width);
+    return Container(
+      alignment: AlignmentDirectional.center,
+      width: width * 0.4,
+      height: height * 0.05,
+      margin: EdgeInsets.all(width * 0.01),
+      padding: EdgeInsets.symmetric(
+          horizontal: width * 0.02, vertical: height * 0.01),
+      decoration: BoxDecoration(
+          border: Border.all(color: borderColor, width: width * 0.002),
+          borderRadius: BorderRadiusDirectional.circular(radius)),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: TeacherCubit.get(context).selectedGrade,
+          hint: Text(
+            'Select Grade',
+            style: TextStyle(fontSize: width * 0.04),
+          ),
+          isExpanded: true,
+          onChanged: (value) {
+            TeacherCubit.get(context).selectGrade(value);
+          },
+          iconSize: width * 0.07,
+          icon: Icon(Icons.arrow_drop_down_outlined),
+          items: TeacherCubit.get(context).grades.map((item) {
+            return DropdownMenuItem<String>(
+              alignment: AlignmentDirectional.center,
+              value: item,
+              child: Text(
+                item,
+                style: TextStyle(fontSize: width * 0.05),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class StudentAttendanceCard extends StatelessWidget {
+  double width;
+  double height;
+  studentModel student;
+
+  StudentAttendanceCard({
+    super.key,
+    required this.width,
+    required this.height,
+    required this.student,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadiusDirectional.circular(width * 0.02),
+            border: Border.all(
+                width: width * 0.01,
+                color: TeacherCubit.get(context).attendance[student.id!] != null
+                    ? TeacherCubit.get(context)
+                                .attendance[student.id!]
+                                .isPresent ==
+                            1
+                        ? defaultColor.withOpacity(0.8)
+                        : Colors.red.withOpacity(0.8)
+                    : const Color(0xFF000000))),
+        width: width,
+        height: height * 0.15,
+        child: Card(
+            child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: width * 0.1,
+                backgroundImage: NetworkImage(student.image!),
+              ),
+              SizedBox(
+                width: width * 0.02,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                      width: width * 0.5,
+                      child: Text(
+                        student.name!,
+                        style: TextStyle(
+                            fontSize: screen_width * 0.05,
+                            fontWeight: FontWeight.w500),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      )),
+                  SizedBox(
+                    height: height * 0.01,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      DefaultButton(
+                        text: 'Present',
+                        color: defaultColor.withOpacity(0.8),
+                        width: width * 0.29,
+                        height: height * 0.05,
+                        onPressed: () {
+                          TeacherCubit.get(context)
+                              .addtoAttendance(student.id!, student.name!, 1);
+                        },
+                      ),
+                      SizedBox(
+                        width: width * 0.02,
+                      ),
+                      DefaultButton(
+                        text: 'Absent',
+                        color: Colors.red.withOpacity(0.8),
+                        width: width * 0.27,
+                        height: height * 0.05,
+                        onPressed: () {
+                          TeacherCubit.get(context)
+                              .addtoAttendance(student.id!, student.name!, 0);
+                        },
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ],
+          ),
+        )));
+  }
+}
+
+class LessonCard extends StatelessWidget {
+  LessonModel lesson;
+  void Function() onTap;
+  double width;
+  double height;
+  LessonCard(
+      {required this.width,
+      required this.height,
+      required this.lesson,
+      required this.onTap,
+      super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        height: height * 0.12,
+        child: Card(
+            child: Padding(
+          padding: EdgeInsets.symmetric(
+              vertical: height * 0.01, horizontal: width * 0.05),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                lesson.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: width * 0.05, fontWeight: FontWeight.w500),
+              ),
+              SizedBox(
+                height: height * 0.02,
+              ),
+              Row(
+                children: [
+                  Text(lesson.grade,
+                      style: TextStyle(
+                          fontSize: width * 0.04, fontWeight: FontWeight.w500)),
+                  SizedBox(
+                    width: width * 0.3,
+                  ),
+                  Text(getDate(lesson.datetime, format: 'MMM, EE, hh:mm a'),
+                      style: TextStyle(
+                          fontSize: width * 0.04, fontWeight: FontWeight.w500))
+                ],
+              ),
+            ],
+          ),
+        )),
+      ),
+    );
+  }
+}

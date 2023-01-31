@@ -15,7 +15,20 @@ class CashScreen extends StatelessWidget {
     screen_width = MediaQuery.of(context).size.width;
     screen_height = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        bottom: PreferredSize(child: Divider(), preferredSize: Size(0.5, 0.5)),
+        title: Text('Recharge'),
+        titleSpacing: screen_width * 0.25,
+        titleTextStyle: TextStyle(
+            color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: ImageIcon(AssetImage('assets/images/x.png'), size: 20,color: defaultColor,),
+      )),
       body: BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {
           if (state is RechargeSuccessState) {
@@ -33,10 +46,11 @@ class CashScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  
                   Image(
                     image: AssetImage('assets/images/payment-method.png'),
-                    width: screen_width * 0.4,
-                    height: screen_width * 0.4,
+                    width: screen_width * 0.5,
+                    height: screen_width * 0.5,
                   ),
                   SizedBox(
                     height: screen_height * 0.05,
