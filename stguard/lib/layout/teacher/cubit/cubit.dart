@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/teacher/cubit/states.dart';
 import 'package:st_tracker/models/student_attendance.dart';
@@ -136,6 +140,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
   List<StudentAttendanceModel> lessonAttendance = [];
   void getLessonAttendance(String lesson_name) async {
+    emit(GetLessonAttendanceLoadingState());
     await _database.rawQuery('''
       SELECT 
         $tableStAttendLesson.$columnStID AS student_id,
@@ -153,8 +158,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
         lessonAttendance.add(StudentAttendanceModel.fromMap(element));
       });
       print(lessonAttendance);
+      emit(GetLessonAttendanceSuccessState());
     }).catchError((error) {
       print(error.toString());
+      emit(GetLessonAttendanceErrorState());
     });
   }
 
@@ -205,7 +212,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
   void getStudentsNames() {
     students = [];
     emit(GetStudentNamesLoading());
-
+    attendance = {};
     FirebaseFirestore.instance
         .collection('students')
         .where('grade', isEqualTo: selectedGrade)
@@ -237,5 +244,41 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
     print(attendance[stID].isPresent);
     emit(AddStudenttoAttendanceState());
+  }
+
+  Future<void> saveAttendanceToExcel(LessonModel lesson, String filePath,
+      List<StudentAttendanceModel> attendanceData) async {
+    if (await Permission.storage.status == PermissionStatus.granted) {
+      try {
+      // Create an instance of the Excel package
+      var excel = Excel.createExcel();
+      print(await Permission.storage.status == PermissionStatus.granted);
+      // Add a sheet to the excel file
+      var sheet = excel[excel.getDefaultSheet()!];
+
+      // Add headers to the sheet
+      sheet.updateCell(CellIndex.indexByString("A1"), "Student ID");
+      sheet.updateCell(CellIndex.indexByString("B1"), "Student Name");
+      sheet.updateCell(CellIndex.indexByString("C1"), "Lesson");
+      sheet.updateCell(CellIndex.indexByString("D1"), "Is Present");
+
+      // Add data to the sheet
+      for (var i = 0; i < attendanceData.length; i++) {
+        sheet.updateCell(
+            CellIndex.indexByString("A${i + 2}"), attendanceData[i].stID);
+        sheet.updateCell(CellIndex.indexByString("B${i + 2}"),
+            attendanceData[i].studentName);
+        sheet.updateCell(
+            CellIndex.indexByString("C${i + 2}"), attendanceData[i].lessonName);
+        sheet.updateCell(
+            CellIndex.indexByString("D${i + 2}"), attendanceData[i].isPresent);
+      }
+        File('$filePath/${lesson.name}.xlsx').writeAsBytesSync(excel.encode()!);
+        
+        emit(SavetoExcelSuccessState());
+      } catch (e) {
+        emit(SavetoExcelErrorState());
+      }
+    }
   }
 }

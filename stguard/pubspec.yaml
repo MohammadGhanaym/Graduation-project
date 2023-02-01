@@ -48,7 +48,9 @@ dependencies:
   #flutter_isolate: ^2.0.4
   map_launcher: ^2.4.0
   #dio: ^4.0.6
-  
+  permission_handler: ^10.2.0
+  path_provider: ^2.0.12
+  excel: ^2.0.1
   #firebase
   firebase_core: ^2.3.0
   firebase_auth: ^4.1.5

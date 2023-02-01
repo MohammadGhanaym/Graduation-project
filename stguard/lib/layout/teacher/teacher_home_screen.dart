@@ -13,10 +13,9 @@ class TeacherHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     screen_width = MediaQuery.of(context).size.width;
     screen_height = MediaQuery.of(context).size.height;
+    requestWritePermission();
     return BlocConsumer<TeacherCubit, TeacherStates>(
-      listener: (context, state) {
-        if (state is BottomSheetHiddenState) {}
-      },
+      listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
             key: scaffoldKey,
@@ -75,7 +74,7 @@ class TeacherHomeScreen extends StatelessWidget {
                 items: [
                   BottomNavigationBarItem(
                       icon: Icon(Icons.history), label: 'History'),
-                  BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add')
+                  BottomNavigationBarItem(icon: Icon(Icons.add), label: 'New')
                 ]),
             body: TeacherCubit.get(context)
                 .screens[TeacherCubit.get(context).currentIndex]);

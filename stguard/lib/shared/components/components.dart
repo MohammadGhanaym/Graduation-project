@@ -1,9 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
@@ -817,7 +819,7 @@ class StudentAttendanceCard extends StatelessWidget {
                             1
                         ? defaultColor.withOpacity(0.8)
                         : Colors.red.withOpacity(0.8)
-                    : const Color(0xFF000000))),
+                    : Colors.grey[200]!)),
         width: width,
         height: height * 0.15,
         child: Card(
@@ -908,30 +910,39 @@ class LessonCard extends StatelessWidget {
             child: Padding(
           padding: EdgeInsets.symmetric(
               vertical: height * 0.01, horizontal: width * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                lesson.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: width * 0.05, fontWeight: FontWeight.w500),
-              ),
-              SizedBox(
-                height: height * 0.02,
-              ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(lesson.grade,
+                  Container(
+                    width: screen_width * 0.6,
+                    child: Text(
+                      '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: width * 0.04, fontWeight: FontWeight.w500)),
-                  SizedBox(
-                    width: width * 0.3,
+                          fontSize: width * 0.05, fontWeight: FontWeight.w500),
+                    ),
                   ),
-                  Text(getDate(lesson.datetime, format: 'MMM, EE, hh:mm a'),
-                      style: TextStyle(
-                          fontSize: width * 0.04, fontWeight: FontWeight.w500))
+                  SizedBox(
+                    height: height * 0.02,
+                  ),
+                  Row(
+                    children: [
+                      Text(lesson.grade,
+                          style: TextStyle(
+                              fontSize: width * 0.04,
+                              fontWeight: FontWeight.w500)),
+                      SizedBox(
+                        width: width * 0.2,
+                      ),
+                      Text(getDate(lesson.datetime, format: 'MMM, EE, hh:mm a'),
+                          style: TextStyle(
+                              fontSize: width * 0.04,
+                              fontWeight: FontWeight.w500))
+                    ],
+                  ),
                 ],
               ),
             ],
@@ -939,5 +950,63 @@ class LessonCard extends StatelessWidget {
         )),
       ),
     );
+  }
+}
+
+class AttendanceDetailsCard extends StatelessWidget {
+  StudentAttendanceModel studentDetails;
+
+  AttendanceDetailsCard({required this.studentDetails, super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: screen_width,
+      height: screen_height * 0.05,
+      child: Padding(
+        padding: EdgeInsets.all(screen_width * 0.02),
+        child: Row(
+          children: [
+            Container(
+                width: screen_width * 0.57,
+                child: Text(
+                  studentDetails.studentName,
+                  maxLines: 2,
+                  style: TextStyle(fontSize: screen_width * 0.04),
+                  overflow: TextOverflow.ellipsis,
+                )),
+            VerticalDivider(
+              color: defaultColor.withOpacity(0.8),
+              thickness: 1,
+            ),
+            ImageIcon(
+              color: studentDetails.isPresent == 1
+                  ? defaultColor.withOpacity(0.8)
+                  : Colors.red.withOpacity(0.8),
+              AssetImage(studentDetails.isPresent == 1
+                  ? 'assets/images/check-mark.png'
+                  : 'assets/images/close.png'),
+              size: screen_width * 0.1,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+Future<void> requestWritePermission() async {
+  if (Platform.isAndroid) {
+    if (!await Permission.storage.isGranted) {
+      await Permission.storage.request().then((value) {
+        if (value.isDenied) {
+          print("Permission to write to external storage denied");
+        } else if (value.isGranted) {
+          print("Permission to write to external storage granted");
+        }
+        return value;
+      });
+    }
   }
 }

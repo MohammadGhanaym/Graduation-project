@@ -34,3 +34,13 @@ class AddNewAttendanceErrorState extends TeacherStates {
 class GetLessonsSuccessState extends TeacherStates {}
 
 class GetLessonsErrorState extends TeacherStates {}
+
+class GetLessonAttendanceSuccessState extends TeacherStates {}
+
+class GetLessonAttendanceErrorState extends TeacherStates {}
+
+class GetLessonAttendanceLoadingState extends TeacherStates {}
+
+class SavetoExcelSuccessState extends TeacherStates{}
+
+class SavetoExcelErrorState extends TeacherStates{}

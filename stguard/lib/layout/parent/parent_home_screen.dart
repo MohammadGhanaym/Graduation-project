@@ -6,12 +6,15 @@ import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
 import 'package:st_tracker/modules/parent/recharge/recharge_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
+import 'package:st_tracker/shared/components/constants.dart';
 
 class ParentHomeScreen extends StatelessWidget {
   const ParentHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    screen_width = MediaQuery.of(context).size.width;
+    screen_height = MediaQuery.of(context).size.height;
     return Builder(builder: (context) {
       ParentCubit.get(context).createDatabase();
       ParentCubit.get(context).getStudentsData();
