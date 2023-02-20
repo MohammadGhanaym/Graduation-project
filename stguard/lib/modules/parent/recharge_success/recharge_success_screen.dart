@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:st_tracker/layout/parent/parent_home_screen.dart';
-import 'package:st_tracker/modules/parent/recharge/recharge_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class RechargeSuccessScreen extends StatelessWidget {
-  var amount;
-  RechargeSuccessScreen({super.key, required this.amount});
+  Map params;
+  RechargeSuccessScreen({super.key, required this.params});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,6 @@ class RechargeSuccessScreen extends StatelessWidget {
                     fontSize: screen_width * 0.05, fontWeight: FontWeight.w700),
               ),
               Divider(),
-              
               SizedBox(
                 height: screen_height * 0.1,
               ),
@@ -53,7 +51,7 @@ class RechargeSuccessScreen extends StatelessWidget {
               SizedBox(
                 height: screen_height * 0.1,
               ),
-              Text(amount,
+              Text('500',
                   style: TextStyle(
                       fontSize: screen_width * 0.2,
                       fontWeight: FontWeight.bold,

@@ -18,17 +18,26 @@ class AddFamilyMemberLoading extends ParentStates {}
 
 class AddFamilyMemberError extends ParentStates {}
 
+class GetStudentsPathsSuccess extends ParentStates {}
+
+class GetStudentsPathsLoading extends ParentStates {}
+
+class GetStudentsPathsError extends ParentStates {
+  String error;
+  GetStudentsPathsError(this.error);
+}
+
 class GetStudentDataSuccess extends ParentStates {}
 
 class GetStudentDataLoading extends ParentStates {}
 
 class GetStudentDataError extends ParentStates {}
 
-class GetBalanceSuccess extends ParentStates {}
+class GetUserInfoSuccess extends ParentStates {}
 
-class GetBalanceLoading extends ParentStates {}
+class GetUserInfoLoading extends ParentStates {}
 
-class GetBalanceError extends ParentStates {}
+class GetUserInfoError extends ParentStates {}
 
 class UpdateBalanceSuccess extends ParentStates {}
 
@@ -50,11 +59,9 @@ class ParentGeStudentActivityErrorState extends ParentStates {}
 
 class ParentGeSchoolTransactionsSuccessState extends ParentStates {}
 
-class ParentAddNewTranscationSuccessState extends ParentStates {}
+class ParentAddNewAttendanceSuccessState extends ParentStates {}
 
 class ParentAddNewTranscationLoadingState extends ParentStates {}
-
-class TransactionDeleteSuccess extends ParentStates {}
 
 class ClearDatabaseSuccess extends ParentStates {}
 
@@ -66,7 +73,6 @@ class UnpairDigitalIDSuccess extends ParentStates {}
 
 class UnpairDigitalIDError extends ParentStates {}
 
-
 class DeactivateDigitalIDSuccess extends ParentStates {}
 
 class DeactivateDigitalIDError extends ParentStates {}
@@ -76,6 +82,10 @@ class ActivateDigitalIDSuccess extends ParentStates {}
 class ActivateDigitalIDError extends ParentStates {}
 
 class ShowSettingsState extends ParentStates {}
+
+class GetStudentLocationSuccessState extends ParentStates {}
+
+class GetStudentLocationLoadingState extends ParentStates {}
 
 class SetPocketMoneySuccessState extends ParentStates {}
 
@@ -126,3 +136,25 @@ class UpdateAllergiesErrorState extends ParentStates {
   var error;
   UpdateAllergiesErrorState(this.error);
 }
+
+class GetCountriesSucessState extends ParentStates {}
+
+class GetCountriesLoadingState extends ParentStates {}
+
+class GetCountriesErrorState extends ParentStates {
+  dynamic error;
+  GetCountriesErrorState(this.error);
+}
+
+class GetSchoolsSucessState extends ParentStates {}
+
+class GetSchoolsLoadingState extends ParentStates {}
+
+class GetSchoolsErrorState extends ParentStates {
+  dynamic error;
+  GetSchoolsErrorState(this.error);
+}
+
+class PickSchoolState extends ParentStates {}
+
+class PickCountryState extends ParentStates {}

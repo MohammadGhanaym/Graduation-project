@@ -31,6 +31,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
   sqflite: 
   intl: ^0.17.0
   bloc: ^8.1.0
@@ -38,7 +39,7 @@ dependencies:
   hexcolor: ^3.0.1
   conditional_builder_null_safety: ^0.0.6
   shared_preferences: ^2.0.15
-  webview_flutter: ^3.0.4
+  webview_flutter: ^2.1.1
   smooth_page_indicator: ^1.0.0+2
   fluttertoast: ^8.1.1
   carousel_slider: ^4.1.1
@@ -51,10 +52,14 @@ dependencies:
   permission_handler: ^10.2.0
   path_provider: ^2.0.12
   excel: ^2.0.1
+  flutter_tap_payment: ^0.0.4
   #firebase
-  firebase_core: ^2.3.0
-  firebase_auth: ^4.1.5
-  cloud_firestore: ^4.1.0
+  #firebase_core: ^2.3.0
+  firebase_core: ^2.5.0
+  #firebase_auth: ^4.1.5
+  firebase_auth: ^4.2.6
+  #cloud_firestore: ^4.1.0
+  cloud_firestore: ^4.3.2
   firebase_storage: ^11.0.7
   #firebase_messaging: ^14.2.0
   #firebase_analytics: ^10.0.7

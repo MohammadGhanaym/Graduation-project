@@ -24,10 +24,10 @@ class AllergensScreen extends StatelessWidget {
     screen_height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-                bottom: PreferredSize(child: Divider(), preferredSize: Size(0.5, 0.5)),
-
-          title: Text('Allergens'),
-          titleSpacing: screen_width * 0.25,
+          bottom:
+              PreferredSize(child: Divider(), preferredSize: Size(0.5, 0.5)),
+          title: const Text('Allergens'),
+          centerTitle: true,
           titleTextStyle: TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
           elevation: 0,
@@ -49,7 +49,6 @@ class AllergensScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                
                 SizedBox(
                   height: screen_height * 0.01,
                 ),
@@ -96,8 +95,8 @@ class AllergensScreen extends StatelessWidget {
                         radius: 10,
                       )
                     : DefaultButton(
-                        onPressed: () {
-                          ParentCubit.get(context)
+                        onPressed: () async {
+                          await ParentCubit.get(context)
                               .updateAllergens(student_id)
                               .then((value) {
                             Navigator.pop(context);

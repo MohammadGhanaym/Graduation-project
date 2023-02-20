@@ -12,14 +12,10 @@ class AttendanceHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    screen_height = MediaQuery.of(context).size.height;
-    screen_width = MediaQuery.of(context).size.width;
-
+    ParentCubit.get(context).getAttendanceHistory(model.st_id);
     return Scaffold(
-      appBar: AppBar(),
-      body: Builder(builder: (context) {
-        ParentCubit.get(context).getAttendanceHistory(model.st_id);
-        return BlocConsumer<ParentCubit, ParentStates>(
+        appBar: AppBar(),
+        body: BlocConsumer<ParentCubit, ParentStates>(
           listener: (context, state) {},
           builder: (context, state) {
             return Padding(
@@ -69,8 +65,6 @@ class AttendanceHistoryScreen extends StatelessWidget {
               ),
             );
           },
-        );
-      }),
-    );
+        ));
   }
 }

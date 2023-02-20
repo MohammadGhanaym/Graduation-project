@@ -1,14 +1,17 @@
 import 'dart:io';
 
-import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
+import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
+import 'package:st_tracker/models/canteen_product_model.dart';
+import 'package:st_tracker/models/school_model.dart';
 import 'package:st_tracker/models/student_attendance.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/product_model.dart';
@@ -18,6 +21,7 @@ import 'package:st_tracker/modules/parent/attendance_history/attendance_history_
 import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
 import 'package:st_tracker/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:st_tracker/shared/components/constants.dart';
+import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
@@ -38,7 +42,7 @@ class DefaultButton extends StatelessWidget {
       required this.text,
       this.textColor = Colors.white,
       this.textSize = 20,
-      this.onPressed,
+      required this.onPressed,
       super.key});
 
   @override
@@ -67,6 +71,7 @@ class DefaultFormField extends StatelessWidget {
   bool isPassword = false;
   String? Function(String? value) validate;
   String? label;
+  String? errorText;
   IconData? prefix;
   IconData? suffix;
   void Function()? changeObscured;
@@ -77,6 +82,7 @@ class DefaultFormField extends StatelessWidget {
       required this.type,
       this.onSubmit,
       this.onChange,
+      this.errorText,
       this.onTap,
       this.isPassword = false,
       required this.validate,
@@ -99,6 +105,7 @@ class DefaultFormField extends StatelessWidget {
       onTap: onTap,
       decoration: InputDecoration(
           labelText: label,
+          errorText: errorText,
           border: const OutlineInputBorder(),
           prefixIcon: Icon(prefix),
           suffixIcon: suffix != null
@@ -149,16 +156,67 @@ void signOut(BuildContext context) {
 void cancelListeners() {
   if (transListeners.isNotEmpty) {
     transListeners.forEach((key, value) {
-      value.cancel();
+      //value.cancel();
+      transListeners[key]!.cancel();
+      print('transaction listener is cancelled');
     });
     transListeners = {};
   }
 
   if (attendListeners.isNotEmpty) {
     attendListeners.forEach((key, value) {
-      value.cancel();
+      //value.cancel();
+      attendListeners[key]!.cancel();
+      print('attendance listener is cancelled');
     });
     attendListeners = {};
+  }
+}
+
+class UserInfo extends StatelessWidget {
+  dynamic userModel;
+  UserInfo({super.key, required this.userModel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Profile',
+          style: TextStyle(
+              fontSize: 30,
+              color: defaultColor.withOpacity(0.8),
+              fontWeight: FontWeight.w500),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Text('Name',
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w500)),
+        SizedBox(
+          height: 5,
+        ),
+        Text(userModel.name,
+            style:
+                TextStyle(fontSize:15, color: Colors.grey)),
+        SizedBox(
+          height: 10,
+        ),
+        Text('Email',
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w500)),
+        SizedBox(
+          height: 5,
+        ),
+        Text(userModel.email,
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey,
+            ))
+      ],
+    );
   }
 }
 
@@ -171,27 +229,24 @@ class DrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            if (icon is IconData)
-              Icon(
-                icon,
-                size: 20,
-              )
-            else
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          if (icon is IconData)
+            Icon(
               icon,
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              text,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              size: 20,
             )
-          ],
-        ),
+          else
+            icon,
+          SizedBox(
+            width: 10,
+          ),
+          Text(
+            text,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+          )
+        ],
       ),
       onTap: ontap,
       highlightColor: defaultColor.withOpacity(0.5),
@@ -202,7 +257,7 @@ class DrawerItem extends StatelessWidget {
 
 class ActivityItem extends StatelessWidget {
   ActivityModel model;
-  List<studentModel?> studentsData;
+  List<StudentModel?> studentsData;
   ActivityItem({required this.model, required this.studentsData, super.key});
 
   @override
@@ -313,7 +368,7 @@ class ActivityItem extends StatelessWidget {
 }
 
 class FamilyMemberCard extends StatelessWidget {
-  studentModel? model;
+  StudentModel? model;
   FamilyMemberCard(this.model, {super.key});
 
   @override
@@ -466,8 +521,13 @@ class SettingsCard extends StatelessWidget {
   List<Widget> children = const <Widget>[];
   double? card_width;
   double? card_height;
+  bool condition;
   SettingsCard(
-      {super.key, required this.children, this.card_width, this.card_height});
+      {super.key,
+      required this.children,
+      required this.condition,
+      this.card_width,
+      this.card_height});
 
   @override
   Widget build(BuildContext context) {
@@ -480,9 +540,13 @@ class SettingsCard extends StatelessWidget {
         elevation: 0.0,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: children,
-          ),
+          child: condition
+              ? Column(
+                  children: children,
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
+                ),
         ),
       ),
     );
@@ -512,7 +576,7 @@ class SliderBuilder extends StatelessWidget {
                 label: '${ParentCubit.get(context).pocket_money}',
                 divisions: (500 / 5).toInt(),
                 onChanged: (value) {
-                  if (value <= ParentCubit.get(context).balance) {
+                  if (value <= ParentCubit.get(context).parent!.balance) {
                     ParentCubit.get(context).setPocketMoney(money: value);
                   }
                 },
@@ -596,6 +660,89 @@ class RechargeItem extends StatelessWidget {
                   size: 20, color: defaultColor)
             ]),
           ))),
+    );
+  }
+}
+
+class CountryItem extends StatelessWidget {
+  String country;
+  void Function()? onTap;
+  CountryItem({super.key, required this.country, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: screen_width,
+        height: screen_height * 0.05,
+        child: Row(
+          children: [
+            Text(
+              country,
+              style: TextStyle(
+                  fontSize: screen_width * 0.05, fontWeight: FontWeight.w400),
+            ),
+            Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: defaultColor.withOpacity(0.8),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SchoolItem extends StatelessWidget {
+  School school;
+  void Function()? onTap;
+  SchoolItem({super.key, required this.school, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            height: 60,
+            width: 60,
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(60)),
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Image(image: NetworkImage(school.logo)),
+              radius: 60,
+            ),
+          ),
+          SizedBox(
+            width: 10
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              school.name,
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          SizedBox(
+            width: 10
+          ),
+          Icon(
+            Icons.arrow_forward_ios,
+            color: defaultColor,
+            size: screen_width * 0.05,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -796,7 +943,7 @@ class MyDropdown extends StatelessWidget {
 class StudentAttendanceCard extends StatelessWidget {
   double width;
   double height;
-  studentModel student;
+  StudentModel student;
 
   StudentAttendanceCard({
     super.key,
@@ -821,7 +968,7 @@ class StudentAttendanceCard extends StatelessWidget {
                         : Colors.red.withOpacity(0.8)
                     : Colors.grey[200]!)),
         width: width,
-        height: height * 0.15,
+        height: height * 0.16,
         child: Card(
             child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -843,7 +990,7 @@ class StudentAttendanceCard extends StatelessWidget {
                       child: Text(
                         student.name!,
                         style: TextStyle(
-                            fontSize: screen_width * 0.05,
+                            fontSize: screen_width * 0.04,
                             fontWeight: FontWeight.w500),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -961,13 +1108,13 @@ class AttendanceDetailsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: screen_width,
-      height: screen_height * 0.05,
+      height: screen_height * 0.06,
       child: Padding(
         padding: EdgeInsets.all(screen_width * 0.02),
         child: Row(
           children: [
             Container(
-                width: screen_width * 0.57,
+                width: screen_width * 0.7,
                 child: Text(
                   studentDetails.studentName,
                   maxLines: 2,
@@ -994,8 +1141,6 @@ class AttendanceDetailsCard extends StatelessWidget {
   }
 }
 
-
-
 Future<void> requestWritePermission() async {
   if (Platform.isAndroid) {
     if (!await Permission.storage.isGranted) {
@@ -1008,5 +1153,70 @@ Future<void> requestWritePermission() async {
         return value;
       });
     }
+  }
+}
+
+class CanteenProductCard extends StatelessWidget {
+  CanteenProductModel product;
+  void Function()? onTap;
+  CanteenProductCard({super.key, required this.product, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        child: Card(
+            child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Image(
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  image: NetworkImage(product.image)),
+              const SizedBox(
+                height: 10,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Container(
+                        width: 65,
+                        child: Text(
+                          '${product.price.toStringAsFixed(2)} EGP',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 30,
+                      ),
+                      CanteenCubit.get(context)
+                              .selectedProducts
+                              .contains(product.id)
+                          ? Icon(
+                              Icons.shopping_cart,
+                              color: defaultColor,
+                            )
+                          : Icon(Icons.shopping_cart_outlined)
+                    ],
+                  ),
+                ],
+              )
+            ],
+          ),
+        )),
+      ),
+    );
   }
 }

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
-import 'package:st_tracker/layout/parent/parent_home_screen.dart';
-import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
+import 'package:st_tracker/models/canteen_model.dart';
+import 'package:st_tracker/models/parent_model.dart';
+import 'package:st_tracker/models/teacher_model.dart';
 import 'package:st_tracker/models/user_model.dart';
 import 'package:st_tracker/modules/register/cubit/states.dart';
 
@@ -28,8 +28,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
   }
 
   void userRegister({
-        required var name,
-
+    required var name,
     required var email,
     required var password,
   }) async {
@@ -37,7 +36,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
     FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      createUser(uid: value.user!.uid,name:name, email: email, password: password);
+      createUser(
+          uid: value.user!.uid, name: name, email: email, password: password);
     }).catchError((error) {
       emit(RegisterErrorState(error.toString().split('] ').last));
       print(error.toString());
@@ -45,14 +45,32 @@ class RegisterCubit extends Cubit<RegisterStates> {
   }
 
   void createUser(
-      {required var uid,required var name, required var email, required var password}) {
-    userModel user = userModel(id: uid,name:name, email: email, role: role!);
+      {required var uid,
+      required var name,
+      required var email,
+      required var password}) {
+    if (role == 'parent') {
+      ParentModel user = ParentModel(
+          id: uid, name: name, email: email, balance: 0, role: role!);
+      saveUserData(user, 'Parents');
+    } else if (role == 'teacher') {
+      TeacherModel user =
+          TeacherModel(id: uid, name: name, email: email, role: role!);
+      saveUserData(user, 'Teachers');
+    } else if (role == 'canteen worker') {
+      CanteenWorkerModel user = CanteenWorkerModel(
+          id: uid, name: name, email: email, balance: 0, role: role!);
+      saveUserData(user, 'Canteen Workers');
+    }
+  }
+
+  void saveUserData(dynamic user, String collName) {
     FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
+        .collection(collName)
+        .doc(user.id)
         .set(user.toMap())
         .then((value) {
-      emit(RegisterSuccessState(uid));
+      emit(RegisterSuccessState(user.id));
     }).catchError((error) {
       emit(RegisterErrorState(error.toString()));
       print(error.toString().split('] ')[0]);

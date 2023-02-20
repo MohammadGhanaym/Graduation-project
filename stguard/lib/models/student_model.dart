@@ -1,33 +1,43 @@
-class studentModel {
+class StudentModel {
   String? id;
-  Map<String, dynamic>? attendanceStatus;
-  String? grade;
+  String? className;
   String? image;
-  Map<String, dynamic>? location;
   String? name;
-  dynamic pocket_money;
-  List<dynamic>? restricted_food;
+  dynamic pocketMoney;
   String? parent;
-  studentModel.fromJson(Map<String, dynamic>? json) {
+  StudentModel.fromJson(Map<String, dynamic>? json) {
     if (json != null) {
       id = json['uid'];
       name = json['name'];
       image = json['image'];
-      grade = json['grade'];
-      pocket_money = json['pocket money'];
-      location = json['location'];
-      restricted_food = json['restricted food'];
-      attendanceStatus = json['attendance status'];
       parent = json['parent'];
+      className = json['class_name'];
     }
   }
 }
 
 class SchoolAttendanceModel {
   late bool arrived;
+  late DateTime arriveDate;
   late bool left;
+  late DateTime leaveDate;
   SchoolAttendanceModel.fromJson(Map<String, dynamic> json) {
-    arrived = json['arrive'];
-    left = json['leave'];
+    arrived = json['arrive_state'];
+    arriveDate = json['arrive_date'].toDate();
+    left = json['leave_state'];
+    leaveDate = json['leave_date'].toDate();
+  }
+}
+
+class StudentLocationModel {
+  late double lat;
+  late double long;
+  late String date;
+  late String time;
+  StudentLocationModel.fromJson(Map<String, dynamic> json) {
+    lat = json['latitude'];
+    long = json['longitude'];
+    date = json['date'];
+    time = json['time'];
   }
 }

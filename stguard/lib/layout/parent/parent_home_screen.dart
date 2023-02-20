@@ -3,350 +3,420 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
-import 'package:st_tracker/modules/parent/recharge/recharge_screen.dart';
+import 'package:st_tracker/modules/parent/credit_card/credit_card_screen.dart';
+import 'package:st_tracker/modules/parent/pick_school/pick_school_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
+import 'package:st_tracker/shared/styles/Themes.dart';
 
 class ParentHomeScreen extends StatelessWidget {
-  const ParentHomeScreen({super.key});
-
+  ParentHomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
     screen_width = MediaQuery.of(context).size.width;
     screen_height = MediaQuery.of(context).size.height;
-    return Builder(builder: (context) {
-      ParentCubit.get(context).createDatabase();
-      ParentCubit.get(context).getStudentsData();
-      ParentCubit.get(context).initBackgroundService(action: 'start');
-      ParentCubit.get(context).getBalance();
-      
-      return BlocConsumer<ParentCubit, ParentStates>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          return Scaffold(
-              appBar: AppBar(
-                elevation: 0.0,
+
+    return BlocConsumer<ParentCubit, ParentStates>(
+      listener: (context, state) async {
+        if (state is GetCountriesSucessState) {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: screen_width * 0.1,
+                  vertical: screen_height * 0.02),
+              child: Column(
+                children: [
+                  Container(
+                    width: screen_width * 0.1,
+                    height: screen_height * 0.005,
+                    margin: EdgeInsets.only(top: screen_height * 0.01),
+                    decoration: BoxDecoration(
+                        color: defaultColor.withOpacity(0.8),
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(screen_width * 0.02))),
+                  ),
+                  SizedBox(
+                    height: screen_height * 0.02,
+                  ),
+                  Text(
+                    'Pick your country',
+                    style: TextStyle(
+                        fontSize: screen_width * 0.07,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  SizedBox(
+                    height: screen_height * 0.02,
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) => CountryItem(
+                              country: ParentCubit.get(context)
+                                  .countries[index]
+                                  .name,
+                              onTap: () =>
+                                  ParentCubit.get(context).pickCountry(index),
+                            ),
+                        separatorBuilder: (context, index) => Divider(),
+                        itemCount: ParentCubit.get(context).countries.length),
+                  ),
+                ],
               ),
-              drawer: Drawer(
-                  child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: ListView(children: [
-                  DrawerHeader(
-                      child: Image(
-                        image: AssetImage('assets/images/settings.png'),
-                        fit: BoxFit.scaleDown,
+            ),
+          );
+        } else if (state is GetSchoolsSucessState) {
+          navigateTo(context, PickSchoolScreen());
+        } else if (state is PickCountryState) {
+          await ParentCubit.get(context).getSchools();
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+            appBar: AppBar(
+              elevation: 0.0,
+            ),
+            drawer: Drawer(
+                child: Padding(
+              padding: EdgeInsets.symmetric(
+                  vertical: screen_height * 0.02,
+                  horizontal: screen_width * 0.05),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: screen_height * 0.3,
+                      child: DrawerHeader(
+                        padding: const EdgeInsets.all(0),
+                        child: ParentCubit.get(context).parent != null
+                            ? UserInfo(
+                                userModel: ParentCubit.get(context).parent!,
+                              )
+                            : Center(child: CircularProgressIndicator()),
                       ),
-                      padding:
-                          const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0)),
-                  DrawerItem(
-                    text: 'Add Family Member',
-                    icon: Image(
-                      image: AssetImage('assets/images/member.png'),
-                      width: 30,
-                      height: 30,
                     ),
-                    ontap: () => navigateTo(context, AddMember()),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  DrawerItem(
-                    text: 'Recharge',
-                    icon: Image(
-                      image: AssetImage('assets/images/recharge.png'),
-                      width: 30,
-                      height: 30,
+                    Text(
+                      'Settings',
+                      style: TextStyle(
+                          fontSize: screen_width * 0.07,
+                          color: defaultColor.withOpacity(0.8),
+                          fontWeight: FontWeight.w500),
                     ),
-                    ontap: () => navigateTo(context, RechargeScreen()),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  DrawerItem(
-                    text: 'Clear History',
-                    icon: Image(
-                        image: AssetImage('assets/images/delete.png'),
+                    SizedBox(
+                      height: screen_height * 0.03,
+                    ),
+                    DrawerItem(
+                      text: 'Add Family Member',
+                      icon: Image(
+                        image: AssetImage('assets/images/member.png'),
                         width: 30,
-                        height: 30),
-                    ontap: () => ParentCubit.get(context).clearHistory(),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  DrawerItem(
-                    text: 'Sign Out',
-                    icon: Image(
+                        height: 30,
+                      ),
+                      ontap: () async =>
+                          await ParentCubit.get(context).getCountries(),
+                    ),
+                    SizedBox(
+                      height: screen_height * 0.025,
+                    ),
+                    DrawerItem(
+                      text: 'Recharge',
+                      icon: Image(
+                        image: AssetImage('assets/images/recharge.png'),
+                        width: 30,
+                        height: 30,
+                      ),
+                      ontap: () => navigateTo(context, CreditCardScreen()),
+                    ),
+                    SizedBox(
+                      height: screen_height * 0.025,
+                    ),
+                    DrawerItem(
+                      text: 'Clear History',
+                      icon: Image(
+                          image: AssetImage('assets/images/delete.png'),
+                          width: 30,
+                          height: 30),
+                      ontap: () async =>
+                          await ParentCubit.get(context).clearHistory(),
+                    ),
+                    SizedBox(
+                      height: screen_height * 0.025,
+                    ),
+                    DrawerItem(
+                      text: 'Sign Out',
+                      icon: Image(
                         image: AssetImage('assets/images/signout.png'),
                         width: 30,
-                        height: 30),
-                    ontap: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                                title: Text(
-                                  'Are you sure?',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                                content: Text(
-                                  'Are you sure you want to log out?',
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        signOut(context);
-                                      },
-                                      child: Text("LOG OUT")),
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text("NEVERMIND"))
-                                ],
-                              ));
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ]),
-              )),
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // balance
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    alignment: AlignmentDirectional.topStart,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 170,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Balance',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 40),
+                        height: 30,
+                        color: Colors.red.shade300,
+                      ),
+                      ontap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  title: Text(
+                                    'Are you sure?',
+                                    style: TextStyle(fontSize: 20),
                                   ),
-                                  SizedBox(
-                                    height: 5,
+                                  content: Text(
+                                    'Are you sure you want to log out?',
+                                    style: TextStyle(fontSize: 15),
                                   ),
-                                  Text(
-                                    '${ParentCubit.get(context).balance.toStringAsFixed(2)}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 25),
-                                  )
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 40,
-                            ),
-                            Image(
-                              color: Colors.white,
-                              image: AssetImage('assets/images/purse.png'),
-                              width: 100,
-                              height: 100,
-                            )
-                          ],
-                        ),
-                      ],
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          signOut(context);
+                                        },
+                                        child: Text("LOG OUT")),
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("NEVERMIND"))
+                                  ],
+                                ));
+                      },
                     ),
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(30),
-                            bottomRight: Radius.circular(30)),
-                        color: Theme.of(context).primaryColor),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  // family
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Family',
-                            style: TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.bold)),
-                      ],
+                    SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  //family
-                  ConditionalBuilder(
-                      condition: ParentCubit.get(context).studentsData.isNotEmpty,
-                      builder: (context) => ParentCubit.get(context)
-                              .studentsData
-                              .isNotEmpty
-                          ? Padding(
-                              padding: const EdgeInsets.only(left: 20.0),
-                              child: SizedBox(
-                                height: 140,
-                                width: double.infinity,
-                                child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    shrinkWrap: true,
-                                    itemBuilder: (context, index) =>
-                                        FamilyMemberCard(
-                                          ParentCubit.get(context)
-                                              .studentsData[index],
-                                        ),
-                                    separatorBuilder: (context, index) =>
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                    itemCount: ParentCubit.get(context)
-                                        .studentsData
-                                        .length),
-                              ),
-                            )
-                          : Row(
+                  ]),
+            )),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // balance
+                Container(
+                  padding: EdgeInsets.all(20),
+                  alignment: AlignmentDirectional.topStart,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 170,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
-                                  child: Container(
-                                    padding: EdgeInsets.zero,
-                                    height: 150,
-                                    width: 130,
-                                    child: Card(
-                                      child: Container(
-                                        width: double.infinity,
-                                        child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              CircleAvatar(
-                                                radius: 36,
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                        .primaryColor,
-                                                child: CircleAvatar(
-                                                    radius: 35,
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    child: IconButton(
-                                                        onPressed: () {
-                                                          navigateTo(
-                                                              context,
-                                                              BlocProvider.value(
-                                                                  value: ParentCubit
-                                                                      .get(
-                                                                          context),
-                                                                  child:
-                                                                      AddMember()));
-                                                        },
-                                                        icon: Icon(Icons.add))),
-                                              ),
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              Container(
-                                                  width: 80,
-                                                  child:
-                                                      Text('Add Family Member'))
-                                            ]),
-                                      ),
-                                    ),
-                                  ),
+                                Text(
+                                  'Balance',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 40),
                                 ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  ParentCubit.get(context).parent != null
+                                      ? ParentCubit.get(context)
+                                          .parent!
+                                          .balance
+                                          .toStringAsFixed(2)
+                                      : '0.00',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 25),
+                                )
                               ],
                             ),
-                      fallback: (context) => Center(
-                            child: CircularProgressIndicator(),
-                          )),
-
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Activity',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold)),
-                          SizedBox(
-                            height: 5,
                           ),
-                          //activity
-                          ConditionalBuilder(
-                            condition: state is! ParentGetDataBaseLoadingState,
-                            builder: (context) => ParentCubit.get(context)
-                                    .activities
-                                    .isNotEmpty
-                                ? Expanded(
-                                    child: ListView.separated(
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, index) =>
-                                            ActivityItem(
-                                                model: ParentCubit.get(context)
-                                                    .activities[index],
-                                                studentsData:
-                                                    ParentCubit.get(context)
-                                                        .studentsData),
-                                        separatorBuilder: (context, index) =>
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                        itemCount: ParentCubit.get(context)
-                                            .activities
-                                            .length),
-                                  )
-                                : Center(
-                                    child: Container(
-                                      width: 200,
-                                      height: 230,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Image(
-                                            height: 130,
-                                            width: 130,
-                                            image: AssetImage(
-                                                'assets/images/searching.png'),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            'No activity Found',
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                color: Colors.black54,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                            fallback: (context) => Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                          SizedBox(
+                            width: 40,
+                          ),
+                          Image(
+                            color: Colors.white,
+                            image: AssetImage('assets/images/purse.png'),
+                            width: 100,
+                            height: 100,
                           )
                         ],
                       ),
+                    ],
+                  ),
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(30),
+                          bottomRight: Radius.circular(30)),
+                      color: Theme.of(context).primaryColor),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                // family
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Family',
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                //family
+                ConditionalBuilder(
+                    condition: state is! GetStudentDataLoading,
+                    builder: (context) => ParentCubit.get(context)
+                            .studentsData
+                            .isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: SizedBox(
+                              height: 140,
+                              width: double.infinity,
+                              child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) =>
+                                      FamilyMemberCard(
+                                        ParentCubit.get(context)
+                                            .studentsData[index],
+                                      ),
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                  itemCount: ParentCubit.get(context)
+                                      .studentsData
+                                      .length),
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: Container(
+                                  padding: EdgeInsets.zero,
+                                  height: 150,
+                                  width: 130,
+                                  child: Card(
+                                    child: Container(
+                                      width: double.infinity,
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            CircleAvatar(
+                                              radius: 36,
+                                              backgroundColor: Theme.of(context)
+                                                  .primaryColor,
+                                              child: CircleAvatar(
+                                                  radius: 35,
+                                                  backgroundColor: Colors.white,
+                                                  child: IconButton(
+                                                      onPressed: () async {
+                                                        await ParentCubit.get(
+                                                                context)
+                                                            .getCountries();
+                                                      },
+                                                      icon: Icon(Icons.add))),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Container(
+                                                width: 80,
+                                                child:
+                                                    Text('Add Family Member'))
+                                          ]),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                    fallback: (context) => Center(
+                          child: CircularProgressIndicator(),
+                        )),
+
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Activity',
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        //activity
+                        ConditionalBuilder(
+                          condition: state
+                                  is! ParentGeStudentActivityErrorState &&
+                              ParentCubit.get(context).studentsData.isNotEmpty,
+                          builder: (context) => ParentCubit.get(context)
+                                  .activities
+                                  .isNotEmpty
+                              ? Expanded(
+                                  child: ListView.separated(
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) =>
+                                          ActivityItem(
+                                              model:
+                                                  ParentCubit.get(context)
+                                                      .activities[index],
+                                              studentsData:
+                                                  ParentCubit.get(context)
+                                                      .studentsData),
+                                      separatorBuilder: (context, index) =>
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                      itemCount: ParentCubit.get(context)
+                                          .activities
+                                          .length),
+                                )
+                              : Center(
+                                  child: Container(
+                                    width: 200,
+                                    height: 230,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image(
+                                          height: 130,
+                                          width: 130,
+                                          image: AssetImage(
+                                              'assets/images/searching.png'),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          'No activity Found',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                          fallback: (context) => Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      ],
                     ),
-                  )
-                ],
-              ));
-        },
-      );
-    });
+                  ),
+                )
+              ],
+            ));
+      },
+    );
   }
 }

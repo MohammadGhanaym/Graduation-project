@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,13 +6,14 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/models/activity_model.dart';
+import 'package:st_tracker/models/country_model.dart';
+import 'package:st_tracker/models/parent_model.dart';
+import 'package:st_tracker/models/school_model.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/product_model.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/background_service.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
@@ -23,9 +23,6 @@ class ParentCubit extends Cubit<ParentStates> {
   late Database database;
 
   void createDatabase() async {
-    /*databaseFactory.deleteDatabase('activities.db').then((value) {
-      print('database deleted');
-    });*/
     database = await openDatabase(
       'activities.db',
       version: 1,
@@ -62,84 +59,170 @@ class ParentCubit extends Cubit<ParentStates> {
     );
   }
 
-  void clearHistory() async {
+  Future<void> clearHistory() async {
     await database.rawDelete('DELETE FROM student_activity');
     await database.rawDelete('DELETE FROM products');
 
-    getDataFromActivityTable();
+    await getDataFromActivityTable();
   }
 
-  List<studentModel?> studentsData = [];
-  List<String> studentIDs = [];
+  Map<String, DocumentReference<Map<String, dynamic>>> studentsPaths = {};
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  Future<void> getMyStudents() async {
+    studentsPaths = {};
 
-  void getStudentsData() async {
-    studentsData = [];
-    studentIDs = [];
-    emit(GetStudentDataLoading());
-    await FirebaseFirestore.instance
-        .collection('students')
-        .where('parent', isEqualTo: userID)
+    emit(GetStudentsPathsLoading());
+    await db
+        .collection('Parents')
+        .doc(userID)
+        .collection('Students')
         .get()
         .then((value) {
       if (value.docs.isNotEmpty) {
-        value.docs.forEach((student) {
-          studentsData.add(studentModel.fromJson(student.data()));
-          studentIDs.add(student['uid']);
+        value.docs.forEach((st) {
+          print(st.data());
+
+          studentsPaths[st.id] = db
+              .collection('Countries')
+              .doc(st['country'])
+              .collection('Schools')
+              .doc(st['school'])
+              .collection('Students')
+              .doc(st['uid']);
         });
-        emit(GetStudentDataSuccess());
-        listentoNewData();
+        emit(GetStudentsPathsSuccess());
+      } else {
+        emit(GetStudentsPathsError('No students found'));
       }
-      getDataFromActivityTable();
     }).catchError((error) {
       print(error.toString());
-      emit(GetStudentDataError());
-      
+      print('paths error');
+      emit(GetStudentsPathsError(error.toString()));
+    });
+    await getStudentsData();
+    await listentoNewData();
+    await getDataFromActivityTable();
+  }
+
+  List<StudentModel?> studentsData = [];
+  Future<void> getStudentsData() async {
+    studentsData = [];
+    emit(GetStudentDataLoading());
+    studentsPaths.forEach(
+      (stId, stDoc) async {
+        await stDoc.get().then((value) {
+          if (value.data() != null) {
+            studentsData.add(StudentModel.fromJson(value.data()));
+            emit(GetStudentDataSuccess());
+          }
+        }).catchError((error) {
+          print(error.toString());
+          emit(GetStudentDataError());
+        });
+      },
+    );
+  }
+
+  Future<void> listentoNewData() async {
+    cancelListeners();
+    print('*' * 100);
+    print(transListeners.length);
+    print(attendListeners.length);
+    print('*' * 100);
+
+    studentsPaths.forEach((stId, stDoc) async {
+      await addNewAttendance(stId, stDoc);
+      await addNewTranscation(stId, stDoc);
     });
   }
 
-  void listentoNewData() {
-    cancelListeners();
-    transListeners = {};
-    attendListeners = {};
-    if (studentIDs.isNotEmpty) {
-      studentIDs.forEach((ID) {
-        addNewTranscation(ID);
-        addNewAttendance(ID);
-      });
-    }
+  List<Country> countries = [];
+  Future<void> getCountries() async {
+    countries = [];
+    emit(GetCountriesLoadingState());
+    await db.collection('Countries').get().then((value) {
+      if (value.docs.isNotEmpty) {
+        value.docs.forEach((country) {
+          countries.add(Country(name: country['name'], id: country.id));
+        });
+
+        emit(GetCountriesSucessState());
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetCountriesErrorState(error.toString()));
+    });
   }
 
-  void addFamilyMember(String id) async {
-    userID ??= CacheHelper.getData(key: 'id');
+  Country? pickedCountry;
 
+  void pickCountry(int index) {
+    pickedCountry = countries[index];
+    emit(PickCountryState());
+  }
+
+  List<School> schools = [];
+  Future<void> getSchools() async {
+    schools = [];
+    emit(GetSchoolsLoadingState());
+
+    await db
+        .collection('Countries')
+        .doc(pickedCountry!.id)
+        .collection('Schools')
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        value.docs.forEach((school) {
+          schools.add(School(
+              id: school.id, name: school['name'], logo: school['logo']));
+        });
+        emit(GetSchoolsSucessState());
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetSchoolsErrorState(error.toString()));
+    });
+  }
+
+  School? pickedSchool;
+  void pickSchool(School school) {
+    pickedSchool = school;
+    emit(PickSchoolState());
+  }
+
+  Future<void> addFamilyMember(String id) async {
     emit(AddFamilyMemberLoading());
-    int inSchool = 0;
-    FirebaseFirestore db = FirebaseFirestore.instance;
 
+    CollectionReference stColl = db
+        .collection('Countries')
+        .doc(pickedCountry!.id)
+        .collection('Schools')
+        .doc(pickedSchool!.id)
+        .collection('Students');
     db.runTransaction((transaction) async {
-      await db
-          .collection('students')
-          .where('uid', isEqualTo: id)
-          .count()
-          .get()
-          .then((value) async {
-        inSchool = value.count;
-        if (inSchool == 1) {
-          if (studentIDs.contains(id)) {
-            print(studentIDs);
+      await stColl.where('uid', isEqualTo: id).get().then((st) async {
+        if (st.docs.isNotEmpty) {
+          if (studentsPaths.keys.contains(id)) {
             emit(FamilyMemberAlreadyExisted('You added this member before'));
           } else {
-            db
-                .collection('students')
-                .doc(id)
+            stColl
+                .doc(st.docs[0].id)
                 .update({'parent': userID}).then((value) async {
-              db.collection('students').doc(id).update({'active': true}).then(
-                (value) {
-                  initBackgroundService(action: 'refresh');
-                  getStudentsData();
-                  getDataFromActivityTable();
-                  print(studentIDs);
+              db
+                  .collection('Parents')
+                  .doc(userID)
+                  .collection('Students')
+                  .doc(id)
+                  .set({
+                'uid': st.docs[0].id,
+                'country': pickedCountry!.id,
+                'school': pickedSchool!.id
+              }).then(
+                (value) async {
                   emit(AddFamilyMemberSuccess());
+                  await getMyStudents();
+                  await refreshBackgroundService();
                 },
               );
             });
@@ -148,91 +231,78 @@ class ParentCubit extends Cubit<ParentStates> {
           emit(IDNotFound(
               "Oops! We couldn't find anyone matching student ID $id"));
         }
-      }).catchError((error) {
-        print(error.toString());
-        emit(AddFamilyMemberError());
       });
+    }).catchError((error) {
+      print(error.toString());
+      emit(AddFamilyMemberError());
     });
   }
 
-  void addNewTranscation(String studentID) {
+  Future<void> addNewTranscation(
+      String studentID, DocumentReference<Map<String, dynamic>> stDoc) async {
     print('before listener');
 
-    transListeners[studentID] = FirebaseFirestore.instance
-        .collection('canteen transactions')
-        .doc(studentID)
-        .collection('transactions')
-        .snapshots()
-        .listen((event) async {
-      print('inside listener');
-      print(event.docs.length);
-      event.docs.forEach((trans) async {
-        print(trans.id);
-        await FirebaseFirestore.instance
-            .collection('canteen transactions')
-            .doc(studentID)
-            .collection('transactions')
-            .doc(trans.id)
-            .delete()
-            .then((value) {
-          insertToActivityTable(
-              id: studentID,
-              activityType: trans['total_price'],
-              date: trans['date'].toDate(),
-              transId: trans.id);
+    transListeners[studentID] =
+        stDoc.collection('CanteenTransactions').snapshots().listen((event) {
+      if (event.docChanges.isNotEmpty) {
+        event.docChanges.forEach((trans) {
+          if (trans.type == DocumentChangeType.added) {
+            print('Im here in trans');
 
-          trans['products'].forEach((product) {
-            insertToTransactionsTable(
-                trans_id: trans.id,
-                product: product['name'],
-                price: product['price']);
-          });
-          emit(TransactionDeleteSuccess());
+            trans.doc.reference.delete().then((value) async {
+              await insertToActivityTable(
+                  id: studentID,
+                  activityType: trans.doc['total_price'],
+                  date: trans.doc['date'].toDate(),
+                  transId: trans.doc.id);
 
-          print('transcation deleted');
-          print(studentID);
-        }).catchError((error) {
-          print(error.toString());
+              trans.doc['products'].forEach((product) async {
+                await insertToTransactionsTable(
+                    trans_id: trans.doc.id,
+                    product: product['name'],
+                    price: product['price']);
+              });
+            });
+          }
         });
-      });
-      print('after listener');
+      }
     });
   }
 
-  void addNewAttendance(String studentID) {
-    //studentID = CacheHelper.getData(key: 'st_id');
-    attendListeners[studentID] = FirebaseFirestore.instance
-        .collection('students')
-        .doc(studentID)
-        .snapshots()
-        .listen((event) async {
-      SchoolAttendanceModel attendanceStatus =
-          SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
-
-      if (attendanceStatus.arrived) {
-        await FirebaseFirestore.instance
-            .collection('students')
-            .doc(studentID)
-            .update({
-          'attendance status': {'arrive': false, 'leave': attendanceStatus.left}
-        }).then((value) {
-          insertToActivityTable(
-              id: studentID, activityType: 'Arrived', date: DateTime.now());
-        });
-      } else if (attendanceStatus.left) {
-        await FirebaseFirestore.instance
-            .collection('students')
-            .doc(studentID)
-            .update({
-          'attendance status': {
-            'arrive': attendanceStatus.arrived,
-            'leave': false
-          }
-        }).then((value) {
-          insertToActivityTable(
-              id: studentID, activityType: 'Left', date: DateTime.now());
-        });
-      }
+  Future<void> addNewAttendance(
+      String studentID, DocumentReference<Map<String, dynamic>> stDoc) async {
+    await db.runTransaction((transaction) async {
+      print('addNewAttendance:{$studentID}');
+      attendListeners[studentID] = stDoc
+          .collection('SchoolAttendance')
+          .snapshots()
+          .listen((event) async {
+        SchoolAttendanceModel attendStatus =
+            SchoolAttendanceModel.fromJson(event.docChanges[0].doc.data()!);
+        if (attendStatus.arrived) {
+          await stDoc
+              .collection('SchoolAttendance')
+              .doc(event.docChanges[0].doc.id)
+              .update({'arrive_state': false}).then((value) async {
+            await insertToActivityTable(
+                id: studentID,
+                activityType: 'Arrived',
+                date: attendStatus.arriveDate);
+          });
+        } else if (attendStatus.left) {
+          await stDoc
+              .collection('SchoolAttendance')
+              .doc(event.docChanges[0].doc.id)
+              .update({'leave_state': false}).then((value) async {
+            await insertToActivityTable(
+                id: studentID,
+                activityType: 'Left',
+                date: attendStatus.leaveDate);
+          });
+        }
+      });
+    }).catchError((error) {
+      print(error.toString());
     });
   }
 
@@ -254,7 +324,7 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  insertToActivityTable(
+  Future<void> insertToActivityTable(
       {required String id,
       required String activityType,
       required DateTime date,
@@ -264,9 +334,9 @@ class ParentCubit extends Cubit<ParentStates> {
       await txn
           .rawInsert(
               'INSERT INTO student_activity(id, date, activity, trans_id) VALUES("$id","$date", "$activityType", "$transId")')
-          .then((value) {
+          .then((value) async {
         print('$value inserted successfully');
-        getDataFromActivityTable();
+        await getDataFromActivityTable();
       }).catchError((err) {
         print(
             'Error when inserting into student_activity table! ${err.toString()}');
@@ -276,7 +346,7 @@ class ParentCubit extends Cubit<ParentStates> {
 
   List<ActivityModel> activities = [];
 
-  void getDataFromActivityTable() async {
+  Future<void> getDataFromActivityTable() async {
     print('getDataFromActivityTable');
     Database activity_database = await openDatabase('activities.db');
     emit(ParentGetDataBaseLoadingState());
@@ -284,8 +354,8 @@ class ParentCubit extends Cubit<ParentStates> {
     await activity_database
         .query('student_activity',
             orderBy: 'date DESC',
-            where: "id IN (${studentIDs.map((_) => '?').join(', ')})",
-            whereArgs: studentIDs)
+            where: "id IN (${studentsPaths.keys.map((_) => '?').join(', ')})",
+            whereArgs: studentsPaths.keys.toList())
         .then((value) {
       activities = [];
       value.forEach(
@@ -303,7 +373,7 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<ProductModel> products = [];
-  void getDataFromTransactionsTable(String trans_id) async {
+  Future<void> getDataFromTransactionsTable(String trans_id) async {
     Database product_database = await openDatabase('activities.db');
     emit(ParentGetDataBaseLoadingState());
     //SELECT * FROM canteenTransactions ORDER BY date DESC'
@@ -319,21 +389,15 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  void initBackgroundService({action}) async {
-    if (action == 'start') {
-      if (!await FlutterBackgroundService().isRunning()) {
-        await BackgroundService.initializeService();
-      }
-    }
-
-    if (action == 'refresh') {
-      FlutterBackgroundService().invoke('stopService');
-      await BackgroundService.initializeService();
-    }
-
-    if (action == 'stop') {
-      FlutterBackgroundService().invoke('stopService');
-    }
+  StudentLocationModel? location;
+  Future<void> getLocation(String id) async {
+    emit(GetStudentLocationLoadingState());
+    await studentsPaths[id]!.collection('Location').get().then((value) {
+      location = StudentLocationModel.fromJson(value.docs[0].data());
+      emit(GetStudentLocationSuccessState());
+    }).catchError((error) {
+      print(error);
+    });
   }
 
   void openMap({required double lat, required double long}) async {
@@ -348,7 +412,7 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<ActivityModel> attendance_history = [];
-  void getAttendanceHistory(st_id) async {
+  Future<void> getAttendanceHistory(st_id) async {
     Database database = await openDatabase('activities.db');
     emit(AttendanceHistoryLoading());
     await database.query(
@@ -381,116 +445,88 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(ShowSettingsState());
   }
 
-  bool active = false;
-  void changeDigitalIDState(String id) {
-    active = !active;
-    FirebaseFirestore.instance
-        .collection('students')
-        .doc(id)
-        .update({'active': active}).then((value) {
-      emit(DeactivateDigitalIDSuccess());
-    }).catchError((error) {
-      print(error.toString());
-      emit(DeactivateDigitalIDError());
+  Future<void> changeDigitalIDState(String id) async {
+    await db.runTransaction((transaction) async {
+      studentsPaths[id]!.get().then((value) async {
+        active = value['parent'] == null ? userID : null;
+        await studentsPaths[id]!.update({'parent': active}).then((value) {
+          emit(DeactivateDigitalIDSuccess());
+        }).catchError((error) {
+          print(error);
+          emit(DeactivateDigitalIDError());
+        });
+      });
     });
   }
 
-  void getActiveState(String id) async{
-   await FirebaseFirestore.instance
-        .collection('students')
-        .doc(id)
-        .get()
-        .then((value) {
-      if (value.data() != null) {
-        active = value['active'];
-      }
+  String? active;
+  Future<void> getActiveState(String id) async {
+    studentsPaths[id]!.get().then((value) {
+      active = value['parent'];
     }).catchError((error) {
-      print(error.toString());
+      print(error);
     });
   }
 
-  void unpairDigitalID(String id) async {
-    initBackgroundService(action: 'stop');
+  Future<void> unpairDigitalID(String id) async {
+    await db.runTransaction((transaction) async {
+      await db
+          .collection('Parents')
+          .doc(userID)
+          .collection('Students')
+          .doc(id)
+          .delete()
+          .then((value) async {
+        await studentsPaths[id]!.update({'parent': null}).then((value) async {
+          active = null;
+          studentsPaths.remove(id);
+          attendListeners[id]!.cancel();
+          transListeners[id]!.cancel();
 
-   await FirebaseFirestore.instance
-        .collection('students')
-        .doc(id)
-        .update({'parent': null, 'active': false}).then((value) {
-      active = false;
-      studentIDs.remove(id);
-      print('unpairDigitalID');
-      print(studentIDs);
-      transListeners[id].cancel();
-      attendListeners[id].cancel();
+          attendListeners.remove(id);
+          transListeners.remove(id);
 
-      transListeners.remove(id);
-      attendListeners.remove(id);
-      emit(UnpairDigitalIDSuccess());
+          print('unpairDigitalID');
+          print(studentsPaths.keys.toList());
+
+          emit(UnpairDigitalIDSuccess());
+          await getActiveState(id);
+          await getMyStudents();
+          await refreshBackgroundService();
+        });
+      });
     }).catchError((error) {
-      print(error.toString());
+      print(error);
       emit(UnpairDigitalIDError());
     });
   }
 
-  double balance = 0.00;
-  void getBalance() {
-    emit(GetBalanceLoading());
+  ParentModel? parent;
+  Future<void> getParentInfo() async {
+    emit(GetUserInfoLoading());
     if (userID != null) {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(userID)
-          .get()
-          .then((value) {
-        print(value.data());
-        if (value.data()!.containsKey('balance')) {
-          balance = value['balance'].toDouble();
-          emit(GetBalanceSuccess());
+      await db.collection('Parents').doc(userID).get().then((value) {
+        if (value.data() != null) {
+          print(value.data()!);
+          parent = ParentModel.fromJson(value.data()!);
+          emit(GetUserInfoSuccess());
+        } else {
+          emit(GetUserInfoError());
         }
       }).catchError((error) {
         print(error.toString());
-        emit(GetBalanceError());
+        emit(GetUserInfoError());
       });
     }
   }
 
-  void cashRecharge({required var code}) {
-    emit(RechargeLoadingState());
-    FirebaseFirestore.instance
-        .collection('school')
-        .doc('referenceCodes')
-        .get()
-        .then((value) {
-      print(value.data());
-      if (value.data() != null) {
-        if (value.data()!.containsKey(code)) {
-          FirebaseFirestore.instance
-              .collection('school')
-              .doc('referenceCodes')
-              .update({code: FieldValue.delete()}).then((v) {
-            balance = balance + value[code];
-            updateBalance();
-            emit(RechargeSuccessState(value[code].toString()));
-          }).catchError((error) {
-            emit(RechargeErrorState(error.toString()));
-          });
-        } else {
-          emit(RechargeErrorState('Invalid Reference Code'));
-        }
-      } else {
-        emit(RechargeErrorState('Invalid Reference Code'));
-      }
-    }).catchError((error) {
-      emit(RechargeErrorState(error.toString()));
-    });
-  }
-
-  void updateBalance() {
+  Future<void> updateBalance() async {
     emit(UpdateBalanceLoading());
 
-    FirebaseFirestore.instance
+    await db
         .collection('users')
         .doc(userID)
-        .update({'balance': balance}).then((value) {
+        .update({'balance': parent!.balance}).then((value) {
       emit(UpdateBalanceSuccess());
     }).catchError((error) {
       emit(UpdateBalanceError());
@@ -503,36 +539,29 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(ChangeSliderState());
   }
 
-  void updatePocketMoney({required var id}) {
+  Future<void> updatePocketMoney({required String id}) async {
     emit(SetPocketMoneyLoadingState());
 
-    if (pocket_money < balance) {
-      FirebaseFirestore.instance
-          .collection('students')
-          .doc(id)
-          .update({'pocket money': pocket_money}).then((value) {
+    if (pocket_money < parent!.balance) {
+      await studentsPaths[id]!
+          .update({'pocket money': pocket_money}).then((value) async {
         emit(SetPocketMoneySuccessState());
+        await getMaxPocketMoney(id: id);
       }).catchError((error) {
+        print(error);
         emit(SetPocketMoneyErrorState());
       });
     }
   }
 
-  void getMaxPocketMoney({required var id})async {
-    pocket_money = 0.0;
-
-    await FirebaseFirestore.instance
-        .collection('students')
-        .doc(id)
-        .get()
-        .then((value) {
-      if (value.data() != null) {
-        pocket_money = value['pocket money'];
-      }
-
-      emit(SetPocketMoneySuccessState());
+  Future<void> getMaxPocketMoney({required String id}) async {
+    emit(GetPocketMoneyLoadingState());
+    await studentsPaths[id]!.get().then((value) {
+      pocket_money = value['pocket money'].toDouble();
+      emit(GetPocketMoneySuccessState());
     }).catchError((error) {
-      emit(SetPocketMoneyErrorState());
+      print(error);
+      emit(GetPocketMoneyErrorState());
     });
   }
 
@@ -559,25 +588,24 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<dynamic> allergens = [];
-  void getAllergies(id) async {
+  Future<void> getAllergies(id) async {
     selectedAllergens = [];
     allergens = [Icons.add];
     emit(GetAllergiesLoadingState());
-    await FirebaseFirestore.instance
-        .collection('students')
-        .doc(id)
-        .get()
-        .then((value) {
-      emit(GetAllergiesSucessState());
-      print(value.data());
-      if (value['allergens'] != null) {
-        value['allergens'].forEach((element) {
+
+    await studentsPaths[id]!.get().then((value) {
+      if (value['allergies'] != null) {
+        value['allergies'].forEach((element) {
           allergens.add(element);
           selectedAllergens.add(element);
         });
+        emit(GetAllergiesSucessState());
+      } else {
+        print('No allergies found');
+        emit(GetAllergiesErrorState('No allergies Found'));
       }
     }).catchError((error) {
-      print(error.toString());
+      print(error);
       emit(GetAllergiesErrorState(error.toString()));
     });
   }
@@ -585,14 +613,30 @@ class ParentCubit extends Cubit<ParentStates> {
   Future<void> updateAllergens(id) async {
     emit(UpdateAllergiesLoadingState());
 
-    FirebaseFirestore.instance.collection('students').doc(id).update({
-      'allergens': selectedAllergens.isNotEmpty ? selectedAllergens : null
-    }).then((value) {
+    await studentsPaths[id]!.update({
+      'allergies': selectedAllergens.isNotEmpty ? selectedAllergens : null
+    }).then((value) async {
       emit(UpdateAllergiesSuccessState());
-      getAllergies(id);
+      await getAllergies(id);
     }).catchError((error) {
       print(error);
       emit(UpdateAllergiesErrorState(error.toString()));
     });
+  }
+
+  Future<void> startBackgroundService() async {
+    if (!await FlutterBackgroundService().isRunning()) {
+      await BackgroundService.initializeService();
+    }
+  }
+
+  Future<void> refreshBackgroundService() async {
+    FlutterBackgroundService().invoke('stopService');
+    await Future.delayed(const Duration(seconds: 5));
+    await BackgroundService.initializeService();
+  }
+
+  void stopBackgroundService() {
+    FlutterBackgroundService().invoke('stopService');
   }
 }

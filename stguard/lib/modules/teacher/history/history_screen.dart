@@ -22,35 +22,38 @@ class HistoryScreen extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
-          body: SingleChildScrollView(
-              child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: screen_width * 0.05,
-                vertical: screen_height * 0.01),
-            child: ConditionalBuilder(
-              condition: TeacherCubit.get(context).lessons.isNotEmpty,
-              builder: (context) => ListView.separated(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) => LessonCard(
-                      width: screen_width,
-                      height: screen_height,
-                      lesson: TeacherCubit.get(context).lessons[index],
-                      onTap: () {
-                        navigateTo(
-                            context,
-                            AttendanceDetailsScreen(
-                                lesson:
-                                    TeacherCubit.get(context).lessons[index]));
-                      }),
-                  separatorBuilder: (context, index) =>
-                      SizedBox(height: screen_height * 0.01),
-                  itemCount: TeacherCubit.get(context).lessons.length),
-              fallback: (context) => Center(
-                child: Text('No attendance has been taken yet'),
+          body: Center(
+            child: SingleChildScrollView(
+                child: Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: screen_width * 0.05,
+                  vertical: screen_height * 0.01),
+              child: ConditionalBuilder(
+                condition: TeacherCubit.get(context).lessons.isNotEmpty,
+                builder: (context) => ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) => LessonCard(
+                        width: screen_width,
+                        height: screen_height,
+                        lesson: TeacherCubit.get(context).lessons[index],
+                        onTap: () {
+                          navigateTo(
+                              context,
+                              AttendanceDetailsScreen(
+                                  lesson:
+                                      TeacherCubit.get(context).lessons[index]));
+                        }),
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: screen_height * 0.01),
+                    itemCount: TeacherCubit.get(context).lessons.length),
+                fallback: (context) => Center(
+                  child: Text('No attendance has been taken yet',
+                   style: TextStyle(fontSize: screen_width*0.05, fontWeight: FontWeight.w500, color: Colors.grey),),
+                ),
               ),
-            ),
-          )),
+            )),
+          ),
         );
       },
     );

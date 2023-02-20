@@ -2,10 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
-import 'package:st_tracker/layout/parent/parent_home_screen.dart';
-import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
-import 'package:st_tracker/models/user_model.dart';
 import 'package:st_tracker/modules/login/cubit/states.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
@@ -32,95 +28,33 @@ class LoginCubit extends Cubit<LoginStates> {
     required var password,
   }) async {
     emit(LoginLoadingState());
-
-    /*if (mAuth.currentUser != null) {
-      emit(LoginSuccessState(mAuth.currentUser!.uid));
-    } else {
-      await mAuth.signInAnonymously().then((value) async {
-        if (email != mAuth.currentUser!.email) {
-          await mAuth.currentUser!.updateEmail(email).then((value) async {
-            Map<String, dynamic> data = {};
-            data['name'] = name;
-            data['role'] = role;
-            data['email'] = email;
-            if (role == 'parent' || role == 'canteen worker') {
-              data['balance'] = 0.0;
-            }
-
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(mAuth.currentUser!.uid)
-                .set(data);
-            emit(LoginSuccessState(mAuth.currentUser!.uid));
-            print(mAuth.currentUser!.uid);
-          }).catchError((error) {
-            emit(LoginErrorState(error.toString()));
-            print(error);
-          });
-        }
-      });
-    }*/
-    /*
-    if (mAuth.currentUser != null) {
-      emit(LoginSuccessState(mAuth.currentUser!.uid));
-    } else {
-      await mAuth.signInAnonymously().then((value) async {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(mAuth.currentUser!.uid)
-            .get()
-            .then((value) async {
-          print('THIS IS LOGIN PAGE TEST');
-          print(value.data());
-          if (value.data() == null) {
-            await mAuth.currentUser!.updateEmail(email).then((value) async {
-              Map<String, dynamic> data = {};
-              data['role'] = role;
-              data['email'] = email;
-              if (role == 'parent' || role == 'canteen worker') {
-                data['balance'] = 0.0;
-              }
-
-              FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(mAuth.currentUser!.uid)
-                  .set(data);
-              emit(LoginSuccessState(mAuth.currentUser!.uid));
-              print(mAuth.currentUser!.uid);
-            }).catchError((error) {
-              emit(LoginErrorState(error.toString()));
-              print(error);
-            });
-          } else {
-            emit(LoginSuccessState(mAuth.currentUser!.uid));
-          }
-        });
-      });
-    }
-    */
-
-    FirebaseAuth.instance
+ FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(value.user!.uid)
-          .get()
-          .then((user) {
-        if (user.data() != null) {
-          if (role != user['role']) {
-            emit(LoginErrorState('You are not a $role'));
-          }
-          else
-          {
-            emit(LoginSuccessState(value.user!.uid));
-          }
-        }
-      });
-      
+      if (role == 'parent') {
+        checkRole('Parents', value.user!.uid);
+      } else if (role == 'teacher') {
+        checkRole('Teachers', value.user!.uid);
+      } else if (role == 'canteen worker') {
+        checkRole('Canteen Workers', value.user!.uid);
+      }
     }).catchError((error) {
       emit(LoginErrorState(error.toString().split('] ').last));
       print(error.toString().split('] ').last);
+    });
+  }
+
+  void checkRole(String collName, dynamic uid) {
+    FirebaseFirestore.instance.collection(collName).doc(uid).get().then((user) {
+      if (user.data() != null) {
+        if (role != user['role']) {
+          emit(LoginErrorState('You are not a $role'));
+        } else {
+          emit(LoginSuccessState(uid));
+        }
+      } else {
+        emit(LoginErrorState("You don't have an account"));
+      }
     });
   }
 }

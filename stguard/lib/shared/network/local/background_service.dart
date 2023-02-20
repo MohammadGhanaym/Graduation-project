@@ -107,71 +107,136 @@ class BackgroundService {
     userID = CacheHelper.getData(key: 'id');
 
     await FirebaseFirestore.instance
-        .collection('students')
-        .where('parent', isEqualTo: userID)
+        .collection('Parents')
+        .doc(userID)
+        .collection('Students')
         .get()
         .then((value) {
       if (value.docs.isNotEmpty) {
         value.docs.forEach((st) {
-          sendTransNotification(
-              st['uid'], flutterLocalNotificationsPlugin, notify);
+          sendTransNotification(st, flutterLocalNotificationsPlugin, notify);
           sendAttendanceNotification(
-              st['uid'], flutterLocalNotificationsPlugin, notify);
+              st, flutterLocalNotificationsPlugin, notify);
         });
       }
     });
   }
 
   static void sendTransNotification(
-      studentID,
+      QueryDocumentSnapshot<Map<String, dynamic>> st,
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       var notify) {
-    FirebaseFirestore.instance
-        .collection('canteen transactions')
-        .doc(studentID)
-        .collection('transactions')
-        .snapshots()
-        .listen((event) {
-      int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
-      event.docs.forEach((trans) async {
-        String notify_body =
-            '-${trans['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
-        FirebaseFirestore.instance
-            .collection('students')
-            .doc(studentID)
-            .get()
-            .then((value) async {
-          await flutterLocalNotificationsPlugin.show(notify_id,
-              '${value['name'].split(' ')[0]} Purchased', notify_body, notify);
-        });
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    db.runTransaction((transaction) async {
+      db
+          .collection('Countries')
+          .doc(st['country'])
+          .collection('Schools')
+          .doc(st['school'])
+          .collection('Students')
+          .doc(st['uid'])
+          .collection('CanteenTransactions')
+          .snapshots()
+          .listen((event) {
+        if (event.docChanges.isNotEmpty) {
+          int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
+          event.docChanges.forEach((trans) async {
+            if (trans.type == DocumentChangeType.added) {
+              String notify_body =
+                  '-${trans.doc['total_price']}\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}';
+              db
+                  .collection('Countries')
+                  .doc(st['country'])
+                  .collection('Schools')
+                  .doc(st['school'])
+                  .collection('Students')
+                  .doc(st['uid'])
+                  .get()
+                  .then((value) async {
+                await flutterLocalNotificationsPlugin.show(
+                    notify_id,
+                    '${value['name'].split(' ')[0]} Purchased',
+                    notify_body,
+                    notify);
+              });
+            }
+          });
+        }
       });
+    }).catchError((error) {
+      print(error.toString());
     });
   }
 
   static void sendAttendanceNotification(
-      studentID,
+      QueryDocumentSnapshot<Map<String, dynamic>> st,
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       var notify) {
-    if (studentID != null) {
-      FirebaseFirestore.instance
-          .collection('students')
-          .doc(studentID)
-          .snapshots()
-          .listen((event) async {
-        print('sendAttendanceNotification');
-        int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
+    if (st.exists) {
+      FirebaseFirestore db = FirebaseFirestore.instance;
+      db.runTransaction((transaction) async {
+        db
+            .collection('Countries')
+            .doc(st['country'])
+            .collection('Schools')
+            .doc(st['school'])
+            .collection('Students')
+            .doc(st['uid'])
+            .collection('SchoolAttendance')
+            .snapshots()
+            .listen((event) async {
+          if (event.docChanges.isNotEmpty) {
+            if (event.docChanges[0].type == DocumentChangeType.modified) {
+              print('sendAttendanceNotification1');
+              int notify_id = random.nextInt(pow(2, 31).toInt() - 1);
 
-        SchoolAttendanceModel attendanceStatus =
-            SchoolAttendanceModel.fromJson(event.data()!['attendance status']);
-        String notify_body = DateFormat('EE, hh:mm a').format(DateTime.now());
+              SchoolAttendanceModel attendanceStatus =
+                  SchoolAttendanceModel.fromJson(event.docs[0].data());
 
-        if (attendanceStatus.arrived) {
-          await flutterLocalNotificationsPlugin.show(notify_id,
-              '${event['name'].split(' ')[0]} Arrived', notify_body, notify);
-        } else if (attendanceStatus.left) {
-          await flutterLocalNotificationsPlugin.show(notify_id,
-              '${event['name'].split(' ')[0]} Left', notify_body, notify);
-        }
+              if (attendanceStatus.arrived) {
+                String notifyBody =
+                    'Arrived at ${DateFormat('hh:mm a').format(attendanceStatus.arriveDate)}';
+                db
+                    .collection('Countries')
+                    .doc(st['country'])
+                    .collection('Schools')
+                    .doc(st['school'])
+                    .collection('Students')
+                    .doc(st['uid'])
+                    .get()
+                    .then((value) async {
+                  print('sendAttendanceNotification2');
+                  await flutterLocalNotificationsPlugin.show(
+                      notify_id,
+                      '${value['name'].split(' ')[0]} Arrived',
+                      notifyBody,
+                      notify);
+                });
+              } else if (attendanceStatus.left) {
+                String notifyBody =
+                    'Left at ${DateFormat('hh:mm a').format(attendanceStatus.leaveDate)}';
+                db
+                    .collection('Countries')
+                    .doc(st['country'])
+                    .collection('Schools')
+                    .doc(st['school'])
+                    .collection('Students')
+                    .doc(st['uid'])
+                    .get()
+                    .then((value) async {
+                  print('sendAttendanceNotification3');
+                  await flutterLocalNotificationsPlugin.show(
+                      notify_id,
+                      '${value['name'].split(' ')[0]} Left',
+                      notifyBody,
+                      notify);
+                });
+              }
+            }
+          }
+        });
+      }).catchError((error) {
+        print(error.toString());
       });
     }
   }

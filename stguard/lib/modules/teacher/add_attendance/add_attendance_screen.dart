@@ -35,6 +35,15 @@ class AddAttendanceScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Image(
+                          width: screen_width * 0.5,
+                          height: screen_width * 0.5,
+                          color: defaultColor,
+                          image:
+                              AssetImage('assets/images/attendance_black.png')),
+                      SizedBox(
+                        height: screen_height * 0.02,
+                      ),
                       DefaultFormField(
                           controller: lessonController,
                           type: TextInputType.text,
@@ -58,15 +67,16 @@ class AddAttendanceScreen extends StatelessWidget {
                         height: screen_height * 0.02,
                       ),
                       Container(
-                        width: screen_width * 0.5,
+                        width: screen_width * 0.4,
                         height: screen_height * 0.3,
                         padding: EdgeInsets.symmetric(
                             vertical: screen_height * 0.02),
                         alignment: AlignmentDirectional.center,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadiusDirectional.circular(5),
+                            borderRadius: BorderRadiusDirectional.circular(20),
                             border: Border.all(color: Colors.grey)),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
                               'Select Grade',

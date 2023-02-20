@@ -13,14 +13,13 @@ class AddMember extends StatelessWidget {
   var idController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    screen_width = MediaQuery.of(context).size.width;
-    screen_height = MediaQuery.of(context).size.height;
     return BlocConsumer<ParentCubit, ParentStates>(
       listener: (context, state) {
         if (state is AddFamilyMemberSuccess) {
           ShowToast(
               message: 'Member is added successfully',
               state: ToastStates.SUCCESS);
+          navigateAndFinish(context, ParentHomeScreen());
         } else if (state is FamilyMemberAlreadyExisted) {
           ShowToast(message: state.message!, state: ToastStates.WARNING);
         } else if (state is IDNotFound) {
@@ -54,8 +53,9 @@ class AddMember extends StatelessWidget {
                                 if (value!.isEmpty) return 'Enter student ID';
                                 return null;
                               },
-                              onSubmit: (p0) => ParentCubit.get(context)
-                                        .addFamilyMember(p0),
+                              onSubmit: (p0) async =>
+                                  await ParentCubit.get(context)
+                                      .addFamilyMember(p0),
                               label: 'Student ID'),
                           SizedBox(
                             height: 20,
@@ -65,13 +65,14 @@ class AddMember extends StatelessWidget {
                                   text: 'Confirm',
                                   height: screen_height * 0.07,
                                   color: defaultColor.withOpacity(0.8),
-                                  onPressed: () {
-                                    ParentCubit.get(context)
+                                  onPressed: () async {
+                                    await ParentCubit.get(context)
                                         .addFamilyMember(idController.text);
                                   },
                                 )
                               : LoadingOnWaiting(
-                                  height: screen_height * 0.07,color: defaultColor.withOpacity(0.8),
+                                  height: screen_height * 0.07,
+                                  color: defaultColor.withOpacity(0.8),
                                 ),
                           SizedBox(
                             height: 20,

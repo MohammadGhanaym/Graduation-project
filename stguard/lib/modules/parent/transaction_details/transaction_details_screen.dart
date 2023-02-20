@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/models/activity_model.dart';
-import 'package:st_tracker/models/product_model.dart';
 import 'package:st_tracker/shared/components/components.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
