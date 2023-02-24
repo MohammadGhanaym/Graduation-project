@@ -1,17 +1,15 @@
 class CanteenProductModel {
-  late String id;
   late String name;
   late String image;
   late double price;
-  List<String>? allergies;
+  List<dynamic>? allergies;
   CanteenProductModel(
-      {required this.id,
+      {
       required this.name,
       required this.image,
       required this.price});
 
-  CanteenProductModel.fromMap(String product_id, Map<String, dynamic> map) {
-    id = product_id;
+  CanteenProductModel.fromMap(Map<String, dynamic> map) {
     name = map['name'];
     price = map['price'].toDouble();
     image = map['image'];

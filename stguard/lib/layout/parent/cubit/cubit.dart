@@ -202,12 +202,12 @@ class ParentCubit extends Cubit<ParentStates> {
         .collection('Students');
     db.runTransaction((transaction) async {
       await stColl.where('uid', isEqualTo: id).get().then((st) async {
+        
         if (st.docs.isNotEmpty) {
           if (studentsPaths.keys.contains(id)) {
             emit(FamilyMemberAlreadyExisted('You added this member before'));
           } else {
-            stColl
-                .doc(st.docs[0].id)
+            st.docs[0].reference
                 .update({'parent': userID}).then((value) async {
               db
                   .collection('Parents')

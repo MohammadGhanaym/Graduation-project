@@ -64,10 +64,59 @@ class GetProductsLoadingState extends CanteenStates {}
 class GetProductsSuccessState extends CanteenStates {}
 
 class GetProductsErrorState extends CanteenStates {}
-class GetAllProductsSuccessState extends CanteenStates{}
-class SelectProductState extends CanteenStates{}
 
-class CartHaveProductsState extends CanteenStates{}
-class CartEmptyState extends CanteenStates{}
-class ShowBottomSheetState extends CanteenStates{}
+class GetAllProductsSuccessState extends CanteenStates {}
+
+class SelectProductState extends CanteenStates {}
+class CalculateTotalPriceState extends CanteenStates {}
+
+class CancelSelectedProductState extends CanteenStates {}
+
+class CartHaveProductsState extends CanteenStates {}
+
+class CartEmptyState extends CanteenStates {}
+
+class ShowBottomSheetState extends CanteenStates {}
+
+class GetInventorySearchResultssSuccessState extends CanteenStates {}
+
+class AddIngredientSuccessState extends CanteenStates {}
+
+class RemoveIngredientSuccessState extends CanteenStates {}
+
+class ItemImagePickedSucessState extends CanteenStates {}
+
+class ItemImagePickedErrorState extends CanteenStates {}
+
+class UploadItemImageLoadingState extends CanteenStates {}
+
+class UploadItemImageSuccessState extends CanteenStates {}
+
+class UploadItemImageErrorState extends CanteenStates {}
+
+class UploadItemDataLoadingState extends CanteenStates {}
+
+class UploadItemDataSuccessState extends CanteenStates {}
+
+class UploadItemDataErrorState extends CanteenStates {}
+
+class GetAllergiesLoadingState extends CanteenStates {}
+
+class GetAllergiesSuccessState extends CanteenStates {}
+
+class GetAllergiesErrorState extends CanteenStates {}
+class StartListeningBuyerDataState extends CanteenStates{}
+class PaymentLoadingState extends CanteenStates {}
+
+class PaymentSuccessState extends CanteenStates {}
+
+class PaymentErrorState extends CanteenStates {}
+
+class IDDeactivatedState extends CanteenStates {}
+
+class SpendingLimitExceededState extends CanteenStates {}
+
+class ProductsContainAllergensState extends CanteenStates {}
+class NotEnoughBalanceState extends CanteenStates {}
+class SomethingWentWrongState extends CanteenStates {}
 

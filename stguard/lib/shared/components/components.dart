@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -68,15 +69,15 @@ class DefaultFormField extends StatelessWidget {
   void Function(String)? onSubmit;
   void Function(String)? onChange;
   void Function()? onTap;
-  bool isPassword = false;
+  bool isPassword;
   String? Function(String? value) validate;
   String? label;
   String? errorText;
   IconData? prefix;
   IconData? suffix;
   void Function()? changeObscured;
-  bool isClickable = true;
-
+  bool isClickable;
+  bool readOnly;
   DefaultFormField(
       {required this.controller,
       required this.type,
@@ -91,6 +92,7 @@ class DefaultFormField extends StatelessWidget {
       IconData? this.suffix,
       this.changeObscured,
       this.isClickable = true,
+      this.readOnly = false,
       super.key});
 
   @override
@@ -103,6 +105,7 @@ class DefaultFormField extends StatelessWidget {
       onFieldSubmitted: onSubmit,
       onChanged: onChange,
       onTap: onTap,
+      readOnly: readOnly,
       decoration: InputDecoration(
           labelText: label,
           errorText: errorText,
@@ -189,29 +192,26 @@ class UserInfo extends StatelessWidget {
               color: defaultColor.withOpacity(0.8),
               fontWeight: FontWeight.w500),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
-        Text('Name',
-            style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.w500)),
-        SizedBox(
+        const Text('Name',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+        const SizedBox(
           height: 5,
         ),
         Text(userModel.name,
-            style:
-                TextStyle(fontSize:15, color: Colors.grey)),
-        SizedBox(
+            style: const TextStyle(fontSize: 15, color: Colors.grey)),
+        const SizedBox(
           height: 10,
         ),
-        Text('Email',
-            style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.w500)),
-        SizedBox(
+        const Text('Email',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+        const SizedBox(
           height: 5,
         ),
         Text(userModel.email,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               color: Colors.grey,
             ))
@@ -239,12 +239,12 @@ class DrawerItem extends StatelessWidget {
             )
           else
             icon,
-          SizedBox(
+          const SizedBox(
             width: 10,
           ),
           Text(
             text,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
           )
         ],
       ),
@@ -310,11 +310,11 @@ class ActivityItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   Container(
@@ -324,30 +324,30 @@ class ActivityItem extends StatelessWidget {
                           ? '$name Puchased'
                           : '$name ${model.activity}',
                       maxLines: 2,
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
                   Text('${getDate(model.date)}')
                 ]),
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 model.trans_id != 'null'
                     ? Text(
                         '-${model.activity}',
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       )
                     : Row(
                         children: [
                           model.activity == 'Arrived'
-                              ? SizedBox(
+                              ? const SizedBox(
                                   width: 10,
                                 )
-                              : SizedBox(
+                              : const SizedBox(
                                   width: 20,
                                 ),
                           ImageIcon(
@@ -385,7 +385,7 @@ class FamilyMemberCard extends StatelessWidget {
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   CircleAvatar(
@@ -397,16 +397,16 @@ class FamilyMemberCard extends StatelessWidget {
                       backgroundImage: NetworkImage(model!.image!),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Container(
                       width: 80,
                       child: Center(
                           child: Text(
-                        '${model!.name!.split(' ')[0]}',
+                        model!.name!.split(' ')[0],
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w500),
                       )))
                 ]),
@@ -442,22 +442,22 @@ class ProductItem extends StatelessWidget {
             Text(
               product.product_name,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
-            SizedBox(
+            const SizedBox(
               height: 5,
             ),
             Row(
               children: [
-                Text('Price:',
+                const Text('Price:',
                     style:
                         TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Text(
                   product.price,
-                  style: TextStyle(fontSize: 15),
+                  style: const TextStyle(fontSize: 15),
                 ),
               ],
             )
@@ -487,14 +487,15 @@ class AttendanceHistoryItem extends StatelessWidget {
                 children: [
                   Text(
                     '${getDate(model.date, format: 'EEEE')}',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(
                     height: screen_height * 0.01,
                   ),
                   Text('${getDate(model.date, format: 'yyyy-MM-dd')}',
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.bold))
                 ],
               ),
               VerticalDivider(
@@ -532,7 +533,7 @@ class SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           borderRadius: BorderRadiusDirectional.all(Radius.circular(10))),
       width: card_width,
       height: card_height,
@@ -544,7 +545,7 @@ class SettingsCard extends StatelessWidget {
               ? Column(
                   children: children,
                 )
-              : Center(
+              : const Center(
                   child: CircularProgressIndicator(),
                 ),
         ),
@@ -559,7 +560,7 @@ class SliderBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           SliderSideLabel(
@@ -567,7 +568,7 @@ class SliderBuilder extends StatelessWidget {
             type: 'min',
           ),
           SliderTheme(
-            data: SliderThemeData(trackHeight: 3),
+            data: const SliderThemeData(trackHeight: 3),
             child: Expanded(
               child: Slider(
                 value: ParentCubit.get(context).pocket_money,
@@ -610,7 +611,7 @@ class SliderSideLabel extends StatelessWidget {
         width: 35,
         child: Text(
           '${value.round()}',
-          style: TextStyle(
+          style: const TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
         ));
   }
@@ -651,12 +652,13 @@ class RechargeItem extends StatelessWidget {
               ),
               Text(
                 text,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
               SizedBox(
                 width: width,
               ),
-              Icon(Icons.arrow_forward_ios_outlined,
+              const Icon(Icons.arrow_forward_ios_outlined,
                   size: 20, color: defaultColor)
             ]),
           ))),
@@ -683,7 +685,7 @@ class CountryItem extends StatelessWidget {
               style: TextStyle(
                   fontSize: screen_width * 0.05, fontWeight: FontWeight.w400),
             ),
-            Spacer(),
+            const Spacer(),
             Icon(
               Icons.arrow_forward_ios,
               color: defaultColor.withOpacity(0.8),
@@ -720,22 +722,17 @@ class SchoolItem extends StatelessWidget {
               radius: 60,
             ),
           ),
-          SizedBox(
-            width: 10
-          ),
+          const SizedBox(width: 10),
           Expanded(
             flex: 3,
             child: Text(
               school.name,
-              style: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),
-          SizedBox(
-            width: 10
-          ),
+          const SizedBox(width: 10),
           Icon(
             Icons.arrow_forward_ios,
             color: defaultColor,
@@ -879,8 +876,8 @@ class LoadingOnWaiting extends StatelessWidget {
         decoration: BoxDecoration(
             color: defaultColor.withOpacity(0.8),
             borderRadius: BorderRadiusDirectional.circular(10)),
-        child: Center(
-            child: const CircularProgressIndicator(
+        child: const Center(
+            child: CircularProgressIndicator(
           color: Colors.white,
         )));
   }
@@ -923,7 +920,7 @@ class MyDropdown extends StatelessWidget {
             TeacherCubit.get(context).selectGrade(value);
           },
           iconSize: width * 0.07,
-          icon: Icon(Icons.arrow_drop_down_outlined),
+          icon: const Icon(Icons.arrow_drop_down_outlined),
           items: TeacherCubit.get(context).grades.map((item) {
             return DropdownMenuItem<String>(
               alignment: AlignmentDirectional.center,
@@ -1158,8 +1155,10 @@ Future<void> requestWritePermission() async {
 
 class CanteenProductCard extends StatelessWidget {
   CanteenProductModel product;
+  String productID;
   void Function()? onTap;
-  CanteenProductCard({super.key, required this.product, this.onTap});
+  CanteenProductCard(
+      {super.key, required this.productID, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1171,21 +1170,29 @@ class CanteenProductCard extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           child: Column(
             children: [
-              Image(
+              Image.network(
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
-                  image: NetworkImage(product.image)),
+                  product.image,
+                  errorBuilder: (context, error, stackTrace) => const Image(
+                      fit: BoxFit.contain,
+                      width: 120,
+                      height: 120,
+                      image: AssetImage('assets/images/no-image.png'))),
               const SizedBox(
                 height: 10,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  Container(
+                    height: 35,
+                    child: Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Row(
@@ -1195,20 +1202,21 @@ class CanteenProductCard extends StatelessWidget {
                         child: Text(
                           '${product.price.toStringAsFixed(2)} EGP',
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 30,
                       ),
                       CanteenCubit.get(context)
                               .selectedProducts
-                              .contains(product.id)
-                          ? Icon(
+                              .keys
+                              .contains(productID)
+                          ? const Icon(
                               Icons.shopping_cart,
                               color: defaultColor,
                             )
-                          : Icon(Icons.shopping_cart_outlined)
+                          : const Icon(Icons.shopping_cart_outlined)
                     ],
                   ),
                 ],
@@ -1216,6 +1224,75 @@ class CanteenProductCard extends StatelessWidget {
             ],
           ),
         )),
+      ),
+    );
+  }
+}
+
+class ProductSearchItem extends StatelessWidget {
+  CanteenProductModel product;
+  String productID;
+  Widget suffixWidget;
+  ProductSearchItem(
+      {super.key,
+      required this.productID,
+      required this.product,
+      required this.suffixWidget});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 140,
+      width: double.infinity,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Image.network(
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  product.image,
+                  errorBuilder: (context, error, stackTrace) => const Image(
+                      fit: BoxFit.contain,
+                      width: 50,
+                      height: 50,
+                      image: AssetImage('assets/images/no-image.png'))),
+              const SizedBox(
+                width: 5,
+              ),
+              Container(
+                width: 170,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      '${product.price.toStringAsFixed(2)} EGP',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(fontWeight: FontWeight.w500),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              suffixWidget
+            ],
+          ),
+        ),
       ),
     );
   }

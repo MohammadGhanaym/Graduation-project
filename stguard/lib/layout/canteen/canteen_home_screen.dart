@@ -106,7 +106,7 @@ class CanteenHomeScreen extends StatelessWidget {
                         ),
                       ),
                     ])),
-            bottomNavigationBar: CanteenCubit.get(context).canteenPath == null
+            bottomNavigationBar: CanteenCubit.get(context).schoolCanteenPath == null
                 ? null
                 : BottomNavigationBar(
                     currentIndex: CanteenCubit.get(context).currentIndex,
@@ -126,7 +126,7 @@ class CanteenHomeScreen extends StatelessWidget {
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                : CanteenCubit.get(context).canteenPath == null
+                : CanteenCubit.get(context).schoolCanteenPath == null
                     ? CanteenJoinCommunityScreen()
                     : CanteenCubit.get(context)
                         .screens[CanteenCubit.get(context).currentIndex]);

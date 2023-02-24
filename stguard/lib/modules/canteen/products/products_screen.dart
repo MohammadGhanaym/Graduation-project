@@ -1,6 +1,7 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:st_tracker/layout/canteen/cubit/canteen_home.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/modules/canteen/processed/processed_screen.dart';
@@ -14,14 +15,43 @@ class ProductsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+              onPressed: () {
+                if (CanteenCubit.get(context).selectedProducts.isNotEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Are you sure?'),
+                      content: const Text(
+                          'If you leave this screen now, the selected product will be cancelled. Are you sure you want to proceed?'),
+                      actions: [
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        ElevatedButton(
+                          child: const Text('Leave'),
+                          onPressed: () {
+                            CanteenCubit.get(context).cancelSelectedProducts();
+                            navigateAndFinish(context, CanteenHome());
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+              icon: const Icon(Icons.arrow_back)),
           actions: [
             IconButton(
                 onPressed: () {
                   navigateTo(context, SearchScreen());
                 },
-                icon: Icon(Icons.search)),
+                icon: const Icon(Icons.search)),
             PopupMenuButton(
-              icon: ImageIcon(AssetImage('assets/images/menu.png')),
+              icon: const ImageIcon(AssetImage('assets/images/menu.png')),
               itemBuilder: (context) => List.generate(
                   CanteenCubit.get(context).categories.length,
                   (index) => PopupMenuItem(
@@ -38,11 +68,13 @@ class ProductsScreen extends StatelessWidget {
           ],
         ),
         body: BlocConsumer<CanteenCubit, CanteenStates>(
-          listener: (context, state) {},
+          listener: (context, state) {
+            
+          },
           builder: (context, state) {
             return ConditionalBuilder(
               condition: state is! GetProductsLoadingState,
-              fallback: (context) => Center(
+              fallback: (context) => const Center(
                 child: CircularProgressIndicator(),
               ),
               builder: (context) => Padding(
@@ -57,10 +89,24 @@ class ProductsScreen extends StatelessWidget {
                   children: List.generate(
                       CanteenCubit.get(context).products.length,
                       (index) => CanteenProductCard(
-                            product: CanteenCubit.get(context).products[index],
+                            productID: CanteenCubit.get(context)
+                                .products
+                                .keys
+                                .toList()[index],
+                            product: CanteenCubit.get(context)
+                                .products
+                                .values
+                                .toList()[index],
                             onTap: () {
                               CanteenCubit.get(context).selectProduct(
-                                  CanteenCubit.get(context).products[index].id);
+                                  CanteenCubit.get(context)
+                                      .products
+                                      .keys
+                                      .toList()[index],
+                                  CanteenCubit.get(context)
+                                      .products
+                                      .values
+                                      .toList()[index]);
                               if (CanteenCubit.get(context)
                                   .selectedProducts
                                   .isNotEmpty) {
@@ -72,8 +118,9 @@ class ProductsScreen extends StatelessWidget {
                                         text: 'Processed',
                                         color: defaultColor.withOpacity(0.8),
                                         onPressed: () {
-                                          navigateTo(
-                                              context, ProcessedScreen());
+                                          CanteenCubit.get(context)
+                                              .calTotalPrice();
+                                          navigateTo(context, const ProcessedScreen());
                                         }),
                                   );
                                   CanteenCubit.get(context)
