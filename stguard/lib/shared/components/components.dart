@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -417,9 +418,11 @@ class FamilyMemberCard extends StatelessWidget {
   }
 }
 
-dynamic getDate(date, {format = 'EE, hh:mm a'}) {
+String getDate(date, {format = 'EE, hh:mm a'}) {
   if (date is String) {
     return DateFormat(format).format(DateTime.parse(date));
+  } else if (date is Timestamp) {
+    return DateFormat(format).format(date.toDate());
   } else {
     return DateFormat(format).format(date);
   }
@@ -440,7 +443,7 @@ class ProductItem extends StatelessWidget {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              product.product_name,
+              product.productName,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
@@ -1260,10 +1263,10 @@ class ProductSearchItem extends StatelessWidget {
                       height: 50,
                       image: AssetImage('assets/images/no-image.png'))),
               const SizedBox(
-                width: 5,
+                width: 10,
               ),
               Container(
-                width: 170,
+                width: 160,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1297,3 +1300,5 @@ class ProductSearchItem extends StatelessWidget {
     );
   }
 }
+
+

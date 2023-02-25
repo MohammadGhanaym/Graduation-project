@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/cubit/canteen_home.dart';
+import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
@@ -9,6 +9,7 @@ import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/shared/bloc_observer.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
+import 'package:st_tracker/shared/styles/Themes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,10 +56,10 @@ class MyApp extends StatelessWidget {
               ..getCanteenPath())
       ],
       child: MaterialApp(
-        home: CanteenHome(),
+        home: CanteenHomeScreen(),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          appBarTheme: AppBarTheme(color: Colors.blueAccent),
+          appBarTheme: const AppBarTheme(color: defaultColor),
           primaryColor: Colors.blueAccent,
           scaffoldBackgroundColor: Colors.grey[200],
         ),

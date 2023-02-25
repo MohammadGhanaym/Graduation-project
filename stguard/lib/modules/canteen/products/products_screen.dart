@@ -1,7 +1,7 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/cubit/canteen_home.dart';
+import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/modules/canteen/processed/processed_screen.dart';
@@ -33,7 +33,7 @@ class ProductsScreen extends StatelessWidget {
                           child: const Text('Leave'),
                           onPressed: () {
                             CanteenCubit.get(context).cancelSelectedProducts();
-                            navigateAndFinish(context, CanteenHome());
+                            navigateAndFinish(context, CanteenHomeScreen());
                           },
                         ),
                       ],

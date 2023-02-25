@@ -23,6 +23,9 @@ class ParentCubit extends Cubit<ParentStates> {
   late Database database;
 
   void createDatabase() async {
+    /* await databaseFactory.deleteDatabase('attendance_db.db').then((value) {
+      print('database deleted');
+    });*/
     database = await openDatabase(
       'activities.db',
       version: 1,
@@ -30,20 +33,31 @@ class ParentCubit extends Cubit<ParentStates> {
         print('db created');
         await db.transaction((txn) async {
           // create student_activity table
-          await txn
-              .execute(
-                  'CREATE TABLE student_activity(id TEXT, activity TEXT ,date DATETIME, trans_id TEXT)')
-              .then((value) {
+          await txn.execute('''
+                    CREATE TABLE student_activity(
+                      id TEXT NOT NULL,
+                      activity TEXT,
+                      date DATETIME,
+                      trans_id TEXT,
+                      PRIMARY KEY (id, trans_id),
+                      FOREIGN KEY (trans_id) REFERENCES products(trans_id)
+                      )
+                  ''').then((value) {
             print('Table Created');
           }).catchError((error) {
             print(error.toString());
             return error;
           });
           // create canteenTransactions table
-          await txn
-              .execute(
-                  'CREATE TABLE products(trans_id TEXT, product TEXT, price )')
-              .then((value) {
+          await txn.execute('''
+                CREATE TABLE products(
+                    trans_id TEXT NOT NULL,
+                    product TEXT NOT NULL,
+                    price TEXT NOT NULL,
+                    quantity TEXT,
+                    PRIMARY KEY trans_id
+                    )
+                  ''').then((value) {
             print('Table Created');
           }).catchError((error) {
             print(error.toString());
@@ -202,13 +216,11 @@ class ParentCubit extends Cubit<ParentStates> {
         .collection('Students');
     db.runTransaction((transaction) async {
       await stColl.where('uid', isEqualTo: id).get().then((st) async {
-        
         if (st.docs.isNotEmpty) {
           if (studentsPaths.keys.contains(id)) {
             emit(FamilyMemberAlreadyExisted('You added this member before'));
           } else {
-            st.docs[0].reference
-                .update({'parent': userID}).then((value) async {
+            st.docs[0].reference.update({'parent': userID}).then((value) async {
               db
                   .collection('Parents')
                   .doc(userID)
@@ -260,7 +272,8 @@ class ParentCubit extends Cubit<ParentStates> {
                 await insertToTransactionsTable(
                     trans_id: trans.doc.id,
                     product: product['name'],
-                    price: product['price']);
+                    price: product['price'],
+                    quantity: product['quantity']);
               });
             });
           }
@@ -309,13 +322,14 @@ class ParentCubit extends Cubit<ParentStates> {
   Future<void> insertToTransactionsTable(
       {required String trans_id,
       required String product,
-      required dynamic price}) async {
+      required dynamic price,
+      required dynamic quantity}) async {
     Database insert_database = await openDatabase('activities.db');
 
     await insert_database.transaction((txn) async {
       await txn
           .rawInsert(
-              'INSERT INTO products(trans_id, product, price) VALUES("$trans_id", "$product", "$price")')
+              'INSERT INTO products(trans_id, product, price, quantity) VALUES("$trans_id", "$product", "$price", "$quantity")')
           .then((value) {
         print('$value inserted successfully');
       }).catchError((err) {

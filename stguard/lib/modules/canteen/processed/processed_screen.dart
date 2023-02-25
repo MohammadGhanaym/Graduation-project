@@ -12,12 +12,12 @@ class ProcessedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        
+      ),
       body: BlocConsumer<CanteenCubit, CanteenStates>(
-        listener: (context, state) 
-        {
-          if(state is StartListeningBuyerDataState)
-          {
+        listener: (context, state) {
+          if (state is StartListeningBuyerDataState) {
             navigateTo(context, const TapPayScreen());
           }
         },
@@ -96,10 +96,9 @@ class ProcessedScreen extends StatelessWidget {
                   Container(
                     height: 50,
                     child: DefaultButton(
-                      color: defaultColor.withOpacity(0.8),
+                        color: defaultColor.withOpacity(0.8),
                         onPressed: () {
                           CanteenCubit.get(context).listentoBuyer();
-                          
                         },
                         text: 'CONFIRM'),
                   ),
@@ -116,8 +115,8 @@ class ProcessedScreen extends StatelessWidget {
                               IconButton(
                                 padding: EdgeInsets.zero,
                                 onPressed: () {
-                                  CanteenCubit.get(context).updateQuantities(
-                                      'add',
+                                  CanteenCubit.get(context).addQuantity(
+                                     
                                       CanteenCubit.get(context)
                                           .selectedProducts
                                           .keys
@@ -136,8 +135,7 @@ class ProcessedScreen extends StatelessWidget {
                               IconButton(
                                 padding: EdgeInsets.zero,
                                 onPressed: () {
-                                  CanteenCubit.get(context).updateQuantities(
-                                      'remove',
+                                  CanteenCubit.get(context).removeQuantity(
                                       CanteenCubit.get(context)
                                           .selectedProducts
                                           .keys

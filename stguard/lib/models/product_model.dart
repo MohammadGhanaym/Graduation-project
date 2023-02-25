@@ -1,21 +1,24 @@
 class ProductModel {
   late String trans_id;
-  late String product_name;
+  late String productName;
   late dynamic price;
-
+  late dynamic quantity;
   ProductModel({
     required this.trans_id,
-    required this.product_name,
+    required this.productName,
     required this.price,
+    required this.quantity,
   });
 
   ProductModel.fromJson(Map<String, dynamic>? json) {
     if (json != null) {
       trans_id = json['trans_id'];
 
-      product_name = json['product'];
+      productName = json['product'];
 
       price = json['price'];
+
+      quantity = json['quantity'];
     }
   }
 }

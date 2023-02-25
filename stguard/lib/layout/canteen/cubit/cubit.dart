@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
+import 'package:st_tracker/models/canteen_details_model.dart';
 import 'package:st_tracker/models/canteen_model.dart';
 import 'package:st_tracker/models/canteen_product_model.dart';
 import 'package:st_tracker/models/country_model.dart';
@@ -14,6 +15,7 @@ import 'package:st_tracker/models/school_model.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/modules/canteen/inventory/inventory_screen.dart';
 import 'package:st_tracker/modules/canteen/products/products_screen.dart';
+import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -61,6 +63,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
 
         emit(GetCanteenPathSuccessState());
         await getCategories();
+        await getCanteenDetails();
       } else {
         emit(NeedtoJoinCommunityState());
       }
@@ -273,19 +276,11 @@ class CanteenCubit extends Cubit<CanteenStates> {
     print(selectedProducts);
   }
 
-  void updateQuantities(String action, String id) {
-    if (action == 'add') {
-      itemQuantities[id] = itemQuantities[id]! + 1;
-    } else if (itemQuantities[id]! > 1) {
-      itemQuantities[id] = itemQuantities[id]! - 1;
-    }
-    calTotalPrice();
-  }
-
   double totalPrice = 0.0;
   int itemsCount = 0;
   void calTotalPrice() {
     totalPrice = 0.0;
+    itemsCount = 0;
     selectedProducts.forEach((id, p) {
       totalPrice += p.price * itemQuantities[id]!;
       itemsCount += itemQuantities[id]!;
@@ -296,8 +291,21 @@ class CanteenCubit extends Cubit<CanteenStates> {
     emit(CalculateTotalPriceState());
   }
 
+  void addQuantity(String id) {
+    itemQuantities[id] = itemQuantities[id]! + 1;
+    calTotalPrice();
+  }
+
+  void removeQuantity(String id) {
+    if (itemQuantities[id]! > 1) {
+      itemQuantities[id] = itemQuantities[id]! - 1;
+      calTotalPrice();
+    }
+  }
+
   void cancelSelectedProducts() {
     selectedProducts = {};
+    itemQuantities = {};
     bottomSheetShown = false;
     emit(CancelSelectedProductState());
   }
@@ -376,7 +384,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
     required String category,
   }) async {
     List<String> itemAllergies = [];
-
+    print(allergies);
     ingredients.forEach((ingredient) {
       allergies.forEach((allergy, allergens) {
         for (String allergen in allergens) {
@@ -385,12 +393,15 @@ class CanteenCubit extends Cubit<CanteenStates> {
                   .toLowerCase()
                   .contains(ingredient.toLowerCase().split(' ').last) ||
               ingredient.toLowerCase().contains(allergen.toLowerCase())) {
-            itemAllergies.add(allergy);
+            if (!itemAllergies.contains(allergy)) {
+              itemAllergies.add(allergy);
+            }
             break;
           }
         }
       });
     });
+    print(itemAllergies);
     await uploadItemImage(
         name: name,
         price: price,
@@ -444,6 +455,8 @@ class CanteenCubit extends Cubit<CanteenStates> {
         'allergies': itemAllergies
       }).then((value) {
         emit(UploadItemDataSuccessState());
+        itemImage = null;
+        ingredients = [];
         getProducts();
       });
     }).catchError((error) {
@@ -469,65 +482,164 @@ class CanteenCubit extends Cubit<CanteenStates> {
     });
   }
 
-  Future<void> getBuyerData(String buyerID) async {
-    emit(PaymentLoadingState());
-    // info of interest: parent, spending limit, totday's spending, allergies
-    await schoolCanteenPath!
-        .collection('Students')
-        .where('uid', isEqualTo: buyerID)
-        .get()
-        .then((value) {
-      print(value.docs[0].data());
-      analyzeBuyerData(value.docs[0].data());
-    }).catchError((error) {
-      print('getBuyerData');
-      print(error.toString());
-      emit(PaymentErrorState());
-    });
+  void cancelBuyerListener() {
+    if (buyerListener != null) {
+      buyerListener!.cancel();
+    }
   }
 
   StudentModel? buyer;
+  Future<void> getBuyerData(String? buyerID) async {
+    emit(PaymentLoadingState());
+    // info of interest: parent, spending limit, totday's spending, allergies
+    if (buyerID != null) {
+      await schoolCanteenPath!
+          .collection('Students')
+          .where('uid', isEqualTo: buyerID)
+          .get()
+          .then((value) async {
+        print(value.docs[0].data());
+        if (value.docs.isNotEmpty) {
+          buyer = StudentModel.fromJson(value.docs[0].data());
+          print('buyer');
+          print(buyer);
+          print(buyer!.dailySpending);
+          if (buyer != null) {
+            if (buyer!.dailySpending != null) {
+              print('buyer!.dailySpending != null');
+              if (getDate(buyer!.dailySpending!['updateTime'],
+                      format: 'yyyy-MM-dd') ==
+                  getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
+                print("I'm here");
+                await analyzeBuyerData();
+              } else {
+                print('buyer!.dailySpending == null');
+                await value.docs[0].reference.update({
+                  'dailySpending': {'value': 0.0, 'updateTime': DateTime.now()}
+                }).then(
+                  (value) async {
+                    await analyzeBuyerData();
+                  },
+                ).catchError((error) {
+                  cancelBuyerListener();
+                  cancelBuyer();
+                  emit(PaymentErrorState());
+                });
+              }
+            } else {
+              await analyzeBuyerData();
+            }
+          } else {
+            cancelBuyer();
+            emit(PaymentErrorState());
+          }
+        } else {
+          cancelBuyer();
+          emit(PaymentErrorState());
+        }
+      }).catchError((error) {
+        cancelBuyerListener();
+        cancelBuyer();
+        print('getBuyerData');
+        print(error.toString());
+        emit(PaymentErrorState());
+      });
+    }
+  }
 
-  void analyzeBuyerData(Map<String, dynamic> buyerData) {
-    buyer = StudentModel.fromJson(buyerData);
+  String? result;
+  void resetResult() {
+    result = null;
+  }
+
+  Future<void> analyzeBuyerData() async {
+    print('analyzeBuyerData');
     if (buyer!.parent == null) {
-      emit(IDDeactivatedState());
-    } else if (buyer!.dailySpending != null) {
-      if (buyer!.dailySpending!['value'] + totalPrice > buyer!.pocketMoney) {
-        emit(SpendingLimitExceededState());
-      }
+      print('ID is Deactivated');
+      result = 'ID is Deactivated';
+      cancelBuyerListener();
+      cancelBuyer();
+      emit(PaymentErrorState());
+    } else if (totalPrice > buyer!.pocketMoney) {
+      cancelBuyerListener();
+      cancelBuyer();
+      print('Daily spending limit exceeded1');
+      result = 'Daily spending limit exceeded';
+      emit(PaymentErrorState());
+    } else if ((buyer!.dailySpending!['value'] ?? 0) + totalPrice >
+        buyer!.pocketMoney) {
+      print('Daily spending limit exceeded2');
+      cancelBuyerListener();
+      cancelBuyer();
+      result = 'Daily spending limit exceeded';
+      emit(PaymentErrorState());
     } else if (buyer!.allergies != null) {
+      print('One or more products contain allergens');
+      print('checkallergies');
+      bool hasAllergen = false;
       for (CanteenProductModel product in selectedProducts.values) {
         if (product.allergies != null) {
           for (String allergy in product.allergies!) {
             if (buyer!.allergies!.contains(allergy)) {
-              emit(ProductsContainAllergensState());
+              result = 'One or more products contain allergens';
+              hasAllergen = true;
+              cancelBuyerListener();
+              cancelBuyer();
+              emit(PaymentErrorState());
+
+              break;
             }
           }
         }
       }
+      if (!hasAllergen) {
+        print('completePayment');
+
+        await completePayment(buyer!.parent!);
+      }
     } else {
-      completePayment(buyer!.parent!);
+      print('completePayment');
+      await completePayment(buyer!.parent!);
     }
   }
 
-  final batch = FirebaseFirestore.instance.batch();
-  void completePayment(String parentID) async {
+  WriteBatch batch = FirebaseFirestore.instance.batch();
+  Future<void> completePayment(String parentID) async {
+    batch = FirebaseFirestore.instance.batch();
     ParentModel? parent;
     final parentDocRef = db.collection('Parents').doc(parentID);
     await parentDocRef.get().then((parentDoc) async {
       if (parentDoc.exists) {
         parent = ParentModel.fromJson(parentDoc.data()!);
-        if (parent!.balance <= totalPrice) {
+        if (parent!.balance >= totalPrice) {
           batch.update(parentDocRef, {'balance': parent!.balance - totalPrice});
           await updateCanteenData();
           await setTransaction();
+        } else {
+          result = 'Not Enough Balance';
+          cancelBuyerListener();
+          cancelBuyer();
+          emit(PaymentErrorState());
         }
       }
     }).catchError((error) {
+      cancelBuyerListener();
+      cancelBuyer();
       print('completePayment');
       print(error.toString());
       emit(PaymentErrorState());
+    });
+  }
+
+  void cancelBuyer() async {
+    await schoolCanteenPath!.collection('Canteen').get().then((canteen) async {
+      if (canteen.docs.isNotEmpty) {
+        await canteen.docs[0].reference.get().then((canteenData) async {
+          if (canteenData.data() != null) {
+            canteenData.reference.update({'CurrentBuyer': null});
+          }
+        });
+      }
     });
   }
 
@@ -559,16 +671,22 @@ class CanteenCubit extends Cubit<CanteenStates> {
             }
           }
         }).catchError((error) {
+          cancelBuyerListener();
+          cancelBuyer();
           print('updateCanteenData');
           print(error.toString());
           emit(PaymentErrorState());
         });
       } else {
+        cancelBuyerListener();
+        cancelBuyer();
         print('updateCanteenData');
         print('canteen is empty');
         emit(PaymentErrorState());
       }
     }).catchError((error) {
+      cancelBuyerListener();
+      cancelBuyer();
       print('updateCanteenData');
       print(error.toString());
       emit(PaymentErrorState());
@@ -599,7 +717,8 @@ class CanteenCubit extends Cubit<CanteenStates> {
         if (value.docs[0].data().containsKey('dailySpending')) {
           batch.update(value.docs[0].reference, {
             'dailySpending': {
-              'value': totalPrice + value.docs[0].data()['dailySpending'],
+              'value':
+                  totalPrice + value.docs[0].data()['dailySpending']['value'],
               'updateTime': DateTime.now()
             }
           });
@@ -614,20 +733,63 @@ class CanteenCubit extends Cubit<CanteenStates> {
             createTranscation());
 
         await batch.commit().then((value) {
+          cancelBuyerListener();
+          cancelBuyer();
           emit(PaymentSuccessState());
-          if (buyerListener != null) {
-            buyerListener!.cancel();
-          }
         }).catchError((error) {
+          cancelBuyerListener();
+          cancelBuyer();
           print('batch commit error');
           print(error.toString());
           emit(PaymentErrorState());
         });
       }
     }).catchError((error) {
+      cancelBuyerListener();
+      cancelBuyer();
       print('setTransaction');
       print(error.toString());
       emit(PaymentErrorState());
+    });
+  }
+
+  CanteenDetailsModel? canteenDetails;
+  Future<void> getCanteenDetails() async {
+    emit(GetCanteenDetailsLoadingState());
+    await schoolCanteenPath!.collection('Canteen').get().then((canteen) async {
+      if (canteen.docs.isNotEmpty) {
+        await canteen.docs[0].reference.get().then((canteenData) async {
+          if (canteenData.exists) {
+            canteenDetails = CanteenDetailsModel.fromJson(canteenData.data());
+            if (canteenDetails!.updateTime != null) {
+              print(getDate(canteenDetails!.updateTime, format: 'yyyy-MM-dd'));
+              print(getDate(DateTime.now(), format: 'yyyy-MM-dd'));
+              if (getDate(canteenDetails!.updateTime, format: 'yyyy-MM-dd') !=
+                  getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
+                await canteenData.reference.update({
+                  'daily revenue': 0,
+                  'daily transactions': 0,
+                  'updateTime': DateTime.now()
+                }).then((value) {
+                  emit(GetCanteenDetailsSuccessState());
+                  canteenDetails = null;
+                }).catchError((error) {
+                  emit(GetCanteenDetailsErrorState());
+                  print(error.toString());
+                });
+              } else {
+                emit(GetCanteenDetailsSuccessState());
+              }
+            }
+          }
+        }).catchError((error) {
+          emit(GetCanteenDetailsErrorState());
+          print(error.toString());
+        });
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetCanteenDetailsErrorState());
     });
   }
 }

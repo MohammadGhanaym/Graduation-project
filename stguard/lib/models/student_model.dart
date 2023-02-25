@@ -17,8 +17,8 @@ class StudentModel {
       if (json.containsKey('pocket money')) {
         pocketMoney = json['pocket money'];
       }
-      if (json.containsKey('todaySpending')) {
-        dailySpending = json['todaySpending'];
+      if (json.containsKey('dailySpending')) {
+        dailySpending = json['dailySpending'];
       }
       if (json.containsKey('allergies')) {
         allergies = json['allergies'];

@@ -68,6 +68,7 @@ class GetProductsErrorState extends CanteenStates {}
 class GetAllProductsSuccessState extends CanteenStates {}
 
 class SelectProductState extends CanteenStates {}
+
 class CalculateTotalPriceState extends CanteenStates {}
 
 class CancelSelectedProductState extends CanteenStates {}
@@ -105,18 +106,17 @@ class GetAllergiesLoadingState extends CanteenStates {}
 class GetAllergiesSuccessState extends CanteenStates {}
 
 class GetAllergiesErrorState extends CanteenStates {}
-class StartListeningBuyerDataState extends CanteenStates{}
+
+class StartListeningBuyerDataState extends CanteenStates {}
+
 class PaymentLoadingState extends CanteenStates {}
 
 class PaymentSuccessState extends CanteenStates {}
 
 class PaymentErrorState extends CanteenStates {}
 
-class IDDeactivatedState extends CanteenStates {}
+class GetCanteenDetailsLoadingState extends CanteenStates {}
 
-class SpendingLimitExceededState extends CanteenStates {}
+class GetCanteenDetailsSuccessState extends CanteenStates {}
 
-class ProductsContainAllergensState extends CanteenStates {}
-class NotEnoughBalanceState extends CanteenStates {}
-class SomethingWentWrongState extends CanteenStates {}
-
+class GetCanteenDetailsErrorState extends CanteenStates {}
