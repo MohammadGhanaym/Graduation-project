@@ -109,7 +109,7 @@ class ProcessedScreen extends StatelessWidget {
                   ListView.separated(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemBuilder: (context, index) => ProductSearchItem(
+                      itemBuilder: (context, index) => ProductCartItem(
                           suffixWidget: Column(
                             children: [
                               IconButton(

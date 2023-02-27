@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -230,6 +231,9 @@ class DrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: ontap,
+      highlightColor: defaultColor.withOpacity(0.5),
+      borderRadius: BorderRadius.circular(5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -249,9 +253,6 @@ class DrawerItem extends StatelessWidget {
           )
         ],
       ),
-      onTap: ontap,
-      highlightColor: defaultColor.withOpacity(0.5),
-      borderRadius: BorderRadius.circular(5),
     );
   }
 }
@@ -678,22 +679,26 @@ class CountryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Container(
-        width: screen_width,
-        height: screen_height * 0.05,
-        child: Row(
-          children: [
-            Text(
-              country,
-              style: TextStyle(
-                  fontSize: screen_width * 0.05, fontWeight: FontWeight.w400),
-            ),
-            const Spacer(),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: defaultColor.withOpacity(0.8),
-            )
-          ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal:8.0),
+        child: Container(
+          width: double.infinity,
+          height: 50,
+          child: Row(
+            children: [
+              Text(
+                country,
+                style: TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.w400),
+              ),
+              const Spacer(),
+              Icon(
+                size:20,
+                Icons.arrow_forward_ios,
+                color: defaultColor.withOpacity(0.8),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -721,8 +726,8 @@ class SchoolItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(60)),
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Image(image: NetworkImage(school.logo)),
               radius: 60,
+              child: Image(image: NetworkImage(school.logo)),
             ),
           ),
           const SizedBox(width: 10),
@@ -739,7 +744,7 @@ class SchoolItem extends StatelessWidget {
           Icon(
             Icons.arrow_forward_ios,
             color: defaultColor,
-            size: screen_width * 0.05,
+            size: 20,
           ),
         ],
       ),
@@ -1234,9 +1239,139 @@ class CanteenProductCard extends StatelessWidget {
 
 class ProductSearchItem extends StatelessWidget {
   CanteenProductModel product;
+  void Function()? ontap;
+  var priceController = TextEditingController();
+  String productID;
+  ProductSearchItem({
+    super.key,
+    this.ontap,
+    required this.productID,
+    required this.product,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 140,
+      width: double.infinity,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Image.network(
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  product.image,
+                  errorBuilder: (context, error, stackTrace) => const Image(
+                      fit: BoxFit.contain,
+                      width: 50,
+                      height: 50,
+                      image: AssetImage('assets/images/no-image.png'))),
+              const SizedBox(
+                width: 10,
+              ),
+              Container(
+                width: 160,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      '${product.price.toStringAsFixed(2)} EGP',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(fontWeight: FontWeight.w500),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit,
+                      color: defaultColor.withOpacity(0.8),
+                    ),
+                    onPressed: () async{
+                      await showDefaultDialog(context,
+                      content:
+                      DefaultFormField(
+                                controller: priceController,
+                                type: TextInputType.number,
+                                validate: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Price must not be empty';
+                                  }
+                                  if (double.tryParse(value) == null) {
+                                    return 'Please enter a valid number';
+                                  }
+                                  return null;
+                                },
+                                label: 'New Price') ,
+                          title: 'Update Price',
+                          buttonText1: 'Cancel',
+                          buttonText2: 'Update',
+                          onPressed1: () { Navigator.pop(context);},
+                          onPressed2: () {
+                            CanteenCubit.get(context).updatePrice(
+                                      id: productID,
+                                      newPrice:
+                                          double.parse(priceController.text),
+                                      category: product.category);
+                          });
+                      },
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                      color: defaultColor.withOpacity(0.8),
+                    ),
+                    onPressed: () async{
+                      await showDefaultDialog(context,
+                          title: 'Delete Item',
+                          content: const Text(
+                              'Are you sure you want to delete this item?'),
+                          buttonText1: 'Cancel',
+                          onPressed1: () => Navigator.pop(context),
+                          buttonText2: 'Delete',
+                          onPressed2: () => CanteenCubit.get(context)
+                              .deleteItem(
+                                  id: productID, category: product.category));
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ProductCartItem extends StatelessWidget {
+  CanteenProductModel product;
   String productID;
   Widget suffixWidget;
-  ProductSearchItem(
+  ProductCartItem(
       {super.key,
       required this.productID,
       required this.product,
@@ -1244,7 +1379,7 @@ class ProductSearchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 140,
       width: double.infinity,
       child: Card(
@@ -1301,4 +1436,28 @@ class ProductSearchItem extends StatelessWidget {
   }
 }
 
-
+Future<Widget?> showDefaultDialog(context,
+    {Widget? content,
+    required String title,
+    required String buttonText1,
+    required String buttonText2,
+    required void Function()? onPressed1,
+    required void Function()? onPressed2}) {
+  return showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: content,
+      actions: [
+        TextButton(
+          onPressed: onPressed1,
+          child: Text(buttonText1),
+        ),
+        ElevatedButton(
+          onPressed: onPressed2,
+          child: Text(buttonText2),
+        )
+      ],
+    ),
+  );
+}

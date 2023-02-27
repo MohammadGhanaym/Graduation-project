@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
               ..getCanteenPath())
       ],
       child: MaterialApp(
-        home: CanteenHomeScreen(),
+        home: startScreen,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           appBarTheme: const AppBarTheme(color: defaultColor),

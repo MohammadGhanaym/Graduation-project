@@ -233,11 +233,12 @@ class CanteenCubit extends Cubit<CanteenStates> {
         await getProductbyCategory(category);
       }
     }
+    getInventorySearchResults();
   }
 
   Future<void> getProductbyCategory(category) async {
-    await schoolCanteenPath!.collection('Canteen').get().then((value) {
-      schoolCanteenPath!
+    await schoolCanteenPath!.collection('Canteen').get().then((value) async {
+      await schoolCanteenPath!
           .collection('Canteen')
           .doc(value.docs[0].id)
           .collection('categories')
@@ -247,12 +248,12 @@ class CanteenCubit extends Cubit<CanteenStates> {
           .then((value) {
         value.docs.forEach(
           (product) {
-            products[product.id] = CanteenProductModel.fromMap(product.data());
+            products[product.id] =
+                CanteenProductModel.fromMap(product.data(), category);
           },
         );
-        emit(GetProductsSuccessState());
 
-        print(value.docs);
+        emit(GetProductsSuccessState());
       });
     }).catchError((error) {
       emit(GetProductsErrorState());
@@ -317,7 +318,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   Map<String, CanteenProductModel> inventorySearchResults = {};
-  void getSearchResults({String search = 'All'}) {
+  void getInventorySearchResults({String search = 'All'}) {
     inventorySearchResults = {};
     if (search == 'All') {
       inventorySearchResults = products;
@@ -393,6 +394,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
                   .toLowerCase()
                   .contains(ingredient.toLowerCase().split(' ').last) ||
               ingredient.toLowerCase().contains(allergen.toLowerCase())) {
+            print(allergy);
             if (!itemAllergies.contains(allergy)) {
               itemAllergies.add(allergy);
             }
@@ -409,14 +411,16 @@ class CanteenCubit extends Cubit<CanteenStates> {
         itemAllergies: itemAllergies);
   }
 
-  Map<String, List<String>> allergies = {};
+  Map<String, List<dynamic>> allergies = {};
   void getAllergies() async {
     emit(GetAllergiesLoadingState());
     await db.collection('Allergies').get().then((value) {
       value.docs.forEach((allergy) {
+        print(allergy);
         allergies[allergy['name']] = allergy['allergens'];
       });
       emit(GetAllergiesSuccessState());
+      print(allergies);
     }).catchError((error) {
       emit(GetAllergiesErrorState());
       print(error.toString());
@@ -440,30 +444,71 @@ class CanteenCubit extends Cubit<CanteenStates> {
       required String image,
       required List<String> itemAllergies}) async {
     emit(UploadItemDataLoadingState());
-    await schoolCanteenPath!.collection('Canteen').get().then((value) {
-      schoolCanteenPath!
-          .collection('Canteen')
-          .doc(value.docs[0].id)
-          .collection('categories')
-          .doc(category)
-          .collection('Products')
-          .doc()
-          .set({
-        'name': name,
-        'price': price,
-        'image': image,
-        'allergies': itemAllergies
-      }).then((value) {
-        emit(UploadItemDataSuccessState());
-        itemImage = null;
-        ingredients = [];
-        getProducts();
-      });
+    await schoolCanteenPath!.collection('Canteen').get().then((canteenData) {
+      if (!categories.contains(category)) {
+        db.runTransaction((transaction) async {
+          transaction.set(
+              canteenData.docs[0].reference
+                  .collection('categories')
+                  .doc(category),
+              {
+                'name': category
+              }).set(
+              canteenData.docs[0].reference
+                  .collection('categories')
+                  .doc(category)
+                  .collection('Products')
+                  .doc(),
+              {
+                'name': name,
+                'price': price,
+                'image': image,
+                'allergies': itemAllergies
+              });
+        }).then((value) async {
+          itemImage = null;
+          itemAllergies = [];
+          ingredients = [];
+          await getProducts();
+
+          getCategories();
+          emit(UploadItemDataSuccessState());
+        }).catchError((error) {
+          emit(UploadItemDataErrorState());
+        });
+      } else {
+        schoolCanteenPath!
+            .collection('Canteen')
+            .doc(canteenData.docs[0].id)
+            .collection('categories')
+            .doc(category)
+            .collection('Products')
+            .doc()
+            .set({
+          'name': name,
+          'price': price,
+          'image': image,
+          'allergies': itemAllergies
+        }).then((value) async {
+          emit(UploadItemDataSuccessState());
+          itemImage = null;
+          itemAllergies = [];
+          ingredients = [];
+          await getProducts();
+        }).catchError((error) {
+          emit(UploadItemDataErrorState());
+        });
+      }
     }).catchError((error) {
       emit(UploadItemDataErrorState());
 
       print(error.toString());
     });
+  }
+
+  void resetItemData() {
+    ingredients = [];
+    itemImage = null;
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? buyerListener;
@@ -790,6 +835,48 @@ class CanteenCubit extends Cubit<CanteenStates> {
     }).catchError((error) {
       print(error.toString());
       emit(GetCanteenDetailsErrorState());
+    });
+  }
+
+  void updatePrice(
+      {required String id,
+      required String category,
+      required double newPrice}) async {
+    emit(UpdatePriceLoadingState());
+    await schoolCanteenPath!.collection('Canteen').get().then((canteenData) {
+      canteenData.docs[0].reference
+          .collection('categories')
+          .doc(category)
+          .collection('Products')
+          .doc(id)
+          .update({'price': newPrice}).then((value) {
+        emit(UpdatePriceSuccessState());
+        getProducts();
+      }).catchError((error) {
+        emit(UpdatePriceErrorState());
+      });
+    }).catchError((error) {
+      emit(UpdatePriceErrorState());
+    });
+  }
+
+  void deleteItem({required String id, required String category}) async {
+    emit(DeleteItemLoadingState());
+    await schoolCanteenPath!.collection('Canteen').get().then((canteenData) {
+      canteenData.docs[0].reference
+          .collection('categories')
+          .doc(category)
+          .collection('Products')
+          .doc(id)
+          .delete()
+          .then((value) {
+        emit(DeleteItemSuccessState());
+        getProducts();
+      }).catchError((error) {
+        emit(DeleteItemErrorState());
+      });
+    }).catchError((error) {
+      emit(DeleteItemErrorState());
     });
   }
 }

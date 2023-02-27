@@ -7,11 +7,10 @@ import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class CanteenJoinCommunityScreen extends StatelessWidget {
- const CanteenJoinCommunityScreen({super.key});
+  const CanteenJoinCommunityScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: BlocConsumer<CanteenCubit, CanteenStates>(
         listener: (context, state) {
@@ -19,9 +18,8 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
             showModalBottomSheet(
               context: context,
               builder: (context) => Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Column(
                   children: [
                     Expanded(
@@ -30,30 +28,27 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
                           Container(
                             width: 30,
                             height: 5,
-                            margin: EdgeInsets.only(top: 10),
+                            margin: const EdgeInsets.only(top: 10),
                             decoration: BoxDecoration(
                                 color: defaultColor.withOpacity(0.8),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10))),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10))),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
-                          Text(
+                          const Text(
                             'Pick your country',
                             style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500),
+                                fontSize: 20, fontWeight: FontWeight.w500),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 15,
                           ),
                         ],
                       ),
                     ),
                     Expanded(
-
-
                       flex: 5,
                       child: ListView.separated(
                           shrinkWrap: true,
@@ -64,7 +59,7 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
                                 onTap: () => CanteenCubit.get(context)
                                     .pickCountry(index),
                               ),
-                          separatorBuilder: (context, index) => Divider(),
+                          separatorBuilder: (context, index) => const Divider(),
                           itemCount:
                               CanteenCubit.get(context).countries.length),
                     ),
@@ -73,47 +68,50 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
               ),
             );
           } else if (state is GetSchoolsSucessState) {
-            navigateTo(context, CanteenPickSchoolScreen());
+            navigateTo(context, const CanteenPickSchoolScreen());
           } else if (state is PickCountryState) {
             CanteenCubit.get(context).getSchools();
           }
         },
         builder: (context, state) {
-          return Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 8,
-                  child: Image(
-                    image: AssetImage('assets/images/canteen.png'),
-                    width: 250,
-                    color: defaultColor,
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    height: 100,
                   ),
-                ),
-                Text(
-                  'Join your school community now',
-                  style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                
-                Expanded(
-                  flex: 1,
-                  child: DefaultButton(
-                    text: 'JOIN',
-                    onPressed: () {
-                      CanteenCubit.get(context).getCountries();
-                    },
-                    color: defaultColor.withOpacity(0.8),
-                    
+                  const Expanded(
+                    flex: 7,
+                    child: Image(
+                      image: AssetImage('assets/images/canteen.png'),
+                      width: 250,
+                    ),
                   ),
-                )
-              ],
+                  const Text(
+                    'Join your school community now',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: DefaultButton(
+                      text: 'JOIN',
+                      onPressed: () {
+                        CanteenCubit.get(context).getCountries();
+                      },
+                      color: defaultColor.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 100,
+                  )
+                ],
+              ),
             ),
           );
         },

@@ -34,7 +34,6 @@ class AddCanteenScreen extends StatelessWidget {
                 children: [
                   Image(
                     image: AssetImage('assets/images/canteen.png'),
-                    color: defaultColor,
                   ),
                   SizedBox(
                     height: screen_height * 0.05,

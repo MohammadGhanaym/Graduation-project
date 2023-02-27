@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
@@ -19,7 +18,21 @@ class CanteenInventoryScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is UploadItemDataSuccessState) {
             ShowToast(
-                message: 'New Item was Added Successfully',
+                message: 'New Item is added Successfully',
+                state: ToastStates.SUCCESS);
+            Navigator.pop(context);
+          }
+
+          if (state is UpdatePriceSuccessState) {
+            ShowToast(
+                message: 'Price is updated Successfully',
+                state: ToastStates.SUCCESS);
+            Navigator.pop(context);
+          }
+
+          if (state is DeleteItemSuccessState) {
+            ShowToast(
+                message: 'Item is deleted Successfully',
                 state: ToastStates.SUCCESS);
             Navigator.pop(context);
           }
@@ -44,9 +57,10 @@ class CanteenInventoryScreen extends StatelessWidget {
                       child: DefaultButton(
                           color: defaultColor.withOpacity(0.8),
                           onPressed: (() {
+                            CanteenCubit.get(context).getAllergies();
                             navigateTo(context, AddProductScreen());
                           }),
-                          text: 'New Item'),
+                          text: 'Add New Item'),
                     ),
                     const SizedBox(
                       height: 20,
@@ -66,38 +80,38 @@ class CanteenInventoryScreen extends StatelessWidget {
                         prefix: Icons.search,
                         onChange: (p0) {
                           CanteenCubit.get(context)
-                              .getSearchResults(search: p0);
+                              .getInventorySearchResults(search: p0);
                         },
                       ),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
-                    ListView.separated(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) => ProductSearchItem(
-                            suffixWidget: IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                color: defaultColor.withOpacity(0.8),
-                              ),
-                              onPressed: () {},
-                            ),
-                            productID: CanteenCubit.get(context)
+                    state is UpdatePriceLoadingState ||
+                            state is DeleteItemLoadingState ||
+                            state is GetInventorySearchResultssLoadingState
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : ListView.separated(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) => ProductSearchItem(
+                                productID: CanteenCubit.get(context)
+                                    .inventorySearchResults
+                                    .keys
+                                    .toList()[index],
+                                product: CanteenCubit.get(context)
+                                    .inventorySearchResults
+                                    .values
+                                    .toList()[index]),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                            itemCount: CanteenCubit.get(context)
                                 .inventorySearchResults
-                                .keys
-                                .toList()[index],
-                            product: CanteenCubit.get(context)
-                                .inventorySearchResults
-                                .values
-                                .toList()[index]),
-                        separatorBuilder: (context, index) => const SizedBox(
-                              height: 10,
-                            ),
-                        itemCount: CanteenCubit.get(context)
-                            .inventorySearchResults
-                            .length)
+                                .length)
                   ],
                 ),
               ),

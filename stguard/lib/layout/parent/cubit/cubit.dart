@@ -23,7 +23,7 @@ class ParentCubit extends Cubit<ParentStates> {
   late Database database;
 
   void createDatabase() async {
-    /* await databaseFactory.deleteDatabase('attendance_db.db').then((value) {
+    /*await databaseFactory.deleteDatabase('activities.db').then((value) {
       print('database deleted');
     });*/
     database = await openDatabase(
@@ -55,7 +55,7 @@ class ParentCubit extends Cubit<ParentStates> {
                     product TEXT NOT NULL,
                     price TEXT NOT NULL,
                     quantity TEXT,
-                    PRIMARY KEY trans_id
+                    PRIMARY KEY (trans_id)
                     )
                   ''').then((value) {
             print('Table Created');

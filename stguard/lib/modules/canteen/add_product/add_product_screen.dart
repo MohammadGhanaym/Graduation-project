@@ -10,6 +10,8 @@ class AddProductScreen extends StatelessWidget {
   AddProductScreen({super.key});
   var formKey = GlobalKey<FormState>();
   var formKeyIngredient = GlobalKey<FormState>();
+  var formKeyCategory = GlobalKey<FormState>();
+
   TextEditingController priceController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController categoryController = TextEditingController();
@@ -18,6 +20,12 @@ class AddProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              CanteenCubit.get(context).resetItemData();
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.arrow_back)),
         title: const Text('Add New Item'),
         centerTitle: true,
       ),
@@ -43,19 +51,22 @@ class AddProductScreen extends StatelessWidget {
                         InkWell(
                           onTap: () => CanteenCubit.get(context).getItemImage(),
                           child: Container(
-                            height: 150,
-                            width: 150,
+                            height: 130,
+                            width: 130,
+                            clipBehavior: Clip.antiAliasWithSaveLayer,
                             decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  fit: BoxFit.scaleDown,
-                                  image: CanteenCubit.get(context).itemImage ==
-                                          null
-                                      ? const AssetImage(
-                                          'assets/images/add_image.png')
-                                      : FileImage(CanteenCubit.get(context)
-                                          .itemImage!) as ImageProvider,
-                                ),
-                                borderRadius: BorderRadius.circular(20)),
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                fit: BoxFit.scaleDown,
+                                image:
+                                    CanteenCubit.get(context).itemImage == null
+                                        ? const AssetImage(
+                                            'assets/images/add_image.png')
+                                        : FileImage(CanteenCubit.get(context)
+                                            .itemImage!) as ImageProvider,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 30),
@@ -105,13 +116,69 @@ class AddProductScreen extends StatelessWidget {
                                     return SimpleDialog(
                                       children: CanteenCubit.get(context)
                                           .categories
-                                          .map((item) => SimpleDialogOption(
-                                                child: Text(item),
-                                                onPressed: () {
-                                                  Navigator.pop(context, item);
-                                                },
-                                              ))
-                                          .toList(),
+                                          .map((item) {
+                                        if (item == 'All') {
+                                          return SimpleDialogOption(
+                                              child: Form(
+                                            key: formKeyCategory,
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  height: 80,
+                                                  child: Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 230,
+                                                        child: TextFormField(
+                                                          controller:
+                                                              categoryController,
+                                                          validator: (value) {
+                                                            if (value!
+                                                                .isEmpty) {
+                                                              return 'Please enter category name';
+                                                            } else if (CanteenCubit
+                                                                    .get(
+                                                                        context)
+                                                                .categories
+                                                                .contains(
+                                                                    value)) {
+                                                              return 'This category already exists';
+                                                            }
+                                                            return null;
+                                                          },
+                                                          decoration:
+                                                              InputDecoration(
+                                                                  labelText:
+                                                                      'Add New Category',
+                                                                  border:
+                                                                      OutlineInputBorder(),
+                                                                  suffixIcon:
+                                                                      IconButton(
+                                                                          onPressed:
+                                                                              (() {
+                                                                            if (formKeyCategory.currentState!.validate()) {
+                                                                              Navigator.pop(context);
+                                                                            }
+                                                                          }),
+                                                                          icon:
+                                                                              Icon(Icons.add))),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const Divider()
+                                              ],
+                                            ),
+                                          ));
+                                        }
+                                        return SimpleDialogOption(
+                                          child: Text(item),
+                                          onPressed: () {
+                                            Navigator.pop(context, item);
+                                          },
+                                        );
+                                      }).toList(),
                                     );
                                   });
 
@@ -138,11 +205,9 @@ class AddProductScreen extends StatelessWidget {
                               child: MaterialButton(
                                   elevation: 1,
                                   color: Colors.white,
-                                  onPressed: (() {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Add ingredients'),
+                                  onPressed: (() async {
+                                    await showDefaultDialog(context,
+                                        title: 'Add ingredients',
                                         content: Form(
                                           key: formKeyIngredient,
                                           child: Column(
@@ -162,37 +227,30 @@ class AddProductScreen extends StatelessWidget {
                                                     if (value!.isEmpty) {
                                                       return 'Please enter an ingredient name';
                                                     }
+                                                    if (CanteenCubit.get(
+                                                            context)
+                                                        .ingredients
+                                                        .contains(value)) {
+                                                      return 'You have already entered this ingredient before';
+                                                    }
                                                     return null;
                                                   },
                                                   label: 'Ingredient Name')
                                             ],
                                           ),
                                         ),
-                                        actions: [
-                                          TextButton(
-                                            child: const Text('Done'),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              ingredientController.clear();
-                                            },
-                                          ),
-                                          ElevatedButton(
-                                            child: const Text('Add'),
-                                            onPressed: () {
-                                              if (formKeyIngredient
-                                                  .currentState!
-                                                  .validate()) {
-                                                CanteenCubit.get(context)
-                                                    .addIngredient(
-                                                        ingredientController
-                                                            .text);
-                                                ingredientController.clear();
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    );
+                                        buttonText1: 'Done',
+                                        buttonText2: 'Add', onPressed1: () {
+                                      Navigator.pop(context);
+                                      ingredientController.clear();
+                                    }, onPressed2: () {
+                                      if (formKeyIngredient.currentState!
+                                          .validate()) {
+                                        CanteenCubit.get(context).addIngredient(
+                                            ingredientController.text);
+                                        ingredientController.clear();
+                                      }
+                                    });
                                   }),
                                   child: const Icon(
                                     Icons.add,
@@ -244,20 +302,41 @@ class AddProductScreen extends StatelessWidget {
                                 height: 40,
                               ),
                         const SizedBox(
-                          height: 10,
+                          height: 30,
                         ),
-                        DefaultButton(
-                            color: defaultColor.withOpacity(0.8),
-                            text: 'Confirm',
-                            onPressed: (() async {
-                              if (formKey.currentState!.validate()) {
-                                await CanteenCubit.get(context).checkAllergens(
-                                  name: nameController.text,
-                                  price: double.parse(priceController.text),
-                                  category: categoryController.text,
-                                );
-                              }
-                            }))
+                        state is UploadItemDataLoadingState
+                            ? LoadingOnWaiting(
+                                height: 50,
+                                color: defaultColor.withOpacity(0.8),
+                              )
+                            : DefaultButton(
+                                color: defaultColor.withOpacity(0.8),
+                                text: 'Confirm',
+                                onPressed: (() async {
+                                  if (formKey.currentState!.validate()) {
+                                    if (CanteenCubit.get(context).itemImage ==
+                                        null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              backgroundColor: Colors.white,
+                                              duration: Duration(seconds: 2),
+                                              content: Text(
+                                                'Please pick an item image',
+                                                style: TextStyle(
+                                                    color: Colors.redAccent,
+                                                    fontSize: 15),
+                                              )));
+                                    } else {
+                                      await CanteenCubit.get(context)
+                                          .checkAllergens(
+                                        name: nameController.text,
+                                        price:
+                                            double.parse(priceController.text),
+                                        category: categoryController.text,
+                                      );
+                                    }
+                                  }
+                                }))
                       ],
                     ),
                   ),

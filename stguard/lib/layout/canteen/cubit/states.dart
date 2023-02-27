@@ -81,6 +81,8 @@ class ShowBottomSheetState extends CanteenStates {}
 
 class GetInventorySearchResultssSuccessState extends CanteenStates {}
 
+class GetInventorySearchResultssLoadingState extends CanteenStates {}
+
 class AddIngredientSuccessState extends CanteenStates {}
 
 class RemoveIngredientSuccessState extends CanteenStates {}
@@ -120,3 +122,15 @@ class GetCanteenDetailsLoadingState extends CanteenStates {}
 class GetCanteenDetailsSuccessState extends CanteenStates {}
 
 class GetCanteenDetailsErrorState extends CanteenStates {}
+
+class UpdatePriceSuccessState extends CanteenStates {}
+
+class UpdatePriceLoadingState extends CanteenStates {}
+
+class UpdatePriceErrorState extends CanteenStates {}
+
+class DeleteItemSuccessState extends CanteenStates {}
+
+class DeleteItemLoadingState extends CanteenStates {}
+
+class DeleteItemErrorState extends CanteenStates {}

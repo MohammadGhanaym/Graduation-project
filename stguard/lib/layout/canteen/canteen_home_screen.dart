@@ -16,9 +16,7 @@ class CanteenHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<CanteenCubit, CanteenStates>(
       listener: (context, state) {
-        if (state is NeedtoJoinCommunityState) {
-          navigateAndFinish(context, CanteenJoinCommunityScreen());
-        }
+        
       },
       builder: (context, state) {
         return Scaffold(
@@ -59,7 +57,7 @@ class CanteenHomeScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w500),
                           ),
                           const SizedBox(
-                            height: 10,
+                            height: 20,
                           ),
                           DrawerItem(
                             text: 'Reset ID',
@@ -70,7 +68,7 @@ class CanteenHomeScreen extends StatelessWidget {
                                 height: 20),
                           ),
                           const SizedBox(
-                            height: 10,
+                            height: 15,
                           ),
                           DrawerItem(
                             text: 'Sign Out',
@@ -115,7 +113,9 @@ class CanteenHomeScreen extends StatelessWidget {
                     ),
                   ),
                 ])),
-            body: ConditionalBuilder(
+            body:state is NeedtoJoinCommunityState?
+            CanteenJoinCommunityScreen():
+             ConditionalBuilder(
               condition: CanteenCubit.get(context).schoolCanteenPath != null,
               builder: (context) => Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -299,7 +299,7 @@ class CanteenHomeScreen extends StatelessWidget {
                         Expanded(
                           child: MaterialButton(
                               onPressed: () {
-                                CanteenCubit.get(context).getSearchResults();
+                                
                                 navigateTo(context, CanteenInventoryScreen());
                               },
                               child: SizedBox(
