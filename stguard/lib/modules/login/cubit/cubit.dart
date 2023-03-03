@@ -23,12 +23,19 @@ class LoginCubit extends Cubit<LoginStates> {
     emit(ChangePasswordVisibilityState());
   }
 
+  bool readOnly = true;
+  void changeReadOnly({bool value = false}) {
+    readOnly = value;
+    print(readOnly);
+    emit(ChangeReadOnlyState());
+  }
+
   void login({
     required var email,
     required var password,
   }) async {
     emit(LoginLoadingState());
- FirebaseAuth.instance
+    FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
       if (role == 'parent') {
@@ -46,14 +53,10 @@ class LoginCubit extends Cubit<LoginStates> {
 
   void checkRole(String collName, dynamic uid) {
     FirebaseFirestore.instance.collection(collName).doc(uid).get().then((user) {
-      if (user.data() != null) {
-        if (role != user['role']) {
-          emit(LoginErrorState('You are not a $role'));
-        } else {
-          emit(LoginSuccessState(uid));
-        }
+      if (user.exists) {
+        emit(LoginSuccessState(uid));
       } else {
-        emit(LoginErrorState("You don't have an account"));
+        emit(LoginErrorState('You are not a $role'));
       }
     });
   }

@@ -127,7 +127,6 @@ class BackgroundService {
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       var notify) {
     FirebaseFirestore db = FirebaseFirestore.instance;
-    db.runTransaction((transaction) async {
       db
           .collection('Countries')
           .doc(st['country'])
@@ -158,14 +157,13 @@ class BackgroundService {
                     '${value['name'].split(' ')[0]} Purchased',
                     notify_body,
                     notify);
+              }).catchError((error) {
+                print(error.toString());
               });
             }
           });
         }
       });
-    }).catchError((error) {
-      print(error.toString());
-    });
   }
 
   static void sendAttendanceNotification(
@@ -174,7 +172,6 @@ class BackgroundService {
       var notify) {
     if (st.exists) {
       FirebaseFirestore db = FirebaseFirestore.instance;
-      db.runTransaction((transaction) async {
         db
             .collection('Countries')
             .doc(st['country'])
@@ -211,6 +208,9 @@ class BackgroundService {
                       '${value['name'].split(' ')[0]} Arrived',
                       notifyBody,
                       notify);
+                }).catchError((error)
+                {
+                  print(error.toString());
                 });
               } else if (attendanceStatus.left) {
                 String notifyBody =
@@ -230,14 +230,15 @@ class BackgroundService {
                       '${value['name'].split(' ')[0]} Left',
                       notifyBody,
                       notify);
+                }).catchError((error)
+                {
+                  print(error.toString());
                 });
               }
             }
           }
         });
-      }).catchError((error) {
-        print(error.toString());
-      });
+  
     }
   }
 }

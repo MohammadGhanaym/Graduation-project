@@ -34,7 +34,7 @@ class MemberSettingsScreen extends StatelessWidget {
                   Navigator.pop(context);
                   ParentCubit.get(context).hideBottomSheet();
                 },
-                child: Icon(
+                child: const Icon(
                   Icons.arrow_back_outlined,
                   color: Colors.white,
                 ),
@@ -46,14 +46,14 @@ class MemberSettingsScreen extends StatelessWidget {
                     onClosing: () {},
                     builder: (context) => Container(
                         color: defaultColor.withOpacity(0.8),
-                        width: screen_width,
+                        width: double.infinity,
                         child: MaterialButton(
                             onPressed: () async {
                               await ParentCubit.get(context)
                                   .updatePocketMoney(id: student!.id!);
                               ParentCubit.get(context).hideBottomSheet();
                             },
-                            child: Text('Give',
+                            child: const Text('Give',
                                 style: TextStyle(
                                     fontSize: 20,
                                     color: Colors.white,
@@ -64,11 +64,11 @@ class MemberSettingsScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         borderRadius:
                             BorderRadiusDirectional.all(Radius.circular(10))),
-                    width: screen_width,
-                    height: screen_height * 0.15,
+                    width: double.infinity,
+                    height: 120,
                     child: Card(
                       color: ParentCubit.get(context).isPaired &&
                               ParentCubit.get(context)
@@ -86,19 +86,19 @@ class MemberSettingsScreen extends StatelessWidget {
                             Row(
                               children: [
                                 Container(
-                                    width: screen_width * 0.5,
-                                    child: Text(
+                                    width: 180,
+                                    child: const Text(
                                       'Digital ID Number',
                                       style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white),
                                     )),
-                                SizedBox(
-                                  width: screen_width * 0.1,
+                                const SizedBox(
+                                  width: 50,
                                 ),
                                 Text('${student!.id}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white54))
@@ -107,7 +107,7 @@ class MemberSettingsScreen extends StatelessWidget {
                             Row(
                               children: [
                                 Container(
-                                    width: screen_width * 0.5,
+                                    width: 180,
                                     child: Text(
                                       ParentCubit.get(context).isPaired &&
                                               ParentCubit.get(context)
@@ -118,13 +118,13 @@ class MemberSettingsScreen extends StatelessWidget {
                                                   null
                                           ? 'Activated'
                                           : 'Deactivated',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white),
                                     )),
-                                SizedBox(
-                                  width: screen_width * 0.1,
+                                const SizedBox(
+                                  width: 50,
                                 ),
                                 Switch(
                                   activeColor: defaultColor.shade700,
@@ -147,8 +147,8 @@ class MemberSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: screen_height * 0.01,
+                  const SizedBox(
+                    height: 10,
                   ),
                   Visibility(
                     visible: ParentCubit.get(context).settingsVisibility,
@@ -164,25 +164,25 @@ class MemberSettingsScreen extends StatelessWidget {
                           : 0.0,
                       onEnd: () =>
                           ParentCubit.get(context).changeSettingsVisibility(),
-                      duration: Duration(milliseconds: 500),
+                      duration: const Duration(milliseconds: 500),
                       child: Column(
                         children: [
                           // location
                           SettingsCard(
                             condition: state is! GetStudentLocationLoadingState,
-                            card_width: screen_width,
-                            card_height: screen_height * 0.15,
+                            card_width: double.infinity,
+                            card_height: 120,
                             children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Image(
-                                      width: screen_width * 0.08,
-                                      height: screen_height * 0.04,
+                                  const Image(
+                                      width: 30,
+                                      height: 30,
                                       image:
                                           AssetImage('assets/images/map.png')),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 5,
                                   ),
                                   Row(
@@ -190,22 +190,22 @@ class MemberSettingsScreen extends StatelessWidget {
                                         CrossAxisAlignment.baseline,
                                     textBaseline: TextBaseline.alphabetic,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'Location',
                                         style: TextStyle(
                                             fontSize: 25,
                                             fontWeight: FontWeight.w500),
                                       ),
-                                      SizedBox(
-                                        width: screen_width * 0.05,
+                                      const SizedBox(
+                                        width: 20,
                                       ),
-                                      Text(
+                                      const Text(
                                         'Last Seen',
                                         style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w300),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         width: 5,
                                       ),
                                       Text(
@@ -215,7 +215,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                 .location!
                                                 .time
                                             : '',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w300),
                                       ),
@@ -223,7 +223,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 10,
                               ),
                               Container(
@@ -244,7 +244,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                     children: [
                                       Text(
                                         'Find ${student!.name!.split(' ')[0]}',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontSize: 16, color: defaultColor),
                                       ),
                                     ],
@@ -253,37 +253,37 @@ class MemberSettingsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: screen_height * 0.01),
+                          const SizedBox(height: 10),
                           SettingsCard(
                               condition: state is! GetPocketMoneyLoadingState,
-                              card_width: screen_width,
-                              card_height: screen_height * 0.18,
+                              card_width: double.infinity,
+                              card_height: 120,
                               children: [
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Image(
-                                        width: screen_width * 0.08,
-                                        height: screen_height * 0.04,
+                                    const Image(
+                                        width: 30,
+                                        height: 30,
                                         image: AssetImage(
                                             'assets/images/pocket_money.png')),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
+                                    const Text(
                                       'Spending Limits',
                                       style: TextStyle(
                                           fontSize: 25,
                                           fontWeight: FontWeight.w500),
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 10,
                                     ),
                                     Container(
                                       alignment: AlignmentDirectional.center,
-                                      width: screen_width * 0.18,
-                                      height: screen_height * 0.04,
+                                      width: 60,
+                                      height: 35,
                                       decoration: BoxDecoration(
                                           color: defaultColor,
                                           borderRadius:
@@ -291,7 +291,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                   15)),
                                       child: Text(
                                         '${ParentCubit.get(context).pocket_money.round()} EGP',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
                                             fontWeight: FontWeight.w800),
@@ -299,45 +299,33 @@ class MemberSettingsScreen extends StatelessWidget {
                                     )
                                   ],
                                 ),
-                                SizedBox(
-                                  height: 5,
+                                const SizedBox(
+                                  height: 10,
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width: screen_width * 0.08,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: screen_height * 0.01,
-                                ),
+                               
+                                
                                 SliderBuilder()
                               ]),
                           SizedBox(
-                            height: screen_height * 0.01,
+                            height: 10,
                           ),
                           SettingsCard(
                               condition: state is! GetAllergiesLoadingState,
-                              card_width: screen_width,
-                              card_height: screen_height * 0.22,
+                              card_width: double.infinity,
+                              card_height: 180,
                               children: [
                                 Row(
                                   children: [
                                     ImageIcon(
-                                      AssetImage(
+                                      const AssetImage(
                                           'assets/images/blood-drop.png'),
-                                      size: screen_width * 0.09,
+                                      size: 30,
                                       color: defaultColor,
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
+                                    const Text(
                                       'Allergens',
                                       style: TextStyle(
                                           fontSize: 25,
@@ -345,20 +333,24 @@ class MemberSettingsScreen extends StatelessWidget {
                                     )
                                   ],
                                 ),
-                                Text(
-                                  'By adding allergens, your child will not be able to purchase anything that marked by a vendor containing them',
-                                  style: TextStyle(
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.w500),
-                                ),
+                                SizedBox(height: 5,),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: const Text(
+                                    'By adding allergens, your child will not be able to purchase anything that marked by a vendor containing them',
+                                    style: TextStyle(
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ),SizedBox(height: 5,),
                                 Expanded(
                                     child: ListView.separated(
                                         scrollDirection: Axis.horizontal,
                                         itemBuilder: (context, index) =>
                                             AllergenItem(
                                                 id: student!.id,
-                                                width: screen_width * 0.18,
-                                                height: screen_height * 0.04,
+                                                width: 65,
+                                                height: 80,
                                                 icon: ParentCubit.get(context)
                                                     .allergens
                                                     .reversed
@@ -366,7 +358,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                 context: context),
                                         separatorBuilder: (context, index) =>
                                             SizedBox(
-                                              width: screen_width * 0.01,
+                                              width: 5
                                             ),
                                         itemCount: ParentCubit.get(context)
                                             .allergens
@@ -376,9 +368,28 @@ class MemberSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Divider(),
+                  const Divider(),
                   MaterialButton(
-                    child: Text(
+                    color: Colors.red,
+                    onPressed: () {
+                      ParentCubit.get(context).showSettings();
+                      showDefaultDialog(context,
+                       title: 'Are you sure?', 
+                       content: const Text(
+                                'If you deactivated your digital ID, you will not able to use it to spend and load up your account'),
+                       buttonText1: "CANCEL", 
+                       buttonText2: "YES, I'M SURE", 
+                       onPressed1: () {
+                                    ParentCubit.get(context).showSettings();
+
+                                    Navigator.of(context).pop();
+                                  }, 
+                       onPressed2:() async{
+                         await ParentCubit.get(context)
+                                        .unpairDigitalID(student!.id!);
+                       },);
+                       },
+                    child: const Text(
                       'Unpair Digital ID',
                       style: TextStyle(
                         color: Colors.white,
@@ -386,39 +397,6 @@ class MemberSettingsScreen extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    color: Colors.red,
-                    onPressed: () {
-                      ParentCubit.get(context).showSettings();
-
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text(
-                              'Are you sure?',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            content: Text(
-                                'If you deactivated your digital ID, you will not able to use it to spend and load up your account'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    ParentCubit.get(context).showSettings();
-
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text("CANCEL")),
-                              TextButton(
-                                  onPressed: () async {
-                                    await ParentCubit.get(context)
-                                        .unpairDigitalID(student!.id!);
-                                  },
-                                  child: Text("YES, I'M SURE"))
-                            ],
-                          );
-                        },
-                      );
-                    },
                   )
                 ],
               ),

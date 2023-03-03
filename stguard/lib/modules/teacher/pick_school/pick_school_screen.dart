@@ -24,8 +24,8 @@ class TeacherPickSchoolScreen extends StatelessWidget {
         builder: (context, state) {
           return Padding(
             padding: EdgeInsets.symmetric(
-                horizontal: screen_width * 0.05,
-                vertical: screen_height * 0.05),
+                horizontal: 15,
+                vertical: 10),
             child: ListView.separated(
                 itemBuilder: (context, index) => SchoolItem(
                       school: TeacherCubit.get(context).schools[index],

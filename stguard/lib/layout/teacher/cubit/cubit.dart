@@ -21,19 +21,19 @@ class TeacherCubit extends Cubit<TeacherStates> {
   TeacherCubit() : super(TeacherInitState());
   static TeacherCubit get(context) => BlocProvider.of(context);
 
-  static final _databaseName = "attendance_db.db";
-  static final _databaseVersion = 1;
+  static const _databaseName = "attendance_db.db";
+  static const _databaseVersion = 1;
 
-  static final tableLesson = 'lesson';
-  static final columnLessonName = 'name';
-  static final columnGrade = 'grade';
-  static final columnDatetime = 'datetime';
+  static const tableLesson = 'lesson';
+  static const columnLessonName = 'name';
+  static const columnGrade = 'grade';
+  static const columnDatetime = 'datetime';
 
-  static final tableStAttendLesson = 'st_attend_lesson';
-  static final columnStID = 'st_id';
-  static final columnStName = 'student_name';
-  static final columnLesson = 'lesson';
-  static final columnIsPresent = 'is_present';
+  static const tableStAttendLesson = 'st_attend_lesson';
+  static const columnStID = 'st_id';
+  static const columnStName = 'student_name';
+  static const columnLesson = 'lesson';
+  static const columnIsPresent = 'is_present';
 
   static late Database _database;
   void initDatabase() async {
@@ -217,8 +217,8 @@ class TeacherCubit extends Cubit<TeacherStates> {
   }
 
   String? selectedGrade;
-  void selectGrade(var value) {
-    selectedGrade = grades[value];
+  void selectGrade(String value) {
+    selectedGrade = value;
     emit(SelectGradeSuccess());
   }
 
@@ -326,9 +326,9 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
   FirebaseFirestore db = FirebaseFirestore.instance;
   DocumentReference<Map<String, dynamic>>? teacherPath;
-  void getTeacherPath() {
+  Future<void> getTeacherPath() async {
     emit(GetTeacherPathLoadingState());
-    db
+    await db
         .collection('Teachers')
         .doc(userID)
         .collection('Community')
@@ -342,32 +342,9 @@ class TeacherCubit extends Cubit<TeacherStates> {
             .doc(value.docs[0]['school']);
 
         emit(GetTeacherPathSuccessState());
+      } else {
+        emit(GetTeacherPathErrorState());
       }
-
-      /*
-        if (value.docs.isNotEmpty) {
-          db
-              .collection('Countries')
-              .doc(value.docs[0]['country'])
-              .collection('Schools')
-              .doc(value.docs[0]['school'])
-              .collection('SchoolStaff')
-              .where('id', isEqualTo: value.docs[0].id)
-              .get()
-              .then((value) {
-            if (value.docs.isNotEmpty) {
-              teacherPath[value.docs[0].id] = db
-                  .collection('Countries')
-                  .doc(value.docs[0]['country'])
-                  .collection('Schools')
-                  .doc(value.docs[0]['school']);
-
-              emit(GetTeacherPathSuccessState());
-            }
-          });
-        } else {
-          emit(NotJoinedCommunityState());
-        }*/
     }).catchError((error) {
       print(error.toString());
       emit(GetTeacherPathErrorState());
@@ -382,9 +359,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
           .collection('Community')
           .get()
           .then((value) {
-        value.docs[0].reference.delete().then((value) {
+        value.docs[0].reference.delete().then((value) async {
+          teacherPath = null;
           emit(ResetIDSuccessState());
-          getTeacherPath();
+          await getTeacherPath();
         });
       });
     }).catchError((error) {

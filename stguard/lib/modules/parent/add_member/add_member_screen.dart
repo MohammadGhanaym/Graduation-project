@@ -63,7 +63,7 @@ class AddMember extends StatelessWidget {
                           state is! AddFamilyMemberLoading
                               ? DefaultButton(
                                   text: 'Confirm',
-                                  height: screen_height * 0.07,
+                                  height:55,
                                   color: defaultColor.withOpacity(0.8),
                                   onPressed: () async {
                                     await ParentCubit.get(context)
@@ -71,7 +71,7 @@ class AddMember extends StatelessWidget {
                                   },
                                 )
                               : LoadingOnWaiting(
-                                  height: screen_height * 0.07,
+                                  height:55,
                                   color: defaultColor.withOpacity(0.8),
                                 ),
                           SizedBox(

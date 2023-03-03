@@ -31,7 +31,7 @@ class CanteenHomeScreen extends StatelessWidget {
                     child: SizedBox(
                       height: 300,
                       child: DrawerHeader(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.only(left: 20, top: 40),
                         child: CanteenCubit.get(context).canteen != null
                             ? UserInfo(
                                 userModel: CanteenCubit.get(context).canteen!,
@@ -45,7 +45,7 @@ class CanteenHomeScreen extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -79,31 +79,23 @@ class CanteenHomeScreen extends StatelessWidget {
                                 width: 20,
                                 height: 20),
                             ontap: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                        title: const Text(
-                                          'Are you sure?',
-                                          style: TextStyle(fontSize: 20),
-                                        ),
-                                        content: const Text(
-                                          'Are you sure you want to log out?',
-                                          style: TextStyle(fontSize: 15),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                signOut(context);
-                                              },
-                                              child: const Text("LOG OUT")),
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text("NEVERMIND"))
-                                        ],
-                                      ));
-                            },
+                             showDefaultDialog(
+                                  context,
+                                  title: 'Are you sure?',
+                                  content: const Text(
+                                    'Are you sure you want to log out?',
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                  buttonText1: "NEVERMIND",
+                                  onPressed1: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  buttonText2: "SIGN OUT",
+                                  onPressed2: () {
+                                    signOut(context);
+                                  },
+                                );
+ },
                           ),
                           const SizedBox(
                             height: 10,

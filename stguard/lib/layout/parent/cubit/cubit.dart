@@ -38,9 +38,7 @@ class ParentCubit extends Cubit<ParentStates> {
                       id TEXT NOT NULL,
                       activity TEXT,
                       date DATETIME,
-                      trans_id TEXT,
-                      PRIMARY KEY (id, trans_id),
-                      FOREIGN KEY (trans_id) REFERENCES products(trans_id)
+                      trans_id TEXT
                       )
                   ''').then((value) {
             print('Table Created');
@@ -54,8 +52,7 @@ class ParentCubit extends Cubit<ParentStates> {
                     trans_id TEXT NOT NULL,
                     product TEXT NOT NULL,
                     price TEXT NOT NULL,
-                    quantity TEXT,
-                    PRIMARY KEY (trans_id)
+                    quantity INT NOT NULL
                     )
                   ''').then((value) {
             print('Table Created');
@@ -67,6 +64,7 @@ class ParentCubit extends Cubit<ParentStates> {
       },
       onOpen: (db) {
         database = db;
+        getMyStudents();
 
         print('db opened');
       },
@@ -122,19 +120,23 @@ class ParentCubit extends Cubit<ParentStates> {
   Future<void> getStudentsData() async {
     studentsData = [];
     emit(GetStudentDataLoading());
-    studentsPaths.forEach(
-      (stId, stDoc) async {
-        await stDoc.get().then((value) {
-          if (value.data() != null) {
-            studentsData.add(StudentModel.fromJson(value.data()));
-            emit(GetStudentDataSuccess());
-          }
-        }).catchError((error) {
-          print(error.toString());
-          emit(GetStudentDataError());
-        });
-      },
-    );
+    if (studentsPaths.isNotEmpty) {
+      studentsPaths.forEach(
+        (stId, stDoc) async {
+          await stDoc.get().then((value) {
+            if (value.data() != null) {
+              studentsData.add(StudentModel.fromJson(value.data()));
+              emit(GetStudentDataSuccess());
+            }
+          }).catchError((error) {
+            print(error.toString());
+            emit(GetStudentDataError());
+          });
+        },
+      );
+    } else {
+      emit(GetStudentDataError());
+    }
   }
 
   Future<void> listentoNewData() async {
@@ -206,6 +208,7 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   Future<void> addFamilyMember(String id) async {
+    WriteBatch batch = db.batch();
     emit(AddFamilyMemberLoading());
 
     CollectionReference stColl = db
@@ -214,36 +217,36 @@ class ParentCubit extends Cubit<ParentStates> {
         .collection('Schools')
         .doc(pickedSchool!.id)
         .collection('Students');
-    db.runTransaction((transaction) async {
-      await stColl.where('uid', isEqualTo: id).get().then((st) async {
-        if (st.docs.isNotEmpty) {
-          if (studentsPaths.keys.contains(id)) {
-            emit(FamilyMemberAlreadyExisted('You added this member before'));
-          } else {
-            st.docs[0].reference.update({'parent': userID}).then((value) async {
+    await stColl.where('uid', isEqualTo: id).get().then((st) async {
+      if (st.docs.isNotEmpty) {
+        if (studentsPaths.keys.contains(id)) {
+          emit(FamilyMemberAlreadyExisted('You added this member before'));
+        } else {
+          batch.update(st.docs[0].reference, {'parent': userID});
+          batch.set(
               db
                   .collection('Parents')
                   .doc(userID)
                   .collection('Students')
-                  .doc(id)
-                  .set({
+                  .doc(id),
+              {
                 'uid': st.docs[0].id,
                 'country': pickedCountry!.id,
                 'school': pickedSchool!.id
-              }).then(
-                (value) async {
-                  emit(AddFamilyMemberSuccess());
-                  await getMyStudents();
-                  await refreshBackgroundService();
-                },
-              );
-            });
-          }
-        } else {
-          emit(IDNotFound(
-              "Oops! We couldn't find anyone matching student ID $id"));
+              });
+          batch.commit().then((value) async {
+            emit(AddFamilyMemberSuccess());
+            await getMyStudents();
+            await refreshBackgroundService();
+          }).catchError((error) {
+            print(error.toString());
+            emit(AddFamilyMemberError());
+          });
         }
-      });
+      } else {
+        emit(IDNotFound(
+            "Oops! We couldn't find anyone matching student ID $id"));
+      }
     }).catchError((error) {
       print(error.toString());
       emit(AddFamilyMemberError());
@@ -264,7 +267,7 @@ class ParentCubit extends Cubit<ParentStates> {
             trans.doc.reference.delete().then((value) async {
               await insertToActivityTable(
                   id: studentID,
-                  activityType: trans.doc['total_price'],
+                  activityType: trans.doc['total_price'].toString(),
                   date: trans.doc['date'].toDate(),
                   transId: trans.doc.id);
 
@@ -284,38 +287,36 @@ class ParentCubit extends Cubit<ParentStates> {
 
   Future<void> addNewAttendance(
       String studentID, DocumentReference<Map<String, dynamic>> stDoc) async {
-    await db.runTransaction((transaction) async {
-      print('addNewAttendance:{$studentID}');
-      attendListeners[studentID] = stDoc
-          .collection('SchoolAttendance')
-          .snapshots()
-          .listen((event) async {
-        SchoolAttendanceModel attendStatus =
-            SchoolAttendanceModel.fromJson(event.docChanges[0].doc.data()!);
-        if (attendStatus.arrived) {
-          await stDoc
-              .collection('SchoolAttendance')
-              .doc(event.docChanges[0].doc.id)
-              .update({'arrive_state': false}).then((value) async {
-            await insertToActivityTable(
-                id: studentID,
-                activityType: 'Arrived',
-                date: attendStatus.arriveDate);
-          });
-        } else if (attendStatus.left) {
-          await stDoc
-              .collection('SchoolAttendance')
-              .doc(event.docChanges[0].doc.id)
-              .update({'leave_state': false}).then((value) async {
-            await insertToActivityTable(
-                id: studentID,
-                activityType: 'Left',
-                date: attendStatus.leaveDate);
-          });
-        }
-      });
-    }).catchError((error) {
-      print(error.toString());
+    print('addNewAttendance:{$studentID}');
+    attendListeners[studentID] =
+        stDoc.collection('SchoolAttendance').snapshots().listen((event) async {
+      SchoolAttendanceModel attendStatus =
+          SchoolAttendanceModel.fromJson(event.docChanges[0].doc.data()!);
+      if (attendStatus.arrived) {
+        await stDoc
+            .collection('SchoolAttendance')
+            .doc(event.docChanges[0].doc.id)
+            .update({'arrive_state': false}).then((value) async {
+          await insertToActivityTable(
+              id: studentID,
+              activityType: 'Arrived',
+              date: attendStatus.arriveDate);
+        }).catchError((error) {
+          print(error.toString());
+        });
+      } else if (attendStatus.left) {
+        await stDoc
+            .collection('SchoolAttendance')
+            .doc(event.docChanges[0].doc.id)
+            .update({'leave_state': false}).then((value) async {
+          await insertToActivityTable(
+              id: studentID,
+              activityType: 'Left',
+              date: attendStatus.leaveDate);
+        }).catchError((error) {
+          print(error.toString());
+        });
+      }
     });
   }
 
@@ -324,9 +325,7 @@ class ParentCubit extends Cubit<ParentStates> {
       required String product,
       required dynamic price,
       required dynamic quantity}) async {
-    Database insert_database = await openDatabase('activities.db');
-
-    await insert_database.transaction((txn) async {
+    await database.transaction((txn) async {
       await txn
           .rawInsert(
               'INSERT INTO products(trans_id, product, price, quantity) VALUES("$trans_id", "$product", "$price", "$quantity")')
@@ -343,18 +342,15 @@ class ParentCubit extends Cubit<ParentStates> {
       required String activityType,
       required DateTime date,
       String? transId}) async {
-    Database insert_database = await openDatabase('activities.db');
-    await insert_database.transaction((txn) async {
-      await txn
-          .rawInsert(
-              'INSERT INTO student_activity(id, date, activity, trans_id) VALUES("$id","$date", "$activityType", "$transId")')
-          .then((value) async {
-        print('$value inserted successfully');
-        await getDataFromActivityTable();
-      }).catchError((err) {
-        print(
-            'Error when inserting into student_activity table! ${err.toString()}');
-      });
+    await database
+        .rawInsert(
+            'INSERT INTO student_activity(id, date, activity, trans_id) VALUES("$id","$date", "$activityType", "$transId")')
+        .then((value) async {
+      print('$value inserted successfully');
+      await getDataFromActivityTable();
+    }).catchError((err) {
+      print(
+          'Error when inserting into student_activity table! ${err.toString()}');
     });
   }
 
@@ -362,36 +358,39 @@ class ParentCubit extends Cubit<ParentStates> {
 
   Future<void> getDataFromActivityTable() async {
     print('getDataFromActivityTable');
-    Database activity_database = await openDatabase('activities.db');
+
     emit(ParentGetDataBaseLoadingState());
-    //SELECT * FROM student_activity ORDER BY date DESC
-    await activity_database
-        .query('student_activity',
-            orderBy: 'date DESC',
-            where: "id IN (${studentsPaths.keys.map((_) => '?').join(', ')})",
-            whereArgs: studentsPaths.keys.toList())
-        .then((value) {
-      activities = [];
-      value.forEach(
-        (element) {
-          activities.add(ActivityModel.fromJson(element));
-        },
-      );
-      print('student activities 2023');
-      print(activities);
-      emit(ParentGeStudentActivitySuccessState());
-    }).catchError((error) {
+    if (studentsPaths.isNotEmpty) {
+      //SELECT * FROM student_activity ORDER BY date DESC
+      await database
+          .query('student_activity',
+              orderBy: 'date DESC',
+              where: "id IN (${studentsPaths.keys.map((_) => '?').join(', ')})",
+              whereArgs: studentsPaths.keys.toList())
+          .then((value) {
+        activities = [];
+        value.forEach(
+          (element) {
+            activities.add(ActivityModel.fromJson(element));
+          },
+        );
+        print('student activities 2023');
+
+        print(activities);
+
+        emit(ParentGeStudentActivitySuccessState());
+      }).catchError((error) {});
+    } else {
       activities = [];
       emit(ParentGeStudentActivityErrorState());
-    });
+    }
   }
 
   List<ProductModel> products = [];
   Future<void> getDataFromTransactionsTable(String trans_id) async {
-    Database product_database = await openDatabase('activities.db');
     emit(ParentGetDataBaseLoadingState());
     //SELECT * FROM canteenTransactions ORDER BY date DESC'
-    await product_database.query('products',
+    await database.query('products',
         where: 'trans_id = ?', whereArgs: [trans_id]).then((value) {
       print(value);
       products = [];
@@ -427,7 +426,6 @@ class ParentCubit extends Cubit<ParentStates> {
 
   List<ActivityModel> attendance_history = [];
   Future<void> getAttendanceHistory(st_id) async {
-    Database database = await openDatabase('activities.db');
     emit(AttendanceHistoryLoading());
     await database.query(
       'student_activity',
@@ -460,22 +458,20 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   Future<void> changeDigitalIDState(String id) async {
-    await db.runTransaction((transaction) async {
-      studentsPaths[id]!.get().then((value) async {
-        active = value['parent'] == null ? userID : null;
-        await studentsPaths[id]!.update({'parent': active}).then((value) {
-          emit(DeactivateDigitalIDSuccess());
-        }).catchError((error) {
-          print(error);
-          emit(DeactivateDigitalIDError());
-        });
+    studentsPaths[id]!.get().then((value) async {
+      active = value['parent'] == null ? userID : null;
+      await studentsPaths[id]!.update({'parent': active}).then((value) {
+        emit(DeactivateDigitalIDSuccess());
+      }).catchError((error) {
+        print(error);
+        emit(DeactivateDigitalIDError());
       });
     });
   }
 
   String? active;
   Future<void> getActiveState(String id) async {
-    studentsPaths[id]!.get().then((value) {
+    await studentsPaths[id]!.get().then((value) {
       active = value['parent'];
     }).catchError((error) {
       print(error);
@@ -483,6 +479,34 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   Future<void> unpairDigitalID(String id) async {
+    print('digital id');
+    WriteBatch batch = db.batch();
+    batch.delete(
+        db.collection('Parents').doc(userID).collection('Students').doc(id));
+    batch.update(studentsPaths[id]!, {'parent': null});
+    batch.commit().then((value) async {
+      active = null;
+      studentsPaths.remove(id);
+      if (attendListeners[id] != null) {
+        attendListeners[id]!.cancel();
+        attendListeners.remove(id);
+      }
+      if (transListeners[id] != null) {
+        transListeners[id]!.cancel();
+        transListeners.remove(id);
+      }
+
+      print('batch commited: unpairDigitalID');
+      print(studentsPaths.keys.toList());
+
+      emit(UnpairDigitalIDSuccess());
+      await getMyStudents();
+      await refreshBackgroundService();
+    }).catchError((error) {
+      print(error);
+      emit(UnpairDigitalIDError());
+    });
+    /*
     await db.runTransaction((transaction) async {
       await db
           .collection('Parents')
@@ -512,7 +536,7 @@ class ParentCubit extends Cubit<ParentStates> {
     }).catchError((error) {
       print(error);
       emit(UnpairDigitalIDError());
-    });
+    });*/
   }
 
   ParentModel? parent;

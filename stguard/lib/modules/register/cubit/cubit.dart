@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/models/canteen_model.dart';
 import 'package:st_tracker/models/parent_model.dart';
 import 'package:st_tracker/models/teacher_model.dart';
-import 'package:st_tracker/models/user_model.dart';
 import 'package:st_tracker/modules/register/cubit/states.dart';
 
 class RegisterCubit extends Cubit<RegisterStates> {

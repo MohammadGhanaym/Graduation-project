@@ -6,6 +6,7 @@ import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/modules/login/login_screen.dart';
+import 'package:st_tracker/modules/parent/recharge_success/recharge_success_screen.dart';
 import 'package:st_tracker/shared/bloc_observer.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
@@ -41,7 +42,6 @@ class MyApp extends StatelessWidget {
           create: (context) => ParentCubit()
             ..createDatabase()
             ..getParentInfo()
-            ..getMyStudents()
             ..startBackgroundService(),
         ),
         BlocProvider(
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           appBarTheme: const AppBarTheme(color: defaultColor),
-          primaryColor: Colors.blueAccent,
+          primaryColor: defaultColor,
           scaffoldBackgroundColor: Colors.grey[200],
         ),
       ),

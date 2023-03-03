@@ -17,36 +17,41 @@ class JoinCommunityScreen extends StatelessWidget {
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
           if (state is GetCountriesSucessState) {
-            showModalBottomSheet(
+           showModalBottomSheet(
               context: context,
               builder: (context) => Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: screen_width * 0.1,
-                    vertical: screen_height * 0.02),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Column(
                   children: [
-                    Container(
-                      width: screen_width * 0.1,
-                      height: screen_height * 0.005,
-                      margin: EdgeInsets.only(top: screen_height * 0.01),
-                      decoration: BoxDecoration(
-                          color: defaultColor.withOpacity(0.8),
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(screen_width * 0.02))),
-                    ),
-                    SizedBox(
-                      height: screen_height * 0.02,
-                    ),
-                    Text(
-                      'Pick your country',
-                      style: TextStyle(
-                          fontSize: screen_width * 0.07,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    SizedBox(
-                      height: screen_height * 0.02,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 30,
+                            height: 5,
+                            margin: const EdgeInsets.only(top: 10),
+                            decoration: BoxDecoration(
+                                color: defaultColor.withOpacity(0.8),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10))),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            'Pick your country',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
                     ),
                     Expanded(
+                      flex: 5,
                       child: ListView.separated(
                           shrinkWrap: true,
                           itemBuilder: (context, index) => CountryItem(
@@ -56,7 +61,7 @@ class JoinCommunityScreen extends StatelessWidget {
                                 onTap: () => TeacherCubit.get(context)
                                     .pickCountry(index),
                               ),
-                          separatorBuilder: (context, index) => Divider(),
+                          separatorBuilder: (context, index) => const Divider(),
                           itemCount:
                               TeacherCubit.get(context).countries.length),
                     ),
@@ -64,48 +69,65 @@ class JoinCommunityScreen extends StatelessWidget {
                 ),
               ),
             );
-          } else if (state is GetSchoolsSucessState) {
+           } else if (state is GetSchoolsSucessState) {
             navigateTo(context, TeacherPickSchoolScreen());
           } else if (state is PickCountryState) {
             TeacherCubit.get(context).getSchools();
           }
         },
         builder: (context, state) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-                vertical: screen_height * 0.05, horizontal: screen_width * 0.1),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image(
-                  image: AssetImage(image),
-                  width: screen_width * 0.6,
-                  height: screen_height * 0.2,
-                  color: defaultColor,
-                ),SizedBox(
-                  height: screen_height * 0.1,
+          return Column(
+            children: [
+              Container(
+                                      padding:
+                        const EdgeInsets.only(right: 20, left: 20, top: 100),
+                    alignment: AlignmentDirectional.center,
+                    height: 400,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30)),
+                        color: Theme.of(context).primaryColor),
+                child: Column(
+                  children: [
+                    Image(
+                      image: AssetImage(image),
+                      width: 180,
+                      height: 180,
+                      color: Colors.white,
+                    ),SizedBox(
+                      height: 40,
+                    ),
+                    Text(
+                      
+                      'Join your school community now and be a part of the team',
+                      style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(color: Colors.white),textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-                Text(
-                  'Join your school community now and be a part of the team!',
-                  style: TextStyle(
-                      fontSize: screen_width * 0.1,
-                      fontWeight: FontWeight.w500),
-                ),
-                
-                
-                SizedBox(
-                  height: screen_height * 0.1,
-                ),
-                DefaultButton(
+              ),
+              
+              
+              SizedBox(
+                height: 100,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: DefaultButton(
                   text: 'JOIN',
                   onPressed: () {
                     TeacherCubit.get(context).getCountries();
                   },
                   color: defaultColor.withOpacity(0.8),
-                  height: screen_height * 0.06,
-                )
-              ],
-            ),
+                  height: 55,
+                  width: 250,
+                ),
+              )
+            ],
           );
         },
       ),

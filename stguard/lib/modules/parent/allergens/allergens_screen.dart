@@ -20,15 +20,13 @@ class AllergensScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    screen_width = MediaQuery.of(context).size.width;
-    screen_height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
           bottom:
-              PreferredSize(child: Divider(), preferredSize: Size(0.5, 0.5)),
+              const PreferredSize(preferredSize: Size(0.5, 0.5), child: Divider()),
           title: const Text('Allergens'),
           centerTitle: true,
-          titleTextStyle: TextStyle(
+          titleTextStyle: const TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
           elevation: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -36,7 +34,7 @@ class AllergensScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: ImageIcon(
+            icon: const ImageIcon(
               AssetImage('assets/images/x.png'),
               size: 20,
               color: defaultColor,
@@ -49,28 +47,28 @@ class AllergensScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                SizedBox(
-                  height: screen_height * 0.01,
+                const SizedBox(
+                  height: 20,
                 ),
-                Image(
+                const Image(
                   image: AssetImage('assets/images/blood-drop.png'),
-                  width: screen_width * 0.4,
-                  height: screen_width * 0.4,
+                  width: 150,
+                  height: 150,
                   color: defaultColor,
                 ),
-                SizedBox(
-                  height: screen_height * 0.05,
+                const SizedBox(
+                  height: 30,
                 ),
-                Text(
-                  'Please select any of the following to which your child may be allergic.',
+                const Text(
+                  'Please select any of the following to which your child may be allergic',
                   style: TextStyle(
                       color: Colors.black54, fontWeight: FontWeight.w500),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: screen_height * 0.05),
+                const SizedBox(height: 30),
                 GridView.count(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 3,
                   mainAxisSpacing: 5,
                   crossAxisSpacing: 5,
@@ -80,18 +78,16 @@ class AllergensScreen extends StatelessWidget {
                       allergens.length,
                       (index) => AllergenSelectionItem(
                           icon: allergens[index],
-                          context: context,
-                          width: screen_width,
-                          height: screen_height)),
+                         )),
                 ),
-                SizedBox(
-                  height: screen_height * 0.05,
+                const SizedBox(
+                  height: 30,
                 ),
                 state is UpdateAllergiesLoadingState
                     ? LoadingOnWaiting(
-                        width: screen_width * 0.7,
-                        height: screen_height * 0.06,
-                        color: defaultColor,
+                        width: double.infinity,
+                        height: 55,
+                        color: defaultColor.withOpacity(0.8),
                         radius: 10,
                       )
                     : DefaultButton(
@@ -103,8 +99,9 @@ class AllergensScreen extends StatelessWidget {
                           });
                         },
                         text: 'Confirm',
-                        height: screen_height * 0.06,
-                        width: screen_width * 0.7,
+                        height: 55,
+                        color: defaultColor.withOpacity(0.8),
+                        width: double.infinity,
                       )
               ],
             ),

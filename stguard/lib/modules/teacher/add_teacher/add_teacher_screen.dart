@@ -17,6 +17,7 @@ class AddTeacherScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Join Community'),
+        elevation: 0,
         centerTitle: true,
       ),
       body: BlocConsumer<TeacherCubit, TeacherStates>(
@@ -27,42 +28,57 @@ class AddTeacherScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: screen_height * 0.05,
-                  horizontal: screen_width * 0.1),
-              child: Column(
-                children: [
-                  Image(
+            child: Column(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.only(right: 20, left: 20, top: 10),
+                  alignment: AlignmentDirectional.center,
+                  height: 400,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(30),
+                          bottomRight: Radius.circular(30)),
+                      color: Theme.of(context).primaryColor),
+                  child: Image(
+                    
                     image: AssetImage('assets/images/teacher.png'),
-                    color: defaultColor,
+                    color: Colors.white,
                   ),
-                  SizedBox(
-                    height: screen_height * 0.05,
+                ),
+                SizedBox(
+                  height: screen_height * 0.05,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      DefaultFormField(
+                          controller: teacherController,
+                          type: TextInputType.text,
+                          validate: (value) {
+                            if (value!.isEmpty) {
+                              return 'ID must not be empty';
+                            }
+                            return null;
+                          },
+                          label: 'Teacher ID'),
+                      SizedBox(
+                        height: screen_height * 0.05,
+                      ),
+                      DefaultButton(
+                        text: 'CONFIRM',
+                        color: defaultColor.withOpacity(0.8),
+                        onPressed: () {
+                          TeacherCubit.get(context)
+                              .addTeacher(teacherController.text);
+                        },
+                      ),
+                    ],
                   ),
-                  DefaultFormField(
-                      controller: teacherController,
-                      type: TextInputType.text,
-                      validate: (value) {
-                        if (value!.isEmpty) {
-                          return 'ID must not be empty';
-                        }
-                        return null;
-                      },
-                      label: 'Teacher ID'),
-                  SizedBox(
-                    height: screen_height * 0.05,
-                  ),
-                  DefaultButton(
-                    text: 'CONFIRM',
-                    color: defaultColor.withOpacity(0.8),
-                    onPressed: () {
-                      TeacherCubit.get(context)
-                          .addTeacher(teacherController.text);
-                    },
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           );
         },

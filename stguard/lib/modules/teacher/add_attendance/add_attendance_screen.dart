@@ -17,6 +17,7 @@ class AddAttendanceScreen extends StatelessWidget {
     screen_height = MediaQuery.of(context).size.height;
     print(screen_height);
     return Scaffold(
+
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
           if (state is GetStudentNamesSuccess) {
@@ -24,135 +25,130 @@ class AddAttendanceScreen extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          return Center(
-            child: SingleChildScrollView(
+          return SingleChildScrollView(
+            child: Center(
               child: Form(
                 key: formKey,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screen_width * 0.056,
-                      vertical: screen_height * 0.025),
+                child: SizedBox(
+                  height: 600,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image(
-                          width: screen_width * 0.5,
-                          height: screen_width * 0.5,
-                          color: defaultColor,
-                          image:
-                              AssetImage('assets/images/attendance_black.png')),
-                      SizedBox(
-                        height: screen_height * 0.02,
-                      ),
-                      DefaultFormField(
-                          controller: lessonController,
-                          type: TextInputType.text,
-                          validate: (value) {
-                            if (value!.isEmpty) {
-                              return 'Lesson name must not be empty';
-                            }
-                            if (TeacherCubit.get(context).lessons.isNotEmpty) {
-                              if (TeacherCubit.get(context)
-                                  .lessons
-                                  .map((e) => e.name)
-                                  .toList()
-                                  .contains(value)) {
-                                return 'Lesson name already existed';
-                              }
-                            }
-                            return null;
-                          },
-                          label: 'Lesson Name'),
-                      SizedBox(
-                        height: screen_height * 0.02,
-                      ),
-                      Container(
-                        width: screen_width * 0.4,
-                        height: screen_height * 0.3,
-                        padding: EdgeInsets.symmetric(
-                            vertical: screen_height * 0.02),
-                        alignment: AlignmentDirectional.center,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadiusDirectional.circular(20),
-                            border: Border.all(color: Colors.grey)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Select Grade',
-                              style: TextStyle(
-                                  fontSize: screen_width * 0.05,
-                                  color: Colors.black54),
-                            ),
-                            SizedBox(
-                              height: screen_height * 0.01,
-                            ),
-                            Container(
-                              alignment: AlignmentDirectional.center,
-                              width: screen_width * 0.5,
-                              height: screen_height * 0.2,
-                              child: ListWheelScrollView(
-                                  itemExtent: screen_height * 0.05,
-                                  diameterRatio: 1,
-                                  onSelectedItemChanged: (value) {
-                                    TeacherCubit.get(context)
-                                        .selectGrade(value);
-                                    print(TeacherCubit.get(context)
-                                        .grades[value]);
-                                  },
-                                  physics: const FixedExtentScrollPhysics(),
-                                  children: List.generate(
-                                      TeacherCubit.get(context).grades.length,
-                                      (index) => Container(
-                                            alignment:
-                                                AlignmentDirectional.center,
-                                            width: screen_width * 0.1,
-                                            height: screen_height * 0.01,
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: TeacherCubit.get(
-                                                                    context)
-                                                                .selectedGrade ==
-                                                            TeacherCubit.get(
-                                                                    context)
-                                                                .grades[index]
-                                                        ? defaultColor
-                                                            .withOpacity(0.8)
-                                                        : Colors.grey),
-                                                borderRadius:
-                                                    BorderRadiusDirectional
-                                                        .circular(5)),
-                                            child: Text(
-                                                TeacherCubit.get(context)
-                                                    .grades[index]),
-                                          ))),
-                            ),
-                          ],
+                      Expanded(
+                        flex: 5,
+                        child: Container(
+                          padding:
+                          const EdgeInsets.only(right: 20, left: 20),
+                                      alignment: AlignmentDirectional.center,
+                                      height: 310,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30)),
+                          color: Theme.of(context).primaryColor),
+                          child: const Image(
+                              width: 200,
+                              color: Colors.white,
+                              image:
+                                  AssetImage('assets/images/attendance_black.png')),
                         ),
                       ),
-                      SizedBox(
-                        height: screen_height * 0.03,
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal:20.0),
+                          child: DefaultFormField(
+                                  controller: lessonController,
+                                  type: TextInputType.text,
+                                  validate: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Lesson name must not be empty';
+                                    }
+                                    if (TeacherCubit.get(context).lessons.isNotEmpty) {
+                                      if (TeacherCubit.get(context)
+                                          .lessons
+                                          .map((e) => e.name)
+                                          .toList()
+                                          .contains(value)) {
+                                        return 'Lesson name already existed';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                  label: 'Lesson Name'),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top:10.0, bottom: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                        'Select Grade',
+                        style: Theme.of(context).textTheme.headline6!.copyWith(color: Colors.black54)
+                        ),
+                                  ],
+                                ),
+                              ),
+                        const SizedBox(
+                        height: 15
+                        ),
+                        SizedBox(
+                        width: 300,
+                        height: 40,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder:(context, index) => GradeItem(grade: TeacherCubit.get(context).grades[index]), separatorBuilder:(context, index) =>  SizedBox(width: 10),
+                          itemCount: TeacherCubit.get(context).grades.length),
+                        )
+                             ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
                       ),
                       state is GetStudentNamesLoading
-                          ? LoadingOnWaiting(
-                              width: screen_width * 0.7,
-                              height: screen_height * 0.06,
-                              color: defaultColor.withOpacity(0.8),
-                            )
-                          : DefaultButton(
-                              text: 'Add',
-                              width: screen_width * 0.7,
-                              height: screen_height * 0.06,
-                              onPressed: () {
-                                if (formKey.currentState!.validate()) {
-                                  TeacherCubit.get(context)
-                                      .setLessonName(lessonController.text);
-                                  TeacherCubit.get(context).getStudentsNames();
-                                  lessonController.clear();
-                                }
-                              },
-                              color: defaultColor.withOpacity(0.8),
-                            )
+                          ? Expanded(
+                            child: LoadingOnWaiting(
+                                width: 200,
+                                height: 55,
+                                color: defaultColor.withOpacity(0.8),
+                              ),
+                          )
+                          : Expanded(
+                            child: DefaultButton(
+                                text: 'Add',
+                                width: 200,
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    TeacherCubit.get(context)
+                                        .setLessonName(lessonController.text);
+                                    TeacherCubit.get(context).getStudentsNames();
+                                    lessonController.clear();
+                                  }
+                                },
+                                color: defaultColor.withOpacity(0.8),
+                              ),
+                          ),
+                            const SizedBox(
+                        height: 10,
+                      )
+                          
                     ],
                   ),
                 ),

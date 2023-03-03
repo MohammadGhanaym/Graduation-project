@@ -17,8 +17,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    screen_width = MediaQuery.of(context).size.width;
-    screen_height = MediaQuery.of(context).size.height;
     return BlocProvider<LoginCubit>(
       create: (context) => LoginCubit(),
       child: BlocConsumer<LoginCubit, LoginStates>(
@@ -30,54 +28,84 @@ class LoginScreen extends StatelessWidget {
               userID = state.userID;
               navigateAndFinish(
                   context, homeScreens[LoginCubit.get(context).role]);
+              LoginCubit.get(context).changeReadOnly(value: true);
+
+              
+              
             });
           } else if (state is LoginErrorState) {
             ShowToast(message: state.error, state: ToastStates.ERROR);
+            LoginCubit.get(context).changeReadOnly(value: true);
           }
         },
         builder: (context, state) {
-
           return Scaffold(
-              body: SafeArea(
-            child: SingleChildScrollView(
-              child: Form(
-                key: formKey,
+              body: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  FocusScopeNode currentFocus = FocusScope.of(context);
+                  if (!currentFocus.hasPrimaryFocus) {
+                    currentFocus.unfocus();
+                  }
+                },
                 child: Column(
                   children: [
                     // image
+
                     Container(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      width: MediaQuery.of(context).size.width,
+                      padding:
+                          const EdgeInsets.only(left: 20, right: 20, top: 40),
+                      alignment: AlignmentDirectional.center,
+                      height: 310,
+                      width: double.infinity,
                       decoration: BoxDecoration(
-                          image: DecorationImage(
-                              fit: BoxFit.contain,
-                              image:
-                                  AssetImage('assets/images/login_image.png'))),
-                    ),
-                    // title and subtitle
-                    Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Container(
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hello',
-                              style: TextStyle(
-                                  fontSize: 50, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              'Sign into your account',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .caption!
-                                  .copyWith(fontSize: 20, color: Colors.grey),
-                            ),
-                          ],
-                        ),
+                          borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30)),
+                          color: Theme.of(context).primaryColor),
+                      child: Column(
+                        children: [
+                          const Image(
+                              color: Colors.white,
+                              width: 180,
+                              height: 180,
+                              image: AssetImage('assets/images/school.png')),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            'Welcome',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Sign into your account',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(color: Colors.white),
+                              ),
+                            ],
+                          )
+                        ],
                       ),
                     ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    // title and subtitle
+
                     // ID and password fields
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -86,15 +114,17 @@ class LoginScreen extends StatelessWidget {
                           DefaultFormField(
                               controller: emailController,
                               type: TextInputType.emailAddress,
+                              isClickable: LoginCubit.get(context).readOnly,
                               validate: (value) {
                                 if (value!.isEmpty) {
                                   return 'Email must not be empty';
                                 }
                                 return null;
                               },
+                              
                               label: 'Email',
                               prefix: Icons.email_outlined),
-                          SizedBox(
+                          const SizedBox(
                             height: 15,
                           ),
                           DefaultFormField(
@@ -107,7 +137,9 @@ class LoginScreen extends StatelessWidget {
                               }
                               return null;
                             },
+                           
                             label: 'Password',
+                            isClickable: LoginCubit.get(context).readOnly,
                             changeObscured: () => LoginCubit.get(context)
                                 .changePasswordVisibility(),
                             prefix: Icons.password_outlined,
@@ -118,8 +150,7 @@ class LoginScreen extends StatelessWidget {
                                   email: emailController.text,
                                   password: passwordController.text,
                                 );
-                                passwordController.clear();
-                                emailController.clear();
+                                
                               }
                             },
                           ),
@@ -129,110 +160,85 @@ class LoginScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Don't have an account?"),
-                        SizedBox(
+                        Text(
+                          "Don't have an account?",
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                        const SizedBox(
                           width: 5,
                         ),
                         TextButton(
                             onPressed: () {
                               navigateTo(context, RegisterScreen());
                             },
-                            child: Text('Register Now'))
+                            child: const Text('Register Now'))
                       ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      padding: const EdgeInsets.symmetric(vertical: 5.0),
                       child: Column(
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                width: 140,
-                                child: RadioListTile<String>(
-                                  activeColor: defaultColor,
+                              DefaultRadioListTile(
                                   value: 'parent',
                                   groupValue: LoginCubit.get(context).role,
                                   onChanged: (value) {
                                     print(value);
                                     LoginCubit.get(context).isSelected(value);
                                   },
-                                  contentPadding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                      side:
-                                          BorderSide(color: Colors.grey[400]!),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  title: Text('Parent'),
-                                ),
+                                  title: 'Parent'),
+                              const SizedBox(
+                                width: 10,
                               ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Container(
-                                width: 140,
-                                child: RadioListTile<String>(
+                              DefaultRadioListTile(
                                   value: 'teacher',
                                   groupValue: LoginCubit.get(context).role,
-                                  activeColor: defaultColor,
                                   onChanged: (value) {
                                     print(value);
                                     LoginCubit.get(context).isSelected(value);
                                   },
-                                  title: Text('Teacher'),
-                                  contentPadding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                      side:
-                                          BorderSide(color: Colors.grey[400]!),
-                                      borderRadius: BorderRadius.circular(20)),
-                                ),
-                              ),
+                                  title: 'Teacher'),
                             ],
                           ),
-                          SizedBox(
-                            height: 5,
+                          const SizedBox(
+                            height: 10,
                           ),
-                          Container(
-                            width: 140,
-                            child: RadioListTile<String>(
+                          DefaultRadioListTile(
                               value: 'canteen worker',
                               groupValue: LoginCubit.get(context).role,
-                              activeColor: defaultColor,
                               onChanged: (value) {
                                 print(value);
                                 LoginCubit.get(context).isSelected(value);
                               },
-                              title: Text('Canteen Worker'),
-                              contentPadding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                  side: BorderSide(color: Colors.grey[400]!),
-                                  borderRadius: BorderRadius.circular(20)),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
+                              title: 'Canteen Worker'),
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: 20,
+                    const SizedBox(
+                      height: 5,
                     ),
                     // sign in button
                     state is LoginLoadingState
-                        ? LoadingOnWaiting(height: screen_height * 0.07, width: screen_width * 0.5,
-                        color: defaultColor.withOpacity(0.8),)
+                        ? LoadingOnWaiting(
+                            height: 55,
+                            width: 200,
+                            color: defaultColor.withOpacity(0.8),
+                          )
                         : DefaultButton(
                             text: 'SIGN IN',
-                         height: screen_height * 0.07, width: screen_width * 0.5,
+                            height: 55,
+                            width: 200,
                             color: defaultColor.withOpacity(0.8),
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
                                 LoginCubit.get(context).login(
-                                  email: emailController.text,
+                                  email: emailController.text.replaceAll(' ', ''),
                                   password: passwordController.text,
                                 );
-                                passwordController.clear();
-                                emailController.clear();
+                                LoginCubit.get(context).changeReadOnly(value: false);
+
                               }
                             },
                           )

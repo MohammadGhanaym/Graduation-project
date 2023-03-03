@@ -5,6 +5,7 @@ class LoginInitState extends LoginStates {}
 class RadioButtonSelected extends LoginStates {}
 
 class ChangePasswordVisibilityState extends LoginStates {}
+class ChangeReadOnlyState extends LoginStates {}
 
 class LoginSuccessState extends LoginStates {
   String userID;

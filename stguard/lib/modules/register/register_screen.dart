@@ -30,7 +30,7 @@ class RegisterScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Scaffold(
-              appBar: AppBar(),
+              appBar: AppBar(elevation: 0.0,),
               body: SingleChildScrollView(
                 child: Form(
                   key: formKey,
@@ -38,33 +38,43 @@ class RegisterScreen extends StatelessWidget {
                     children: [
                       // image
                       Container(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                fit: BoxFit.contain,
-                                image: AssetImage(
-                                    'assets/images/login_image.png'))),
-                      ),
-                      // title and subtitle
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Container(
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        padding:
+                          const EdgeInsets.only(left: 20, right: 20),
+                      alignment: AlignmentDirectional.center,
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30)),
+                          color: Theme.of(context).primaryColor),
+                          child:Column(
                             children: [
-                              Text(
+                              Image(
+                                color: Colors.white,
+                                width: 150,
+                                height: 150,
+                                image: 
+                              AssetImage(
+                                        'assets/images/user.png')),
+                                        SizedBox(height: 10,),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text(
                                 'Create an Account',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .caption!
-                                    .copyWith(fontSize: 20, color: Colors.grey),
+                                    .headline6!
+                                    .copyWith(color: Colors.white)
                               ),
+                                          ],
+                                        )
                             ],
-                          ),
-                        ),
+                          ) ,
+                        
                       ),
+                      SizedBox(height: 20,),
                       // ID and password fields
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -120,16 +130,14 @@ class RegisterScreen extends StatelessWidget {
                                     email: emailController.text,
                                     password: passwordController.text,
                                   );
-                                  nameController.clear();
-                                  passwordController.clear();
-                                  emailController.clear();
+                                  
                                 }
                               },
                             ),
                           ],
                         ),
                       ),
-
+                      SizedBox(height: 10,),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Column(
@@ -137,71 +145,38 @@ class RegisterScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  width: 140,
-                                  child: RadioListTile<String>(
-                                    activeColor: defaultColor,
-                                    value: 'parent',
-                                    groupValue: RegisterCubit.get(context).role,
-                                    onChanged: (value) {
+                                DefaultRadioListTile(value: 'parent', 
+                                groupValue: RegisterCubit.get(context).role, 
+                                onChanged: (value) {
                                       print(value);
                                       RegisterCubit.get(context)
                                           .isSelected(value);
-                                    },
-                                    contentPadding: EdgeInsets.zero,
-                                    shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: Colors.grey[400]!),
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    title: Text('Parent'),
-                                  ),
+                                    }, 
+                                title: 'Parent'),
+                               SizedBox(
+                                  width: 10,
                                 ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Container(
-                                  width: 140,
-                                  child: RadioListTile<String>(
-                                    value: 'teacher',
-                                    groupValue: RegisterCubit.get(context).role,
-                                    activeColor: defaultColor,
-                                    onChanged: (value) {
+                                DefaultRadioListTile(value: 'teacher', 
+                                groupValue: RegisterCubit.get(context).role, 
+                                onChanged: (value) {
                                       print(value);
                                       RegisterCubit.get(context)
                                           .isSelected(value);
-                                    },
-                                    title: Text('Teacher'),
-                                    contentPadding: EdgeInsets.zero,
-                                    shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: Colors.grey[400]!),
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                  ),
-                                ),
-                              ],
+                                    }, 
+                                title: 'Teacher')
+                                ],
                             ),
                             SizedBox(
-                              height: 5,
+                              height: 10,
                             ),
-                            Container(
-                              width: 140,
-                              child: RadioListTile<String>(
-                                value: 'canteen worker',
-                                groupValue: RegisterCubit.get(context).role,
-                                activeColor: defaultColor,
-                                onChanged: (value) {
+                            DefaultRadioListTile(value: 'canteen worker', 
+                            groupValue: RegisterCubit.get(context).role, 
+                            onChanged: (value) {
                                   print(value);
                                   RegisterCubit.get(context).isSelected(value);
-                                },
-                                title: Text('Canteen Worker'),
-                                contentPadding: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                    side: BorderSide(color: Colors.grey[400]!),
-                                    borderRadius: BorderRadius.circular(20)),
-                              ),
-                            ),
+                                }, 
+                            title: 'Canteen Worker')
+                            ,
                             SizedBox(
                               height: 5,
                             ),
@@ -209,7 +184,7 @@ class RegisterScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       // sign in button
                       state is RegisterLoadingState
@@ -230,9 +205,7 @@ class RegisterScreen extends StatelessWidget {
                                       email: emailController.text,
                                       password: passwordController.text,
                                     );
-                                    nameController.clear();
-                                    passwordController.clear();
-                                    emailController.clear();
+                                   
                                   }
                                 },
                                 child: Text(

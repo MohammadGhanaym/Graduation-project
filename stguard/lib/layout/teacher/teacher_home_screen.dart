@@ -18,93 +18,96 @@ class TeacherHomeScreen extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(elevation: TeacherCubit.get(context).teacherPath==null || TeacherCubit.get(context).currentIndex==1?0:1,),
             drawer: Drawer(
-                child: Padding(
-              padding: EdgeInsets.symmetric(vertical: screen_height*0.02, horizontal: screen_width*0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                Container(
-                  height: screen_height * 0.3,
-                  child: DrawerHeader(
-                    padding: const EdgeInsets.all(0),
-                    child: TeacherCubit.get(context).teacher != null
-                        ? UserInfo(
-                            userModel: TeacherCubit.get(context).teacher!,
-                          )
-                        : Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 300,
+                      child: DrawerHeader(
+                        padding: const EdgeInsets.only(left: 20, top: 40),
+                        child: TeacherCubit.get(context).teacher != null
+                            ? UserInfo(
+                                userModel: TeacherCubit.get(context).teacher!,
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                      ),
+                    ),
                   ),
-                ),
-                Text(
-                  'Settings',
-                  style: TextStyle(
-                      fontSize: screen_width * 0.07,
-                      color: defaultColor.withOpacity(0.8),
-                      fontWeight: FontWeight.w500),
-                ),
-                SizedBox(
-                  height: screen_height * 0.02,
-                ),
-                DrawerItem(
-                  text: 'Reset ID',
-                  ontap: () => TeacherCubit.get(context).resetId(),
-                  icon: Image(
-                      image: AssetImage('assets/images/undo.png'),
-                      width: screen_width * 0.07,
-                      height: screen_height * 0.03),
-                ),
-                SizedBox(
-                  height: screen_height * 0.02,
-                ),
-                DrawerItem(
-                  text: 'Sign Out',
-                  icon: Image(
-                      color: Colors.red.shade300,
-                      image: AssetImage('assets/images/signout.png'),
-                      width: screen_width * 0.07,
-                      height: screen_height * 0.03),
-                  ontap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                              title: Text(
-                                'Are you sure?',
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              content: Text(
-                                'Are you sure you want to log out?',
-                                style: TextStyle(fontSize: 15),
-                              ),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      signOut(context);
-                                    },
-                                    child: Text("LOG OUT")),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text("NEVERMIND"))
-                              ],
-                            ));
-                  },
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-              ]),
-            )),
-            bottomNavigationBar: TeacherCubit.get(context).teacherPath == null
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Settings',
+                            style: TextStyle(
+                                fontSize: 25,
+                                color: defaultColor.withOpacity(0.8),
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          DrawerItem(
+                            text: 'Reset ID',
+                            ontap: () => TeacherCubit.get(context).resetId(),
+                            icon: const Image(
+                                image: AssetImage('assets/images/undo.png'),
+                                width: 20,
+                                height: 20),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          DrawerItem(
+                            text: 'Sign Out',
+                            icon: Image(
+                                color: Colors.red.shade300,
+                                image: const AssetImage(
+                                    'assets/images/signout.png'),
+                                width: 20,
+                                height: 20),
+                            ontap: () {
+                              showDefaultDialog(
+                                  context,
+                                  title: 'Are you sure?',
+                                  content: const Text(
+                                    'Are you sure you want to log out?',
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                  buttonText1: "NEVERMIND",
+                                  onPressed1: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  buttonText2: "SIGN OUT",
+                                  onPressed2: () {
+                                    signOut(context);
+                                  },
+                                );
+ },
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ])),
+                bottomNavigationBar: TeacherCubit.get(context).teacherPath == null
                 ? null
                 : BottomNavigationBar(
                     currentIndex: TeacherCubit.get(context).currentIndex,
                     onTap: (index) =>
                         TeacherCubit.get(context).switchScreen(index),
-                    items: [
+                    items: const [
                         BottomNavigationBarItem(
                             icon: Icon(Icons.history), label: 'History'),
                         BottomNavigationBarItem(

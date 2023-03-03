@@ -42,6 +42,7 @@ class AddTeacherErrorState extends TeacherStates {
 }
 
 class AddTeacherSucessState extends TeacherStates {}
+class NeedtoJoinCommunityState extends TeacherStates {}
 
 class PickSchoolState extends TeacherStates {}
 
