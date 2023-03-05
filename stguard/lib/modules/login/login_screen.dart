@@ -217,7 +217,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(
-                      height: 5,
+                      height: 15,
                     ),
                     // sign in button
                     state is LoginLoadingState

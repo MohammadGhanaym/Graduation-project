@@ -79,7 +79,7 @@ class JoinCommunityScreen extends StatelessWidget {
           return Column(
             children: [
               Container(
-                                      padding:
+                    padding:
                         const EdgeInsets.only(right: 20, left: 20, top: 100),
                     alignment: AlignmentDirectional.center,
                     height: 400,

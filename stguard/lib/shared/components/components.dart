@@ -118,7 +118,7 @@ class DefaultFormField extends StatelessWidget {
         decoration: InputDecoration(
             labelText: label,
             errorText: errorText,
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             prefixIcon: Icon(prefix),
             suffixIcon: suffix != null
                 ? IconButton(icon: Icon(suffix), onPressed: changeObscured)
@@ -144,7 +144,7 @@ class DefaultRadioListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 1,
+      elevation: 5,
       borderRadius: BorderRadiusDirectional.circular(50),
       child: SizedBox(
         width: 130,
@@ -902,7 +902,7 @@ class LoadingOnWaiting extends StatelessWidget {
   LoadingOnWaiting(
       {super.key,
       this.color = defaultColor,
-      required this.height,
+      this.height=55,
       this.radius = 10,
       this.width = double.infinity});
 
@@ -1002,14 +1002,12 @@ class GradeItem extends StatelessWidget {
 }
 
 class StudentAttendanceCard extends StatelessWidget {
-  double width;
-  double height;
+
   StudentModel student;
 
   StudentAttendanceCard({
     super.key,
-    required this.width,
-    required this.height,
+
     required this.student,
   });
 
@@ -1017,9 +1015,9 @@ class StudentAttendanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-            borderRadius: BorderRadiusDirectional.circular(width * 0.02),
+            borderRadius: BorderRadiusDirectional.circular(5),
             border: Border.all(
-                width: width * 0.01,
+                width: 3,
                 color: TeacherCubit.get(context).attendance[student.id!] != null
                     ? TeacherCubit.get(context)
                                 .attendance[student.id!]
@@ -1028,36 +1026,36 @@ class StudentAttendanceCard extends StatelessWidget {
                         ? defaultColor.withOpacity(0.8)
                         : Colors.red.withOpacity(0.8)
                     : Colors.grey[200]!)),
-        width: width,
-        height: height * 0.16,
+        width: double.infinity,
+        height:120,
         child: Card(
             child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               CircleAvatar(
-                radius: width * 0.1,
+                radius: 30,
                 backgroundImage: NetworkImage(student.image!),
               ),
-              SizedBox(
-                width: width * 0.02,
+              const SizedBox(
+                width: 10,
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                      width: width * 0.5,
+                      width: 220,
                       child: Text(
                         student.name!,
-                        style: TextStyle(
-                            fontSize: screen_width * 0.04,
+                        style: const TextStyle(
+                            fontSize: 15,
                             fontWeight: FontWeight.w500),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       )),
-                  SizedBox(
-                    height: height * 0.01,
+                  const SizedBox(
+                    height: 10,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -1065,21 +1063,21 @@ class StudentAttendanceCard extends StatelessWidget {
                       DefaultButton(
                         text: 'Present',
                         color: defaultColor.withOpacity(0.8),
-                        width: width * 0.29,
-                        height: height * 0.05,
+                        width: 110,
+                        height: 40,
                         onPressed: () {
                           TeacherCubit.get(context)
                               .addtoAttendance(student.id!, student.name!, 1);
                         },
                       ),
-                      SizedBox(
-                        width: width * 0.02,
+                      const SizedBox(
+                        width: 10,
                       ),
                       DefaultButton(
                         text: 'Absent',
                         color: Colors.red.withOpacity(0.8),
-                        width: width * 0.27,
-                        height: height * 0.05,
+                        width: 110,
+                        height: 40,
                         onPressed: () {
                           TeacherCubit.get(context)
                               .addtoAttendance(student.id!, student.name!, 0);
@@ -1098,11 +1096,10 @@ class StudentAttendanceCard extends StatelessWidget {
 class LessonCard extends StatelessWidget {
   LessonModel lesson;
   void Function() onTap;
-  double width;
-  double height;
+
   LessonCard(
-      {required this.width,
-      required this.height,
+      {
+      
       required this.lesson,
       required this.onTap,
       super.key});
@@ -1112,42 +1109,45 @@ class LessonCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        width: width,
-        height: height * 0.12,
+        width: double.infinity,
+        height: 90,
         child: Card(
+          elevation: 5,
             child: Padding(
-          padding: EdgeInsets.symmetric(
-              vertical: height * 0.01, horizontal: width * 0.05),
+          padding: const EdgeInsets.all(10),
           child: Row(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: screen_width * 0.6,
+                    width: 200,
                     child: Text(
                       '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: width * 0.05, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
-                  SizedBox(
-                    height: height * 0.02,
+                  const SizedBox(
+                    height: 15,
                   ),
                   Row(
                     children: [
-                      Text(lesson.grade,
-                          style: TextStyle(
-                              fontSize: width * 0.04,
-                              fontWeight: FontWeight.w500)),
                       SizedBox(
-                        width: width * 0.2,
+                        width: 150,
+                        child: Text(lesson.grade,
+                            style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500)),
+                      ),
+                      const SizedBox(
+                        width: 10,
                       ),
                       Text(getDate(lesson.datetime, format: 'MMM, EE, hh:mm a'),
-                          style: TextStyle(
-                              fontSize: width * 0.04,
+                          style: const TextStyle(
+                              fontSize: 15,
                               fontWeight: FontWeight.w500))
                     ],
                   ),
@@ -1168,24 +1168,21 @@ class AttendanceDetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: screen_width,
-      height: screen_height * 0.06,
+      width: double.infinity,
+      height: 30,
       child: Padding(
-        padding: EdgeInsets.all(screen_width * 0.02),
+        padding: const EdgeInsets.only(left: 20),
         child: Row(
           children: [
             SizedBox(
-                width: screen_width * 0.7,
+                width: 250,
                 child: Text(
                   studentDetails.studentName,
                   maxLines: 2,
-                  style: TextStyle(fontSize: screen_width * 0.04),
+                  style: const TextStyle(fontSize: 15),
                   overflow: TextOverflow.ellipsis,
                 )),
-            VerticalDivider(
-              color: defaultColor.withOpacity(0.8),
-              thickness: 1,
-            ),
+            const SizedBox(width: 20,),
             ImageIcon(
               color: studentDetails.isPresent == 1
                   ? defaultColor.withOpacity(0.8)
@@ -1193,7 +1190,7 @@ class AttendanceDetailsCard extends StatelessWidget {
               AssetImage(studentDetails.isPresent == 1
                   ? 'assets/images/check-mark.png'
                   : 'assets/images/close.png'),
-              size: screen_width * 0.1,
+              size: 30,
             )
           ],
         ),

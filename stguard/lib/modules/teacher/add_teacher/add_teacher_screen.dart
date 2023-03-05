@@ -16,14 +16,14 @@ class AddTeacherScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Join Community'),
+        title: const Text('Join Community'),
         elevation: 0,
         centerTitle: true,
       ),
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
           if (state is GetTeacherPathSuccessState) {
-            navigateAndFinish(context, TeacherHomeScreen());
+            navigateAndFinish(context, const TeacherHomeScreen());
           }
         },
         builder: (context, state) {
@@ -41,14 +41,14 @@ class AddTeacherScreen extends StatelessWidget {
                           bottomLeft: Radius.circular(30),
                           bottomRight: Radius.circular(30)),
                       color: Theme.of(context).primaryColor),
-                  child: Image(
+                  child: const Image(
                     
                     image: AssetImage('assets/images/teacher.png'),
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(
-                  height: screen_height * 0.05,
+                const SizedBox(
+                  height: 40,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
@@ -64,9 +64,11 @@ class AddTeacherScreen extends StatelessWidget {
                             return null;
                           },
                           label: 'Teacher ID'),
-                      SizedBox(
-                        height: screen_height * 0.05,
+                      const SizedBox(
+                        height: 40,
                       ),
+                      state is AddTeacherLoadingState?
+                      LoadingOnWaiting(color: defaultColor.withOpacity(0.8),):
                       DefaultButton(
                         text: 'CONFIRM',
                         color: defaultColor.withOpacity(0.8),

@@ -343,7 +343,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
         emit(GetTeacherPathSuccessState());
       } else {
-        emit(GetTeacherPathErrorState());
+        emit(NeedtoJoinCommunityState());
       }
     }).catchError((error) {
       print(error.toString());

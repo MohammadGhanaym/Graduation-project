@@ -13,9 +13,6 @@ class AddAttendanceScreen extends StatelessWidget {
   var formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    screen_width = MediaQuery.of(context).size.width;
-    screen_height = MediaQuery.of(context).size.height;
-    print(screen_height);
     return Scaffold(
 
       body: BlocConsumer<TeacherCubit, TeacherStates>(

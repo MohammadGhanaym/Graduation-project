@@ -11,14 +11,13 @@ class TeacherHomeScreen extends StatelessWidget {
   const TeacherHomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    screen_width = MediaQuery.of(context).size.width;
-    screen_height = MediaQuery.of(context).size.height;
     requestWritePermission();
     return BlocConsumer<TeacherCubit, TeacherStates>(
       listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
-            appBar: AppBar(elevation: TeacherCubit.get(context).teacherPath==null || TeacherCubit.get(context).currentIndex==1?0:1,),
+            appBar: AppBar(elevation: TeacherCubit.get(context).teacherPath==null 
+            || TeacherCubit.get(context).currentIndex==1?0:1,),
             drawer: Drawer(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,8 +112,10 @@ class TeacherHomeScreen extends StatelessWidget {
                         BottomNavigationBarItem(
                             icon: Icon(Icons.add), label: 'New')
                       ]),
-            body: TeacherCubit.get(context).teacherPath == null
-                ? JoinCommunityScreen(
+            body:state is GetTeacherPathLoadingState?
+              Center(child: CircularProgressIndicator(),):
+             TeacherCubit.get(context).teacherPath == null?
+            JoinCommunityScreen(
                     image: 'assets/images/teacher-and-open-class-door.png')
                 : TeacherCubit.get(context)
                     .screens[TeacherCubit.get(context).currentIndex]);

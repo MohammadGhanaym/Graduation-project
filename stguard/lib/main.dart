@@ -61,7 +61,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           appBarTheme: const AppBarTheme(color: defaultColor),
           primaryColor: defaultColor,
-          scaffoldBackgroundColor: Colors.grey[200],
         ),
       ),
     );
