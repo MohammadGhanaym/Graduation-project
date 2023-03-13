@@ -15,58 +15,77 @@ class AddCanteenScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Join Community'),
+        elevation: 0,
+        title: const Text('Join Community'),
         centerTitle: true,
       ),
       body: BlocConsumer<CanteenCubit, CanteenStates>(
         listener: (context, state) {
           if (state is GetCanteenPathSuccessState) {
-            navigateAndFinish(context, CanteenHomeScreen());
+            navigateAndFinish(context, const CanteenHomeScreen());
           }
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: screen_height * 0.05,
-                  horizontal: screen_width * 0.1),
-              child: Column(
-                children: [
-                  Image(
-                    image: AssetImage('assets/images/canteen.png'),
-                  ),
-                  SizedBox(
-                    height: screen_height * 0.05,
-                  ),
-                  DefaultFormField(
-                      controller: CanteenController,
-                      type: TextInputType.text,
-                      validate: (value) {
-                        if (value!.isEmpty) {
-                          return 'ID must not be empty';
-                        }
-                        return null;
-                      },
-                      label: 'Canteen ID'),
-                  SizedBox(
-                    height: screen_height * 0.05,
-                  ),
-                  state is AddCanteenLoadingState
-                      ? LoadingOnWaiting(
-                          color: defaultColor.withOpacity(0.8),
-                          height: screen_height * 0.06,
-                        )
-                      : DefaultButton(
-                          text: 'Confirm',
-                          height: screen_height * 0.06,
-                          color: defaultColor.withOpacity(0.8),
-                          onPressed: () {
-                            CanteenCubit.get(context)
-                                .addCanteen(CanteenController.text);
-                          },
-                        )
-                ],
+            child: Column(
+              children: [
+                Container(
+                padding:
+                    const EdgeInsets.only(right: 20, left: 20, top: 10),
+                alignment: AlignmentDirectional.center,
+                height: 400,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30)),
+                    color: Theme.of(context).primaryColor),
+                child: const Image(
+                  width: 280,
+                  height: 280,
+                  image: AssetImage('assets/images/canteen.png'),
+                  color: Colors.white,
+                ),
               ),
+              
+                SizedBox(
+                  height: 40,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      DefaultFormField(
+                          controller: CanteenController,
+                          type: TextInputType.text,
+                          validate: (value) {
+                            if (value!.isEmpty) {
+                              return 'ID must not be empty';
+                            }
+                            return null;
+                          },
+                          label: 'Canteen Worker ID'),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      state is AddCanteenLoadingState
+                          ? LoadingOnWaiting(
+                              color: defaultColor.withOpacity(0.8),
+                              height: 55,
+                            )
+                          : DefaultButton(
+                              text: 'Confirm',
+                              height: 55,
+                              color: defaultColor.withOpacity(0.8),
+                              onPressed: () {
+                                CanteenCubit.get(context)
+                                    .addCanteen(CanteenController.text);
+                              },
+                            ),
+                    ],
+                  ),
+                )
+              ],
             ),
           );
         },

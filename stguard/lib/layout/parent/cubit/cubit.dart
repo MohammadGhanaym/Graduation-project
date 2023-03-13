@@ -100,7 +100,7 @@ class ParentCubit extends Cubit<ParentStates> {
               .collection('Schools')
               .doc(st['school'])
               .collection('Students')
-              .doc(st['uid']);
+              .doc(st.id);
         });
         emit(GetStudentsPathsSuccess());
       } else {
@@ -229,11 +229,7 @@ class ParentCubit extends Cubit<ParentStates> {
                   .doc(userID)
                   .collection('Students')
                   .doc(id),
-              {
-                'uid': st.docs[0].id,
-                'country': pickedCountry!.id,
-                'school': pickedSchool!.id
-              });
+              {'country': pickedCountry!.id, 'school': pickedSchool!.id});
           batch.commit().then((value) async {
             emit(AddFamilyMemberSuccess());
             await getMyStudents();
@@ -458,23 +454,31 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   Future<void> changeDigitalIDState(String id) async {
-    studentsPaths[id]!.get().then((value) async {
-      active = value['parent'] == null ? userID : null;
-      await studentsPaths[id]!.update({'parent': active}).then((value) {
-        emit(DeactivateDigitalIDSuccess());
-      }).catchError((error) {
-        print(error);
-        emit(DeactivateDigitalIDError());
-      });
+    db.runTransaction((transaction) async {
+      DocumentSnapshot st = await transaction.get(studentsPaths[id]!);
+      transaction.update(studentsPaths[id]!,
+          {'parent': st.get('parent') == null ? userID : null});
+    }).catchError((error) {
+      print(error);
+      emit(DeactivateDigitalIDError());
+    }).whenComplete(() async {
+      emit(DeactivateDigitalIDSuccess());
+      await getActiveState(id);
     });
   }
 
   String? active;
   Future<void> getActiveState(String id) async {
+    emit(GetDigitalIDStateLoading());
     await studentsPaths[id]!.get().then((value) {
-      active = value['parent'];
+      if(value.data()!.containsKey('parent'))
+      {
+        active = value['parent'];
+      }
+      emit(GetDigitalIDStateSuccess());
     }).catchError((error) {
-      print(error);
+      print(error.toString());
+      emit(GetDigitalIDStateError(error.toString()));
     });
   }
 
@@ -506,38 +510,7 @@ class ParentCubit extends Cubit<ParentStates> {
       print(error);
       emit(UnpairDigitalIDError());
     });
-    /*
-    await db.runTransaction((transaction) async {
-      await db
-          .collection('Parents')
-          .doc(userID)
-          .collection('Students')
-          .doc(id)
-          .delete()
-          .then((value) async {
-        await studentsPaths[id]!.update({'parent': null}).then((value) async {
-          active = null;
-          studentsPaths.remove(id);
-          attendListeners[id]!.cancel();
-          transListeners[id]!.cancel();
-
-          attendListeners.remove(id);
-          transListeners.remove(id);
-
-          print('unpairDigitalID');
-          print(studentsPaths.keys.toList());
-
-          emit(UnpairDigitalIDSuccess());
-          await getActiveState(id);
-          await getMyStudents();
-          await refreshBackgroundService();
-        });
-      });
-    }).catchError((error) {
-      print(error);
-      emit(UnpairDigitalIDError());
-    });*/
-  }
+ }
 
   ParentModel? parent;
   Future<void> getParentInfo() async {
@@ -632,15 +605,17 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(GetAllergiesLoadingState());
 
     await studentsPaths[id]!.get().then((value) {
-      if (value['allergies'] != null) {
-        value['allergies'].forEach((element) {
-          allergens.add(element);
-          selectedAllergens.add(element);
-        });
-        emit(GetAllergiesSucessState());
-      } else {
-        print('No allergies found');
-        emit(GetAllergiesErrorState('No allergies Found'));
+      if (value.data()!.containsKey('allergies')) {
+        if (value['allergies'] != null) {
+          value['allergies'].forEach((element) {
+            allergens.add(element);
+            selectedAllergens.add(element);
+          });
+          emit(GetAllergiesSucessState());
+        } else {
+          print('No allergies found');
+          emit(GetAllergiesErrorState('No allergies Found'));
+        }
       }
     }).catchError((error) {
       print(error);

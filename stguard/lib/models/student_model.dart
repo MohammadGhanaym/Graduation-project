@@ -5,7 +5,7 @@ class StudentModel {
   String? name;
   dynamic pocketMoney;
   List<dynamic>? allergies;
-  Map<String, dynamic>? dailySpending;
+  late Map<String, dynamic> dailySpending;
   String? parent;
   StudentModel.fromJson(Map<String, dynamic>? json) {
     if (json != null) {
@@ -14,11 +14,19 @@ class StudentModel {
       image = json['image'];
       parent = json['parent'];
       className = json['class_name'];
-      if (json.containsKey('pocket money')) {
-        pocketMoney = json['pocket money'];
+
+      if (json.containsKey('parent')) {
+        parent = json['parent'];
       }
+
+      if (json.containsKey('pocket money')) {
+        pocketMoney = json['pocket money'].toInt();
+      }
+      
       if (json.containsKey('dailySpending')) {
         dailySpending = json['dailySpending'];
+      } else {
+        dailySpending = {'value': 0.0, 'updateTime': DateTime.now()};
       }
       if (json.containsKey('allergies')) {
         allergies = json['allergies'];

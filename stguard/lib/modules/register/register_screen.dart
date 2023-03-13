@@ -188,17 +188,13 @@ class RegisterScreen extends StatelessWidget {
                       ),
                       // sign in button
                       state is RegisterLoadingState
-                          ? CircularProgressIndicator()
-                          : Container(
-                              width: 200,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .primaryColor
-                                      .withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: MaterialButton(
-                                onPressed: () {
+                          ? LoadingOnWaiting(
+                            color: defaultColor.withOpacity(0.8),
+                            width: 200)
+                          :DefaultButton(
+                            color: defaultColor.withOpacity(0.8),
+                            width: 200,
+                            text: 'SIGN UP', onPressed: () {
                                   if (formKey.currentState!.validate()) {
                                     RegisterCubit.get(context).userRegister(
                                       name: nameController.text,
@@ -207,15 +203,8 @@ class RegisterScreen extends StatelessWidget {
                                     );
                                    
                                   }
-                                },
-                                child: Text(
-                                  'SIGN UP',
-                                  style: TextStyle(
-                                      fontSize: 20, color: Colors.white),
-                                ),
-                              ),
-                            )
-                    ],
+                                }) 
+               ],
                   ),
                 ),
               ));

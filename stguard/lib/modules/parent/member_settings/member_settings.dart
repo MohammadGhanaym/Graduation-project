@@ -5,7 +5,6 @@ import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/layout/parent/parent_home_screen.dart';
 import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class MemberSettingsScreen extends StatelessWidget {
@@ -61,8 +60,9 @@ class MemberSettingsScreen extends StatelessWidget {
                 : null,
             body: Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Column(
+              child: ParentCubit.get(context).active==null? const Center(child: CircularProgressIndicator(),): Column(
                 children: [
+                  
                   Container(
                     decoration: const BoxDecoration(
                         borderRadius:
@@ -290,7 +290,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                               BorderRadiusDirectional.circular(
                                                   15)),
                                       child: Text(
-                                        '${ParentCubit.get(context).pocket_money.round()} EGP',
+                                        '${ParentCubit.get(context).pocket_money.toInt()} EGP',
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
@@ -306,7 +306,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                 
                                 SliderBuilder()
                               ]),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           SettingsCard(
@@ -316,8 +316,8 @@ class MemberSettingsScreen extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    ImageIcon(
-                                      const AssetImage(
+                                    const ImageIcon(
+                                      AssetImage(
                                           'assets/images/blood-drop.png'),
                                       size: 30,
                                       color: defaultColor,
@@ -333,16 +333,16 @@ class MemberSettingsScreen extends StatelessWidget {
                                     )
                                   ],
                                 ),
-                                SizedBox(height: 5,),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: const Text(
+                                const SizedBox(height: 5,),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Text(
                                     'By adding allergens, your child will not be able to purchase anything that marked by a vendor containing them',
                                     style: TextStyle(
                                         color: Colors.black54,
                                         fontWeight: FontWeight.w500),
                                   ),
-                                ),SizedBox(height: 5,),
+                                ),const SizedBox(height: 5,),
                                 Expanded(
                                     child: ListView.separated(
                                         scrollDirection: Axis.horizontal,
@@ -357,7 +357,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                     .toList()[index],
                                                 context: context),
                                         separatorBuilder: (context, index) =>
-                                            SizedBox(
+                                            const SizedBox(
                                               width: 5
                                             ),
                                         itemCount: ParentCubit.get(context)

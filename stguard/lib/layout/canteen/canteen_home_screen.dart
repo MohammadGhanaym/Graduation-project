@@ -105,8 +105,10 @@ class CanteenHomeScreen extends StatelessWidget {
                     ),
                   ),
                 ])),
-            body:state is NeedtoJoinCommunityState?
-            CanteenJoinCommunityScreen():
+            body:
+            state is GetCanteenPathLoadingState?
+            const Center(child: CircularProgressIndicator(),):
+            
              ConditionalBuilder(
               condition: CanteenCubit.get(context).schoolCanteenPath != null,
               builder: (context) => Column(
@@ -137,11 +139,11 @@ class CanteenHomeScreen extends StatelessWidget {
                                       'assets/images/canteen_sign.png')),
                               Container(
                                 child: Column(
-                                  children: [
+                                  children: const [
                                     SizedBox(
                                       height: 60,
                                     ),
-                                    const Image(
+                                    Image(
                                         color: Colors.white,
                                         height: 200,
                                         width: 200,
@@ -152,7 +154,7 @@ class CanteenHomeScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           Container(
@@ -332,9 +334,7 @@ class CanteenHomeScreen extends StatelessWidget {
                   )
                 ],
               ),
-              fallback: (context) => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              fallback: (context) => const CanteenJoinCommunityScreen()
             ));
       },
     );

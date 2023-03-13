@@ -328,82 +328,85 @@ class ActivityItem extends StatelessWidget {
           height: 90,
           width: double.infinity,
           child: Card(
+              elevation: 2,
               child: Padding(
-            padding:
-                const EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
-            child: Row(
-              children: [
-                Stack(
-                  alignment: model.trans_id != 'null'
-                      ? AlignmentDirectional.centerStart
-                      : AlignmentDirectional.center,
+                padding:
+                    const EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
+                child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Colors.grey[300],
+                    Stack(
+                      alignment: model.trans_id != 'null'
+                          ? AlignmentDirectional.centerStart
+                          : AlignmentDirectional.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.grey[300],
+                        ),
+                        Image(
+                          image: model.trans_id != 'null'
+                              ? const AssetImage('assets/images/purchase.png')
+                              : const AssetImage('assets/images/movement.png'),
+                          width: 45,
+                          height: 35,
+                          fit: BoxFit.scaleDown,
+                        ),
+                      ],
                     ),
-                    Image(
-                      image: model.trans_id != 'null'
-                          ? const AssetImage('assets/images/purchase.png')
-                          : const AssetImage('assets/images/movement.png'),
-                      width: 45,
-                      height: 35,
-                      fit: BoxFit.scaleDown,
+                    const SizedBox(
+                      width: 10,
                     ),
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          SizedBox(
+                            width: 160,
+                            child: Text(
+                              model.trans_id != 'null'
+                                  ? '$name Puchased'
+                                  : '$name ${model.activity}',
+                              maxLines: 2,
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Text('${getDate(model.date)}')
+                        ]),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    model.trans_id != 'null'
+                        ? Text(
+                            '-${model.activity}',
+                            style: const TextStyle(fontSize: 16),
+                          )
+                        : Row(
+                            children: [
+                              model.activity == 'Arrived'
+                                  ? const SizedBox(
+                                      width: 10,
+                                    )
+                                  : const SizedBox(
+                                      width: 20,
+                                    ),
+                              ImageIcon(
+                                  size: 30,
+                                  color: model.activity == 'Arrived'
+                                      ? Colors.green
+                                      : Colors.red,
+                                  AssetImage(
+                                      'assets/images/${model.activity}.png')),
+                            ],
+                          )
                   ],
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  SizedBox(
-                    width: 160,
-                    child: Text(
-                      model.trans_id != 'null'
-                          ? '$name Puchased'
-                          : '$name ${model.activity}',
-                      maxLines: 2,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Text('${getDate(model.date)}')
-                ]),
-                const SizedBox(
-                  width: 10,
-                ),
-                model.trans_id != 'null'
-                    ? Text(
-                        '-${model.activity}',
-                        style: const TextStyle(fontSize: 16),
-                      )
-                    : Row(
-                        children: [
-                          model.activity == 'Arrived'
-                              ? const SizedBox(
-                                  width: 10,
-                                )
-                              : const SizedBox(
-                                  width: 20,
-                                ),
-                          ImageIcon(
-                              size: 30,
-                              color: model.activity == 'Arrived'
-                                  ? Colors.green
-                                  : Colors.red,
-                              AssetImage(
-                                  'assets/images/${model.activity}.png')),
-                        ],
-                      )
-              ],
-            ),
-          ))),
+              ))),
     );
     ;
   }
@@ -422,6 +425,7 @@ class FamilyMemberCard extends StatelessWidget {
         height: 140,
         width: 130,
         child: Card(
+          elevation: 2,
           child: SizedBox(
             width: double.infinity,
             child: Column(
@@ -476,30 +480,35 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SizedBox(
-        width: 120,
+      Expanded(
+        flex: 4,
         child: Text(
           product.productName,
+                                          maxLines: 3,
+
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ),
       const SizedBox(
-        width: 10,
+        width: 60,
       ),
-      SizedBox(
-        width: 80,
+      Expanded(
+        flex: 2,
         child: Text(
           product.price,
           style: const TextStyle(fontSize: 15),
         ),
       ),
       const SizedBox(
-        width: 10,
+        width: 20,
       ),
-      Text(
-        product.quantity.toString(),
-        style: const TextStyle(fontSize: 15),
+      Expanded(
+        flex: 2,
+        child: Text(
+          product.quantity.toString(),
+          style: const TextStyle(fontSize: 15),
+        ),
       )
     ]);
   }
@@ -611,11 +620,13 @@ class SliderBuilder extends StatelessWidget {
                 value: ParentCubit.get(context).pocket_money,
                 min: 0,
                 max: 500,
-                label: '${ParentCubit.get(context).pocket_money}',
-                divisions: (500 / 5).toInt(),
+                label:
+                    '${ParentCubit.get(context).pocket_money}',
+                divisions: 500 ~/ 5,
                 onChanged: (value) {
                   if (value <= ParentCubit.get(context).parent!.balance) {
-                    ParentCubit.get(context).setPocketMoney(money: value);
+                    ParentCubit.get(context)
+                        .setPocketMoney(money: value);
                   }
                 },
                 onChangeStart: (value) {
@@ -902,7 +913,7 @@ class LoadingOnWaiting extends StatelessWidget {
   LoadingOnWaiting(
       {super.key,
       this.color = defaultColor,
-      this.height=55,
+      this.height = 55,
       this.radius = 10,
       this.width = double.infinity});
 
@@ -978,7 +989,7 @@ class MyDropdown extends StatelessWidget {
 
 class GradeItem extends StatelessWidget {
   String grade;
-   GradeItem({super.key,required this.grade});
+  GradeItem({super.key, required this.grade});
 
   @override
   Widget build(BuildContext context) {
@@ -990,8 +1001,7 @@ class GradeItem extends StatelessWidget {
         height: 20,
         decoration: BoxDecoration(
             border: Border.all(
-                color: TeacherCubit.get(context).selectedGrade ==
-                        grade
+                color: TeacherCubit.get(context).selectedGrade == grade
                     ? defaultColor.withOpacity(0.8)
                     : Colors.grey),
             borderRadius: BorderRadiusDirectional.circular(5)),
@@ -1002,12 +1012,10 @@ class GradeItem extends StatelessWidget {
 }
 
 class StudentAttendanceCard extends StatelessWidget {
-
   StudentModel student;
 
   StudentAttendanceCard({
     super.key,
-
     required this.student,
   });
 
@@ -1025,9 +1033,9 @@ class StudentAttendanceCard extends StatelessWidget {
                             1
                         ? defaultColor.withOpacity(0.8)
                         : Colors.red.withOpacity(0.8)
-                    : Colors.grey[200]!)),
+                    : Theme.of(context).scaffoldBackgroundColor)),
         width: double.infinity,
-        height:120,
+        height: 120,
         child: Card(
             child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -1049,8 +1057,7 @@ class StudentAttendanceCard extends StatelessWidget {
                       child: Text(
                         student.name!,
                         style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500),
+                            fontSize: 15, fontWeight: FontWeight.w500),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       )),
@@ -1097,12 +1104,7 @@ class LessonCard extends StatelessWidget {
   LessonModel lesson;
   void Function() onTap;
 
-  LessonCard(
-      {
-      
-      required this.lesson,
-      required this.onTap,
-      super.key});
+  LessonCard({required this.lesson, required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1112,50 +1114,50 @@ class LessonCard extends StatelessWidget {
         width: double.infinity,
         height: 90,
         child: Card(
-          elevation: 5,
+            elevation: 5,
             child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.all(10),
+              child: Row(
                 children: [
-                  SizedBox(
-                    width: 200,
-                    child: Text(
-                      '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
-                        width: 150,
-                        child: Text(lesson.grade,
-                            style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500)),
+                        width: 200,
+                        child: Text(
+                          '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
                       ),
                       const SizedBox(
-                        width: 10,
+                        height: 15,
                       ),
-                      Text(getDate(lesson.datetime, format: 'MMM, EE, hh:mm a'),
-                          style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500))
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            child: Text(lesson.grade,
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w500)),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                              getDate(lesson.datetime,
+                                  format: 'MMM, EE, hh:mm a'),
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w500))
+                        ],
+                      ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
-        )),
+            )),
       ),
     );
   }
@@ -1169,7 +1171,7 @@ class AttendanceDetailsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 30,
+      height: 50,
       child: Padding(
         padding: const EdgeInsets.only(left: 20),
         child: Row(
@@ -1182,7 +1184,9 @@ class AttendanceDetailsCard extends StatelessWidget {
                   style: const TextStyle(fontSize: 15),
                   overflow: TextOverflow.ellipsis,
                 )),
-            const SizedBox(width: 20,),
+            const SizedBox(
+              width: 20,
+            ),
             ImageIcon(
               color: studentDetails.isPresent == 1
                   ? defaultColor.withOpacity(0.8)
@@ -1512,3 +1516,5 @@ Future<Widget?> showDefaultDialog(context,
     ),
   );
 }
+
+

@@ -9,8 +9,8 @@ import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
 
 Map<String, Widget> homeScreens = {
   'parent': ParentHomeScreen(),
-  'teacher': TeacherHomeScreen(),
-  'canteen worker': CanteenHomeScreen()
+  'teacher': const TeacherHomeScreen(),
+  'canteen worker': const CanteenHomeScreen()
 };
 
 String? userID;
@@ -32,7 +32,4 @@ var fcmToken;
 var fcm_project_token =
     'key=AAAArAAgmhg:APA91bFj5XE1LoBN9ZdzthL9rh77pFIDSfeSlv7xEiAkBpuMNymcLh4RkFNOdOoid9EYClLMdTRKCFIqOKZlnzKxIoVfBX4UBGrsf94Su0K0qQd8xkapt7xvzohfX6B0VO8c4K54rAOV';
 
-var background_service;
 
-var screen_height;
-var screen_width;

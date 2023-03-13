@@ -124,7 +124,6 @@ class JoinCommunityScreen extends StatelessWidget {
                   },
                   color: defaultColor.withOpacity(0.8),
                   height: 55,
-                  width: 250,
                 ),
               )
             ],

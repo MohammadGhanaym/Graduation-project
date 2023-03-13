@@ -277,10 +277,10 @@ class CanteenCubit extends Cubit<CanteenStates> {
     print(selectedProducts);
   }
 
-  double totalPrice = 0.0;
+  double totalPrice = 0;
   int itemsCount = 0;
   void calTotalPrice() {
-    totalPrice = 0.0;
+    totalPrice = 0;
     itemsCount = 0;
     selectedProducts.forEach((id, p) {
       totalPrice += p.price * itemQuantities[id]!;
@@ -550,9 +550,8 @@ class CanteenCubit extends Cubit<CanteenStates> {
           print(buyer);
           print(buyer!.dailySpending);
           if (buyer != null) {
-            if (buyer!.dailySpending != null) {
               print('buyer!.dailySpending != null');
-              if (getDate(buyer!.dailySpending!['updateTime'],
+              if (getDate(buyer!.dailySpending['updateTime'],
                       format: 'yyyy-MM-dd') ==
                   getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
                 print("I'm here");
@@ -571,9 +570,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
                   emit(PaymentErrorState());
                 });
               }
-            } else {
-              await analyzeBuyerData();
-            }
+            
           } else {
             cancelBuyer();
             emit(PaymentErrorState());
@@ -605,13 +602,13 @@ class CanteenCubit extends Cubit<CanteenStates> {
       cancelBuyerListener();
       cancelBuyer();
       emit(PaymentErrorState());
-    } else if (totalPrice > buyer!.pocketMoney) {
+    } else if (totalPrice > buyer!.pocketMoney!) {
       cancelBuyerListener();
       cancelBuyer();
       print('Daily spending limit exceeded1');
       result = 'Daily spending limit exceeded';
       emit(PaymentErrorState());
-    } else if ((buyer!.dailySpending!['value'] ?? 0) + totalPrice >
+    } else if (buyer!.dailySpending['value'] + totalPrice >
         buyer!.pocketMoney) {
       print('Daily spending limit exceeded2');
       cancelBuyerListener();

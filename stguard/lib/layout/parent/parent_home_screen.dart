@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +6,6 @@ import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/modules/parent/credit_card/credit_card_screen.dart';
 import 'package:st_tracker/modules/parent/pick_school/pick_school_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class ParentHomeScreen extends StatelessWidget {
@@ -206,7 +203,11 @@ class ParentHomeScreen extends StatelessWidget {
                             bottomLeft: Radius.circular(30),
                             bottomRight: Radius.circular(30)),
                         color: Theme.of(context).primaryColor),
-                    child: Column(
+                    child: 
+                    state is GetUserInfoLoading? const Center(child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),):
+                    Column(
                       children: [
                         Row(
                           children: [
@@ -225,10 +226,12 @@ class ParentHomeScreen extends StatelessWidget {
                                   ),
                                   Text(
                                     ParentCubit.get(context).parent != null
-                                        ? ParentCubit.get(context)
+                                        ?
+                                          ParentCubit.get(context)
                                             .parent!
-                                            .balance
-                                            .toStringAsFixed(2)
+                                            .balance.toStringAsFixed(2)
+                                        
+                                          
                                         : '0.00',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -265,6 +268,7 @@ class ParentHomeScreen extends StatelessWidget {
                         const Text('Family',
                             style: TextStyle(
                                 fontSize: 25, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 5,),
                         ConditionalBuilder(
                             condition: state is! GetStudentDataLoading,
                             builder: (context) => ParentCubit.get(context)
@@ -347,6 +351,7 @@ class ParentHomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 10,),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
@@ -367,27 +372,24 @@ class ParentHomeScreen extends StatelessWidget {
                                   ParentCubit.get(context)
                                       .studentsData
                                       .isNotEmpty
-                              ? SizedBox(
-                                  height: 400,
-                                  child: ListView.separated(
-                                      physics: NeverScrollableScrollPhysics(),
-                                      shrinkWrap: true,
-                                      itemBuilder: (context, index) =>
-                                          ActivityItem(
-                                              model:
-                                                  ParentCubit.get(context)
-                                                      .activities[index],
-                                              studentsData:
-                                                  ParentCubit.get(context)
-                                                      .studentsData),
-                                      separatorBuilder: (context, index) =>
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                      itemCount: ParentCubit.get(context)
-                                          .activities
-                                          .length),
-                                )
+                              ? ListView.separated(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) =>
+                                      ActivityItem(
+                                          model:
+                                              ParentCubit.get(context)
+                                                  .activities[index],
+                                          studentsData:
+                                              ParentCubit.get(context)
+                                                  .studentsData),
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                  itemCount: ParentCubit.get(context)
+                                      .activities
+                                      .length)
                               : Center(
                                   child: SizedBox(
                                     width: 200,
@@ -400,7 +402,7 @@ class ParentHomeScreen extends StatelessWidget {
                                           height: 130,
                                           width: 130,
                                           image: AssetImage(
-                                              'assets/images/searching.png'),
+                                              'assets/images/no_activity.png'),
                                           fit: BoxFit.cover,
                                         ),
                                         SizedBox(

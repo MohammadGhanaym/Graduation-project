@@ -133,7 +133,7 @@ class BackgroundService {
           .collection('Schools')
           .doc(st['school'])
           .collection('Students')
-          .doc(st['uid'])
+          .doc(st.id)
           .collection('CanteenTransactions')
           .snapshots()
           .listen((event) {
@@ -149,7 +149,7 @@ class BackgroundService {
                   .collection('Schools')
                   .doc(st['school'])
                   .collection('Students')
-                  .doc(st['uid'])
+                  .doc(st.id)
                   .get()
                   .then((value) async {
                 await flutterLocalNotificationsPlugin.show(
@@ -178,7 +178,7 @@ class BackgroundService {
             .collection('Schools')
             .doc(st['school'])
             .collection('Students')
-            .doc(st['uid'])
+            .doc(st.id)
             .collection('SchoolAttendance')
             .snapshots()
             .listen((event) async {
@@ -199,7 +199,7 @@ class BackgroundService {
                     .collection('Schools')
                     .doc(st['school'])
                     .collection('Students')
-                    .doc(st['uid'])
+                    .doc(st.id)
                     .get()
                     .then((value) async {
                   print('sendAttendanceNotification2');
@@ -221,7 +221,7 @@ class BackgroundService {
                     .collection('Schools')
                     .doc(st['school'])
                     .collection('Students')
-                    .doc(st['uid'])
+                    .doc(st.id)
                     .get()
                     .then((value) async {
                   print('sendAttendanceNotification3');

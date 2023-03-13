@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/states.dart';
 import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class AddTeacherScreen extends StatelessWidget {
@@ -22,8 +19,9 @@ class AddTeacherScreen extends StatelessWidget {
       ),
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
-          if (state is GetTeacherPathSuccessState) {
-            navigateAndFinish(context, const TeacherHomeScreen());
+          if (state is AddTeacherSucessState) {
+            ShowToast(message: 'Success', state: ToastStates.SUCCESS);
+            navigateAndFinish(context, TeacherHomeScreen());
           }
         },
         builder: (context, state) {
@@ -31,8 +29,7 @@ class AddTeacherScreen extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.only(right: 20, left: 20, top: 10),
+                  padding: const EdgeInsets.only(right: 20, left: 20, top: 10),
                   alignment: AlignmentDirectional.center,
                   height: 400,
                   width: double.infinity,
@@ -42,7 +39,6 @@ class AddTeacherScreen extends StatelessWidget {
                           bottomRight: Radius.circular(30)),
                       color: Theme.of(context).primaryColor),
                   child: const Image(
-                    
                     image: AssetImage('assets/images/teacher.png'),
                     color: Colors.white,
                   ),
@@ -67,16 +63,18 @@ class AddTeacherScreen extends StatelessWidget {
                       const SizedBox(
                         height: 40,
                       ),
-                      state is AddTeacherLoadingState?
-                      LoadingOnWaiting(color: defaultColor.withOpacity(0.8),):
-                      DefaultButton(
-                        text: 'CONFIRM',
-                        color: defaultColor.withOpacity(0.8),
-                        onPressed: () {
-                          TeacherCubit.get(context)
-                              .addTeacher(teacherController.text);
-                        },
-                      ),
+                      state is AddTeacherLoadingState
+                          ? LoadingOnWaiting(
+                              color: defaultColor.withOpacity(0.8),
+                            )
+                          : DefaultButton(
+                              text: 'CONFIRM',
+                              color: defaultColor.withOpacity(0.8),
+                              onPressed: () {
+                                TeacherCubit.get(context)
+                                    .addTeacher(teacherController.text);
+                              },
+                            ),
                     ],
                   ),
                 )

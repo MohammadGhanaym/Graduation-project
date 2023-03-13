@@ -136,7 +136,14 @@ class UpdateAllergiesErrorState extends ParentStates {
   var error;
   UpdateAllergiesErrorState(this.error);
 }
+class GetDigitalIDStateLoading extends ParentStates {}
 
+class GetDigitalIDStateSuccess extends ParentStates {}
+
+class GetDigitalIDStateError extends ParentStates {
+  var error;
+  GetDigitalIDStateError(this.error);
+}
 class GetCountriesSucessState extends ParentStates {}
 
 class GetCountriesLoadingState extends ParentStates {}
@@ -158,3 +165,4 @@ class GetSchoolsErrorState extends ParentStates {
 class PickSchoolState extends ParentStates {}
 
 class PickCountryState extends ParentStates {}
+

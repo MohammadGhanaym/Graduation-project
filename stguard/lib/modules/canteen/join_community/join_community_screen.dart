@@ -75,31 +75,55 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(
-                    height: 100,
-                  ),
-                  const Expanded(
-                    flex: 7,
-                    child: Image(
-                      image: AssetImage('assets/images/canteen.png'),
-                      width: 250,
-                    ),
-                  ),
-                  const Text(
-                    'Join your school community now',
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Expanded(
-                    flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                              Expanded(
+                                flex: 5,
+                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.only(right: 20, left: 20, top: 100),
+                                                  alignment: AlignmentDirectional.center,
+                                                  height: 400,
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: const BorderRadius.only(
+                                                          bottomLeft: Radius.circular(30),
+                                                          bottomRight: Radius.circular(30)),
+                                                      color: Theme.of(context).primaryColor),
+                                              child: Column(
+                                                children: [
+                                                  Image(
+                                                    image: AssetImage('assets/images/canteen.png'),
+                                                    width: 250,
+                                                    height: 250,
+                                                    color: Colors.white,
+                                                  ),SizedBox(
+                                                    height: 40,
+                                                  ),
+                                                  Text(
+                                                    
+                                                    'Join your school community now and be a part of the team',
+                                                    style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(color: Colors.white),textAlign: TextAlign.center,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                              ),
+            
+            
+                const SizedBox(
+                  height: 50,
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: DefaultButton(
+                      height: 55,
                       text: 'JOIN',
                       onPressed: () {
                         CanteenCubit.get(context).getCountries();
@@ -107,11 +131,11 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
                       color: defaultColor.withOpacity(0.8),
                     ),
                   ),
-                  const SizedBox(
-                    height: 100,
-                  )
-                ],
-              ),
+                ),
+                const SizedBox(
+                  height: 50,
+                )
+              ],
             ),
           );
         },
