@@ -1,80 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:st_tracker/layout/parent/cubit/cubit.dart';
+import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/layout/parent/parent_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
-class RechargeSuccessScreen extends StatelessWidget {
-  RechargeSuccessScreen({super.key});
+class RechargeStatusScreen extends StatelessWidget {
+  String amount;
+  String status;
+  String statusImage;
+  RechargeStatusScreen(
+      {super.key,
+      required this.amount,
+      required this.status,
+      required this.statusImage});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-          child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              Text(
-                'Processing Transaction',
-                style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700),
-              ),
-              Divider(),
-              SizedBox(
-                height: 80,
-              ),
-              Image(
-                image: AssetImage('assets/images/check-mark.png'),
-                width: 100,
-                height: 100,
-                color: defaultColor,
-              ),
-              SizedBox(height:10),
-              Text(
-                'Success!',
-                style: TextStyle(
-                    color: defaultColor,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w500),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text('Your transaction has been processed',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500)),
-              SizedBox(
-                height:80,
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('500',
-                      style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54)),
-                          SizedBox(width: 5,),
-                  Text('EGP',
-                      style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54)),
-                ],
-              ),
-              SizedBox(
-                height:180,
-              ),
-              DefaultButton(
-                text: 'Okay',
-                color: defaultColor.withOpacity(0.8),
-                onPressed: () => navigateTo(context, ParentHomeScreen()),
-              )
-            ],
+      appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text('Processing Transaction',
+              style: Theme.of(context).textTheme.headline6),
+          centerTitle: true,
+          elevation: 0,
+          bottom: const PreferredSize(
+              preferredSize: Size(double.infinity, 1), child: Divider())),
+      body: BlocConsumer<ParentCubit, ParentStates>(
+        listener: (context, state) {
+          if (state is GetUserInfoSuccess) {
+            navigateAndFinish(context, ParentHomeScreen());
+          }
+        },
+        builder: (context, state) {
+          return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 80,
+                ),
+                Image(
+                  image: AssetImage('assets/images/$statusImage.png'),
+                  width: 200,
+                  height: 200,
+                  color:status=='Success'? defaultColor:Colors.redAccent,
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  '$status!',
+                  style:  TextStyle(
+                      color: status=='Success'? defaultColor:Colors.redAccent,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(amount,
+                        style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54)),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    const Text('EGP',
+                        style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54)),
+                  ],
+                ),
+                const SizedBox(
+                  height: 90,
+                ),
+                DefaultButton(
+                    text: 'Okay',
+                    color: defaultColor.withOpacity(0.8),
+                    onPressed: () {
+                      ParentCubit.get(context).getParentInfo();
+                    }),
+              ],
+            ),
           ),
-        ),
-      )),
+        );
+        },
+         ),
     );
   }
 }

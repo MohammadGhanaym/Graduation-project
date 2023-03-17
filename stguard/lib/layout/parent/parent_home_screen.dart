@@ -104,12 +104,9 @@ class ParentHomeScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                             Text(
                               'Settings',
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  color: defaultColor.withOpacity(0.8),
-                                  fontWeight: FontWeight.w500),
+                              style:  Theme.of(context).textTheme.headline4
                             ),
                             const SizedBox(
                               height: 20,
@@ -118,8 +115,8 @@ class ParentHomeScreen extends StatelessWidget {
                               text: 'Add Family Member',
                               icon: const Image(
                                 image: AssetImage('assets/images/member.png'),
-                                width: 30,
-                                height: 30,
+                                width: 40,
+                                height: 40,
                               ),
                               ontap: () async =>
                                   await ParentCubit.get(context).getCountries(),
@@ -131,11 +128,11 @@ class ParentHomeScreen extends StatelessWidget {
                               text: 'Recharge',
                               icon: const Image(
                                 image: AssetImage('assets/images/recharge.png'),
-                                width: 30,
-                                height: 30,
+                                width: 40,
+                                height: 40,
                               ),
                               ontap: () =>
-                                  navigateTo(context, const CreditCardScreen()),
+                                  navigateTo(context, CreditCardScreen()),
                             ),
                             const SizedBox(
                               height: 15,
@@ -144,8 +141,8 @@ class ParentHomeScreen extends StatelessWidget {
                               text: 'Clear History',
                               icon: const Image(
                                   image: AssetImage('assets/images/delete.png'),
-                                  width: 30,
-                                  height: 30),
+                                  width: 40,
+                                  height: 40),
                               ontap: () async =>
                                   await ParentCubit.get(context).clearHistory(),
                             ),
@@ -154,12 +151,12 @@ class ParentHomeScreen extends StatelessWidget {
                             ),
                             DrawerItem(
                               text: 'Sign Out',
-                              icon: Image(
-                                image: const AssetImage(
+                              icon: const Image(
+                                image: AssetImage(
                                     'assets/images/signout.png'),
-                                width: 30,
-                                height: 30,
-                                color: Colors.red.shade300,
+                                width: 40,
+                                height: 40,
+                                
                               ),
                               ontap: () {
                                 showDefaultDialog(

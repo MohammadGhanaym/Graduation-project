@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
@@ -286,33 +287,22 @@ class ParentCubit extends Cubit<ParentStates> {
     print('addNewAttendance:{$studentID}');
     attendListeners[studentID] =
         stDoc.collection('SchoolAttendance').snapshots().listen((event) async {
-      SchoolAttendanceModel attendStatus =
-          SchoolAttendanceModel.fromJson(event.docChanges[0].doc.data()!);
-      if (attendStatus.arrived) {
-        await stDoc
-            .collection('SchoolAttendance')
-            .doc(event.docChanges[0].doc.id)
-            .update({'arrive_state': false}).then((value) async {
-          await insertToActivityTable(
-              id: studentID,
-              activityType: 'Arrived',
-              date: attendStatus.arriveDate);
-        }).catchError((error) {
-          print(error.toString());
-        });
-      } else if (attendStatus.left) {
-        await stDoc
-            .collection('SchoolAttendance')
-            .doc(event.docChanges[0].doc.id)
-            .update({'leave_state': false}).then((value) async {
-          await insertToActivityTable(
-              id: studentID,
-              activityType: 'Left',
-              date: attendStatus.leaveDate);
-        }).catchError((error) {
-          print(error.toString());
-        });
-      }
+      event.docChanges.forEach((studentMove) async {
+        if (studentMove.type == DocumentChangeType.added) {
+          SchoolAttendanceModel attendStatus =
+              SchoolAttendanceModel.fromJson(studentMove.doc.data()!);
+
+          await studentMove.doc.reference.delete().then((value) async {
+            await insertToActivityTable(
+                id: studentID,
+                activityType:
+                    "${attendStatus.action[0].toUpperCase()}${attendStatus.action.substring(1)}",
+                date: attendStatus.date);
+          }).catchError((error) {
+            print(error.toString());
+          });
+        }
+      });
     });
   }
 
@@ -471,8 +461,7 @@ class ParentCubit extends Cubit<ParentStates> {
   Future<void> getActiveState(String id) async {
     emit(GetDigitalIDStateLoading());
     await studentsPaths[id]!.get().then((value) {
-      if(value.data()!.containsKey('parent'))
-      {
+      if (value.data()!.containsKey('parent')) {
         active = value['parent'];
       }
       emit(GetDigitalIDStateSuccess());
@@ -510,7 +499,7 @@ class ParentCubit extends Cubit<ParentStates> {
       print(error);
       emit(UnpairDigitalIDError());
     });
- }
+  }
 
   ParentModel? parent;
   Future<void> getParentInfo() async {
@@ -531,14 +520,17 @@ class ParentCubit extends Cubit<ParentStates> {
     }
   }
 
-  Future<void> updateBalance() async {
+  Future<void> updateBalance(double amount) async {
+    print(amount);
+    print(parent!.balance);
+    print(amount + parent!.balance);
     emit(UpdateBalanceLoading());
-
     await db
-        .collection('users')
+        .collection('Parents')
         .doc(userID)
-        .update({'balance': parent!.balance}).then((value) {
+        .update({'balance': parent!.balance + amount}).then((value) {
       emit(UpdateBalanceSuccess());
+      
     }).catchError((error) {
       emit(UpdateBalanceError());
     });
@@ -652,4 +644,27 @@ class ParentCubit extends Cubit<ParentStates> {
   void stopBackgroundService() {
     FlutterBackgroundService().invoke('stopService');
   }
+
+  String cardNumber = '';
+  String expiryDate = '';
+  String cardHolderName = '';
+  String cvvCode = '';
+  bool isCvvFocused = false;
+  OutlineInputBorder? border = OutlineInputBorder(
+    borderSide: BorderSide(
+      color: Colors.grey.withOpacity(0.7),
+      width: 2.0,
+    ),
+  );
+
+  void onCreditCardModelChange(CreditCardModel? creditCardModel) {
+    cardNumber = creditCardModel!.cardNumber;
+    expiryDate = creditCardModel.expiryDate;
+    cardHolderName = creditCardModel.cardHolderName;
+    cvvCode = creditCardModel.cvvCode;
+    isCvvFocused = creditCardModel.isCvvFocused;
+    emit(CreditCardModelChangeState());
+  }
+
+  List<dynamic> rechargeAmounts = [200, 400, 600, 1000, 2000, 'Other'];
 }

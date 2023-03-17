@@ -51,10 +51,7 @@ class CanteenHomeScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Settings',
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: defaultColor.withOpacity(0.8),
-                                fontWeight: FontWeight.w500),
+                            style:  Theme.of(context).textTheme.headline4,
                           ),
                           const SizedBox(
                             height: 20,
@@ -63,21 +60,23 @@ class CanteenHomeScreen extends StatelessWidget {
                             text: 'Reset ID',
                             ontap: () => CanteenCubit.get(context).resetId(),
                             icon: const Image(
+                              color: defaultColor,
+                              fit: BoxFit.scaleDown,
                                 image: AssetImage('assets/images/undo.png'),
-                                width: 20,
-                                height: 20),
+                                width: 35,
+                                height: 35),
                           ),
                           const SizedBox(
                             height: 15,
                           ),
                           DrawerItem(
                             text: 'Sign Out',
-                            icon: Image(
-                                color: Colors.red.shade300,
-                                image: const AssetImage(
+                            icon: const Image(
+                                color: defaultColor,
+                                image: AssetImage(
                                     'assets/images/signout.png'),
-                                width: 20,
-                                height: 20),
+                                width: 35,
+                                height: 35),
                             ontap: () {
                              showDefaultDialog(
                                   context,
@@ -158,7 +157,7 @@ class CanteenHomeScreen extends StatelessWidget {
                             height: 20,
                           ),
                           Container(
-                            height: 150,
+                            height: 160,
                             width: double.infinity,
                             decoration: BoxDecoration(
                                 color: Colors.white,
@@ -171,8 +170,8 @@ class CanteenHomeScreen extends StatelessWidget {
                                   Row(
                                     children: [
                                       const Image(
-                                          width: 30,
-                                          height: 30,
+                                          width: 35,
+                                          height: 35,
                                           image: AssetImage(
                                               'assets/images/sales.png')),
                                       const SizedBox(
@@ -251,7 +250,7 @@ class CanteenHomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   Expanded(
                     child: Row(
@@ -272,12 +271,13 @@ class CanteenHomeScreen extends StatelessWidget {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const Image(
+                                        color: defaultColor,
                                           image: AssetImage(
-                                              'assets/images/candies.png'),
-                                          width: 50,
-                                          height: 50),
+                                              'assets/images/menu.png'),
+                                          width: 70,
+                                          height: 70),
                                       const SizedBox(
-                                        height: 10,
+                                        height: 5,
                                       ),
                                       Text('Menu',
                                           style: Theme.of(context)
@@ -307,12 +307,13 @@ class CanteenHomeScreen extends StatelessWidget {
                                           MainAxisAlignment.center,
                                       children: [
                                         const Image(
+                                          color: defaultColor,
                                             image: AssetImage(
-                                                'assets/images/store-setting.png'),
-                                            width: 50,
-                                            height: 50),
+                                                'assets/images/inventory.png'),
+                                            width: 70,
+                                            height: 70),
                                         const SizedBox(
-                                          height: 10,
+                                          height: 5,
                                         ),
                                         Text(
                                           'Inventory',

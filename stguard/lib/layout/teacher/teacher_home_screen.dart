@@ -45,10 +45,7 @@ class TeacherHomeScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Settings',
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: defaultColor.withOpacity(0.8),
-                                fontWeight: FontWeight.w500),
+                            style: Theme.of(context).textTheme.headline4
                           ),
                           const SizedBox(
                             height: 20,
@@ -57,21 +54,22 @@ class TeacherHomeScreen extends StatelessWidget {
                             text: 'Reset ID',
                             ontap: () => TeacherCubit.get(context).resetId(),
                             icon: const Image(
+                              color:defaultColor,
                                 image: AssetImage('assets/images/undo.png'),
-                                width: 20,
-                                height: 20),
+                                width: 30,
+                                height: 30),
                           ),
                           const SizedBox(
                             height: 15,
                           ),
                           DrawerItem(
                             text: 'Sign Out',
-                            icon: Image(
-                                color: Colors.red.shade300,
-                                image: const AssetImage(
+                            icon: const Image(
+                                color: defaultColor,
+                                image: AssetImage(
                                     'assets/images/signout.png'),
-                                width: 20,
-                                height: 20),
+                                width: 30,
+                                height: 30),
                             ontap: () {
                               showDefaultDialog(
                                   context,
@@ -112,7 +110,7 @@ class TeacherHomeScreen extends StatelessWidget {
                             icon: Icon(Icons.add), label: 'New')
                       ]),
             body:state is GetTeacherPathLoadingState?
-              Center(child: CircularProgressIndicator(),):
+              const Center(child: CircularProgressIndicator(),):
              TeacherCubit.get(context).teacherPath == null?
             JoinCommunityScreen(
                     image: 'assets/images/teacher-and-open-class-door.png')

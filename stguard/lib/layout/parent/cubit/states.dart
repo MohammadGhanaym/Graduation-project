@@ -166,3 +166,6 @@ class PickSchoolState extends ParentStates {}
 
 class PickCountryState extends ParentStates {}
 
+class CreditCardModelChangeState extends ParentStates {}
+
+

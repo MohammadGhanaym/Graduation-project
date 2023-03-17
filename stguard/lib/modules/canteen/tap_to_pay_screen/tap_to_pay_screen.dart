@@ -18,7 +18,7 @@ class TapPayScreen extends StatelessWidget {
               Navigator.pop(context);
               CanteenCubit.get(context).cancelBuyerListener();
             },
-            icon: Icon(Icons.arrow_back)),
+            icon: const Icon(Icons.arrow_back)),
       ),
       body: BlocConsumer<CanteenCubit, CanteenStates>(
         listener: (context, state) {},
@@ -55,7 +55,7 @@ class TapPayScreen extends StatelessWidget {
                                 color: Colors.red,
                                 image: AssetImage('assets/images/error.png')),
                           const SizedBox(
-                            height: 20,
+                            height: 30,
                           ),
                           if (state is PaymentErrorState ||
                               state is PaymentSuccessState)
@@ -79,7 +79,7 @@ class TapPayScreen extends StatelessWidget {
                                           .headline5!
                                           .copyWith(color: Colors.redAccent),
                                     ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 50,
                                   ),
                                   if (state is PaymentErrorState)
@@ -101,7 +101,7 @@ class TapPayScreen extends StatelessWidget {
                               CanteenCubit.get(context)
                                   .totalPrice
                                   .toStringAsFixed(2),
-                              style: Theme.of(context).textTheme.headline5,
+                              style: Theme.of(context).textTheme.headline4,
                             ),
                           const SizedBox(
                             height: 150,
@@ -119,27 +119,11 @@ class TapPayScreen extends StatelessWidget {
                               },
                             ),
                           if (state is StartListeningBuyerDataState)
-                           Container(
-  height: 250,
-  width: 250,
-  decoration: BoxDecoration(
-    shape: BoxShape.circle,
-    gradient: RadialGradient(
-      center: Alignment.center,
-      colors: [
-        Colors.blueAccent,
-        Colors.blueAccent,
-        Colors.blueAccent,
-        Colors.blueAccent.withOpacity(0.9),
-         Colors.blueAccent.withOpacity(0.8),
-        Colors.blueAccent.withOpacity(0.8),
-        Colors.blueAccent.withOpacity(0.8),
-         Colors.blueAccent.withOpacity(0.7),
-      ],
-      stops: const [0.0,0.1, 0.2,0.3, 0.4, 0.6, 0.8, 1.0],
-    ),
-  ),
-)
+                          const Image(
+                            width: 200,
+                            height: 250,
+                            fit: BoxFit.scaleDown,
+                            image:AssetImage('assets/images/tap_to_pay.png'))
 
 
                         ],

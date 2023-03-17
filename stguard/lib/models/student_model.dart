@@ -36,15 +36,12 @@ class StudentModel {
 }
 
 class SchoolAttendanceModel {
-  late bool arrived;
-  late DateTime arriveDate;
-  late bool left;
-  late DateTime leaveDate;
+  late String action;
+  late DateTime date;
+
   SchoolAttendanceModel.fromJson(Map<String, dynamic> json) {
-    arrived = json['arrive_state'];
-    arriveDate = json['arrive_date'].toDate();
-    left = json['leave_state'];
-    leaveDate = json['leave_date'].toDate();
+    action = json['action'];
+    date = json['updateTime'].toDate();
   }
 }
 

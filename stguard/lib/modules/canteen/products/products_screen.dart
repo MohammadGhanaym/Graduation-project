@@ -45,7 +45,9 @@ class ProductsScreen extends StatelessWidget {
                   actions: [
                     PopupMenuButton(
                       icon:
-                          const ImageIcon(AssetImage('assets/images/menu.png')),
+                          const ImageIcon(
+                            color:Colors.white,
+                            AssetImage('assets/images/adjust.png')),
                       itemBuilder: (context) => List.generate(
                           CanteenCubit.get(context).categories.length,
                           (index) => PopupMenuItem(

@@ -26,7 +26,6 @@ class HistoryScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) => LessonCard(
-
                       lesson: TeacherCubit.get(context).lessons[index],
                       onTap: () {
                         navigateTo(

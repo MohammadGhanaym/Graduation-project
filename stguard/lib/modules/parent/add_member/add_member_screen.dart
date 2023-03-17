@@ -11,6 +11,7 @@ import 'package:st_tracker/shared/styles/Themes.dart';
 class AddMember extends StatelessWidget {
   AddMember({super.key});
   var idController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ParentCubit, ParentStates>(
@@ -30,7 +31,15 @@ class AddMember extends StatelessWidget {
         return GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
           child: Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(
+              title: Text(
+                'Find your family member',
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6!
+                    .copyWith(color: Colors.white),
+              ),
+            ),
             body: Center(
               child: SingleChildScrollView(
                 child: Padding(
@@ -38,54 +47,52 @@ class AddMember extends StatelessWidget {
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Find your family member',
-                            style: TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.w600),
+                          const Image(
+                            image: AssetImage('assets/images/add_member.png'),
+                            width: 300,
+                            height: 300,
+                            fit: BoxFit.cover,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 30,
                           ),
-                          DefaultFormField(
-                              controller: idController,
-                              type: TextInputType.text,
-                              validate: (value) {
-                                if (value!.isEmpty) return 'Enter student ID';
-                                return null;
-                              },
-                              onSubmit: (p0) async =>
-                                  await ParentCubit.get(context)
-                                      .addFamilyMember(p0),
-                              label: 'Student ID'),
-                          SizedBox(
-                            height: 20,
+                          Form(
+                            key: formKey,
+                            child: DefaultFormField(
+                                controller: idController,
+                                type: TextInputType.text,
+                                validate: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Enter student ID';
+                                  }
+                                  return null;
+                                },
+                                onSubmit: (p0) async =>
+                                    await ParentCubit.get(context)
+                                        .addFamilyMember(p0),
+                                label: 'Student ID'),
+                          ),
+                          const SizedBox(
+                            height: 40,
                           ),
                           state is! AddFamilyMemberLoading
                               ? DefaultButton(
                                   text: 'Confirm',
-                                  height:55,
+                                  height: 55,
                                   color: defaultColor.withOpacity(0.8),
                                   onPressed: () async {
-                                    await ParentCubit.get(context)
+                                    if(formKey.currentState!.validate())
+                                    {
+                                      await ParentCubit.get(context)
                                         .addFamilyMember(idController.text);
+                                    }
+                                    
                                   },
                                 )
                               : LoadingOnWaiting(
-                                  height:55,
+                                  height: 55,
                                   color: defaultColor.withOpacity(0.8),
                                 ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Container(
-                            width: double.infinity,
-                            height: 200,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/images/add_member.png'),
-                                    fit: BoxFit.contain)),
-                          )
                         ])),
               ),
             ),

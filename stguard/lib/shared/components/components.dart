@@ -229,10 +229,7 @@ class UserInfo extends StatelessWidget {
       children: [
         Text(
           'Profile',
-          style: TextStyle(
-              fontSize: 30,
-              color: defaultColor.withOpacity(0.8),
-              fontWeight: FontWeight.w500),
+          style: Theme.of(context).textTheme.headline4
         ),
         const SizedBox(
           height: 10,
@@ -341,11 +338,12 @@ class ActivityItem extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 25,
-                          backgroundColor: Colors.grey[300],
+                          backgroundColor: Colors.grey[200],
                         ),
                         Image(
+                          color: defaultColor,
                           image: model.trans_id != 'null'
-                              ? const AssetImage('assets/images/purchase.png')
+                              ? const AssetImage('assets/images/shopping-cart.png')
                               : const AssetImage('assets/images/movement.png'),
                           width: 45,
                           height: 35,
@@ -356,54 +354,64 @@ class ActivityItem extends StatelessWidget {
                     const SizedBox(
                       width: 10,
                     ),
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          SizedBox(
-                            width: 160,
-                            child: Text(
-                              model.trans_id != 'null'
-                                  ? '$name Puchased'
-                                  : '$name ${model.activity}',
-                              maxLines: 2,
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w700),
+                    Expanded(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 5,
                             ),
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Text('${getDate(model.date)}')
-                        ]),
+                            SizedBox(
+                              width: 160,
+                              child: Text(
+                                model.trans_id != 'null'
+                                    ? '$name Puchased'
+                                    : '$name ${model.activity}',
+                                maxLines: 2,
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Text('${getDate(model.date)}')
+                          ]),
+                    ),
                     const SizedBox(
                       width: 10,
                     ),
                     model.trans_id != 'null'
-                        ? Text(
-                            '-${model.activity}',
-                            style: const TextStyle(fontSize: 16),
-                          )
-                        : Row(
-                            children: [
-                              model.activity == 'Arrived'
-                                  ? const SizedBox(
-                                      width: 10,
-                                    )
-                                  : const SizedBox(
-                                      width: 20,
-                                    ),
-                              ImageIcon(
-                                  size: 30,
-                                  color: model.activity == 'Arrived'
-                                      ? Colors.green
-                                      : Colors.red,
-                                  AssetImage(
-                                      'assets/images/${model.activity}.png')),
-                            ],
-                          )
+                        ? Container(
+                          alignment: AlignmentDirectional.center,
+                          width: 60,
+                          child: Text(
+                              '-${model.activity}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                        )
+                        : Container(
+                          alignment: AlignmentDirectional.center,
+                          width: 60,
+                          child: Row(
+                              children: [
+                                model.activity == 'Arrived'
+                                    ? const SizedBox(
+                                        width: 10,
+                                      )
+                                    : const SizedBox(
+                                        width: 20,
+                                      ),
+                                ImageIcon(
+                                    size: 30,
+                                    color: model.activity == 'Arrived'
+                                        ? Colors.green
+                                        : Colors.red,
+                                    AssetImage(
+                                        'assets/images/${model.activity}.png')),
+                              ],
+                            ),
+                        )
                   ],
                 ),
               ))),
@@ -1114,7 +1122,7 @@ class LessonCard extends StatelessWidget {
         width: double.infinity,
         height: 90,
         child: Card(
-            elevation: 5,
+            elevation: 4,
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: Row(
@@ -1273,15 +1281,13 @@ class CanteenProductCard extends StatelessWidget {
                       const SizedBox(
                         width: 30,
                       ),
-                      CanteenCubit.get(context)
+                      ImageIcon(
+                            color:CanteenCubit.get(context)
                               .selectedProducts
                               .keys
                               .contains(productID)
-                          ? const Icon(
-                              Icons.shopping_cart,
-                              color: defaultColor,
-                            )
-                          : const Icon(Icons.shopping_cart_outlined)
+                          ?defaultColor:Colors.black,
+                            AssetImage('assets/images/shopping-cart.png'))
                     ],
                   ),
                 ],

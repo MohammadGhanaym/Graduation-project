@@ -25,14 +25,14 @@ class CanteenInventoryScreen extends StatelessWidget {
 
           if (state is UpdatePriceSuccessState) {
             ShowToast(
-                message: 'Price is updated Successfully',
+                message: 'Price is updated successfully',
                 state: ToastStates.SUCCESS);
             Navigator.pop(context);
           }
 
           if (state is DeleteItemSuccessState) {
             ShowToast(
-                message: 'Item is deleted Successfully',
+                message: 'Item is deleted successfully',
                 state: ToastStates.SUCCESS);
             Navigator.pop(context);
           }

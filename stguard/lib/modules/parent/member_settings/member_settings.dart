@@ -263,11 +263,12 @@ class MemberSettingsScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    const Image(
-                                        width: 30,
-                                        height: 30,
-                                        image: AssetImage(
-                                            'assets/images/pocket_money.png')),
+                                    const ImageIcon(
+                                        
+                                        AssetImage(
+                                            'assets/images/pocket_money.png'),
+                                            size: 30,
+                                            color: defaultColor,),
                                     const SizedBox(
                                       width: 5,
                                     ),
