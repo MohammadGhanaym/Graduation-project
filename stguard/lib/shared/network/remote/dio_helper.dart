@@ -1,6 +1,8 @@
 //import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-/*
+
 class DioHelper {
   static late Dio dio;
   static init() {
@@ -10,8 +12,8 @@ class DioHelper {
     ));
   }
 
-  static Map<String, Object> NotificationMessage(
-      {required String title, required String body}) {
+  static Map<String, Object> notificationMessage(
+      {required String title, required String body,required String fcmToken}) {
     return {
       "to": fcmToken,
       "notification": {"title": title, "body": body, "sound": "default"},
@@ -30,16 +32,16 @@ class DioHelper {
   }
 
   static Future<Response> sendNotification({
-    required String notification_title,
-    required String notification_body,
+    required String title,
+    required String body,
+    required String receiverToken
   }) async {
     dio.options.headers = {
       'Content-Type': 'application/json',
-      'Authorization': fcm_project_token
+      'Authorization': fcmProjectToken
     };
     return await dio.post('https://fcm.googleapis.com/fcm/send',
-        data: NotificationMessage(
-            title: notification_title, body: notification_body));
+        data: notificationMessage(fcmToken: receiverToken ,
+            title: title, body: body));
   }
 }
-*/

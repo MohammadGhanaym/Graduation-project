@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/models/canteen_details_model.dart';
 import 'package:st_tracker/models/canteen_model.dart';
@@ -18,6 +19,7 @@ import 'package:st_tracker/modules/canteen/products/products_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:st_tracker/shared/network/remote/dio_helper.dart';
 
 class CanteenCubit extends Cubit<CanteenStates> {
   CanteenCubit() : super(CanteenInitState());
@@ -550,27 +552,27 @@ class CanteenCubit extends Cubit<CanteenStates> {
           print(buyer);
           print(buyer!.dailySpending);
           if (buyer != null) {
-              print('buyer!.dailySpending != null');
-              if (getDate(buyer!.dailySpending['updateTime'],
-                      format: 'yyyy-MM-dd') ==
-                  getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
-                print("I'm here");
-                await analyzeBuyerData();
-              } else {
-                print('buyer!.dailySpending == null');
-                await value.docs[0].reference.update({
-                  'dailySpending': {'value': 0.0, 'updateTime': DateTime.now()}
-                }).then(
-                  (value) async {
-                    await analyzeBuyerData();
-                  },
-                ).catchError((error) {
-                  cancelBuyerListener();
-                  cancelBuyer();
-                  emit(PaymentErrorState());
-                });
-              }
-            
+            print('buyer!.dailySpending != null');
+            if (getDate(buyer!.dailySpending['updateTime'],
+                    format: 'yyyy-MM-dd') ==
+                getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
+              print("I'm here");
+              await analyzeBuyerData();
+            } else {
+              print('buyer!.dailySpending == null');
+              await value.docs[0].reference.update({
+                'dailySpending': {'value': 0.0, 'updateTime': DateTime.now()}
+              }).then(
+                (value) async {
+                  buyer!.resetDailySpending();
+                  await analyzeBuyerData();
+                },
+              ).catchError((error) {
+                cancelBuyerListener();
+                cancelBuyer();
+                emit(PaymentErrorState());
+              });
+            }
           } else {
             cancelBuyer();
             emit(PaymentErrorState());
@@ -645,10 +647,11 @@ class CanteenCubit extends Cubit<CanteenStates> {
     }
   }
 
+  ParentModel? parent;
   WriteBatch batch = FirebaseFirestore.instance.batch();
   Future<void> completePayment(String parentID) async {
     batch = FirebaseFirestore.instance.batch();
-    ParentModel? parent;
+
     final parentDocRef = db.collection('Parents').doc(parentID);
     await parentDocRef.get().then((parentDoc) async {
       if (parentDoc.exists) {
@@ -778,6 +781,20 @@ class CanteenCubit extends Cubit<CanteenStates> {
           cancelBuyerListener();
           cancelBuyer();
           emit(PaymentSuccessState());
+          print('device token');
+          print(parent!.deviceToken);
+          if (parent!.deviceToken != null) {
+            DioHelper.sendNotification(
+                    title: '${buyer!.name!.split(' ')[0]} Purchased',
+                    body:
+                        '-$totalPrice\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}',
+                    receiverToken: parent!.deviceToken!)
+                .then((value) {
+              print(value.data);
+            }).catchError((error) {
+              print(error.toString());
+            });
+          }
         }).catchError((error) {
           cancelBuyerListener();
           cancelBuyer();

@@ -22,7 +22,7 @@ class StudentModel {
       if (json.containsKey('pocket money')) {
         pocketMoney = json['pocket money'].toInt();
       }
-      
+
       if (json.containsKey('dailySpending')) {
         dailySpending = json['dailySpending'];
       } else {
@@ -32,6 +32,10 @@ class StudentModel {
         allergies = json['allergies'];
       }
     }
+  }
+
+  void resetDailySpending() {
+    dailySpending = {'value': 0.0, 'updateTime': DateTime.now()};
   }
 }
 

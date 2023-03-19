@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,7 +21,6 @@ class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
 
   static ParentCubit get(context) => BlocProvider.of(context);
-
   late Database database;
 
   void createDatabase() async {
@@ -222,6 +222,9 @@ class ParentCubit extends Cubit<ParentStates> {
       if (st.docs.isNotEmpty) {
         if (studentsPaths.keys.contains(id)) {
           emit(FamilyMemberAlreadyExisted('You added this member before'));
+        } else if (st.docs[0]['parent'] != null) {
+          emit(FamilyMemberAlreadyHasParent(
+              'This student ID is already connected to another parent'));
         } else {
           batch.update(st.docs[0].reference, {'parent': userID});
           batch.set(
@@ -530,7 +533,6 @@ class ParentCubit extends Cubit<ParentStates> {
         .doc(userID)
         .update({'balance': parent!.balance + amount}).then((value) {
       emit(UpdateBalanceSuccess());
-      
     }).catchError((error) {
       emit(UpdateBalanceError());
     });

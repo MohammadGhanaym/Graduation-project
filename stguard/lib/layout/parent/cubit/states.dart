@@ -9,6 +9,10 @@ class FamilyMemberAlreadyExisted extends ParentStates {
   FamilyMemberAlreadyExisted(this.message);
 }
 
+class FamilyMemberAlreadyHasParent extends ParentStates {
+  String? message;
+  FamilyMemberAlreadyHasParent(this.message);
+}
 class IDNotFound extends ParentStates {
   String? message;
   IDNotFound(this.message);

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/modules/login/cubit/states.dart';
+import 'package:st_tracker/shared/network/remote/dio_helper.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitState());
@@ -51,10 +53,28 @@ class LoginCubit extends Cubit<LoginStates> {
     });
   }
 
-  void checkRole(String collName, dynamic uid) {
-    FirebaseFirestore.instance.collection(collName).doc(uid).get().then((user) {
+  Future<void> checkRole(String collName, dynamic uid) async {
+    await FirebaseFirestore.instance
+        .collection(collName)
+        .doc(uid)
+        .get()
+        .then((user) async {
       if (user.exists) {
-        emit(LoginSuccessState(uid));
+        if (role == 'parent') {
+          await FirebaseFirestore.instance
+              .collection(collName)
+              .doc(uid)
+              .update({
+            'device_token': await FirebaseMessaging.instance.getToken()
+          }).then((value) {
+            emit(LoginSuccessState(uid));
+          }).catchError((error) {
+            print(error.toString());
+            emit(LoginErrorState('Connection Error!'));
+          });
+        } else {
+          emit(LoginSuccessState(uid));
+        }
       } else {
         emit(LoginErrorState('You are not a $role'));
       }

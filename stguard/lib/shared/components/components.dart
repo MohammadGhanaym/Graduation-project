@@ -338,7 +338,7 @@ class ActivityItem extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 25,
-                          backgroundColor: Colors.grey[200],
+                          backgroundColor: Colors.grey[50],
                         ),
                         Image(
                           color: defaultColor,
@@ -361,16 +361,13 @@ class ActivityItem extends StatelessWidget {
                             const SizedBox(
                               height: 5,
                             ),
-                            SizedBox(
-                              width: 160,
-                              child: Text(
-                                model.trans_id != 'null'
-                                    ? '$name Puchased'
-                                    : '$name ${model.activity}',
-                                maxLines: 2,
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w700),
-                              ),
+                            Text(
+                              model.trans_id != 'null'
+                                  ? '$name Puchased'
+                                  : '$name ${model.activity}',
+                              maxLines: 2,
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(
                               height: 15,
