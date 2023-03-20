@@ -63,10 +63,10 @@ void Network::FirestoreDataUpdate(String studentUID, String actionType)
     updateData.clear();
     //updateData.set("fields/canteenStatus/booleanValue", true);
     FirebaseJson updateData;
-    updateData.set("fields/state/stringValue", actionType);
+    updateData.set("fields/action/stringValue", actionType);
     update_write.update_document_content = updateData.raw();
     update_write.update_document_path = documentPath.c_str();
-    update_write.update_masks = "state";
+    update_write.update_masks = "action";
     Serial.println(updateData.raw());
     
     writes.push_back(update_write);

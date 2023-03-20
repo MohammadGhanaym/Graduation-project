@@ -18,7 +18,7 @@
 
 void Set_Up_PN53(void);
 String readNFC(void);
-String tagToString(byte id[4]);
+String tagToString(byte id[7], uint8_t len);
 
 
 

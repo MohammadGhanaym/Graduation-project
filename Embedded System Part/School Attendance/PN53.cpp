@@ -49,7 +49,7 @@ void Set_Up_PN53(void)
 String readNFC(void)
 {
   String tagId = "None", dispTag = "None";
-  byte nuidPICC[4];
+  byte nuidPICC[7];
 
   boolean success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -67,7 +67,7 @@ String readNFC(void)
       Serial.print(" "); Serial.print(uid[i], DEC);
     }
     Serial.println();
-    tagId = tagToString(nuidPICC);
+    tagId = tagToString(nuidPICC, uidLength);
     dispTag = tagId;
     Serial.print(F("tagId is : "));
     Serial.println(tagId);
@@ -83,13 +83,12 @@ String readNFC(void)
   return tagId;
 }
 
-String tagToString(byte id[4])
+String tagToString(byte id[7], uint8_t len)
 {
   String tagId = "";
-  for (byte i = 0; i < 4; i++)
+  for (byte i = 0; i < len; i++)
   {
-    if (i < 3) tagId += String(id[i]);
-    else tagId += String(id[i]);
+    tagId += String(id[i]);
   }
   return tagId;
 }

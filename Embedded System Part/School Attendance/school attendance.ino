@@ -33,23 +33,22 @@ void setup()
   pinMode(redled, OUTPUT);
   pinMode(button, INPUT_PULLUP);
   pinMode(BUZZER, OUTPUT);
+
+  attachInterrupt(digitalPinToInterrupt(button), changeMode, CHANGE);
+
+  //default state
+  digitalWrite(redled, LOW);
+  actionType = "Arrived";
+
+
 }
 
 void loop()
 {
+  
   // default action
   // you will use the button here to update the action type
-  int buttonState  = digitalRead(button);
-  if(buttonState == LOW)
-    {
-      digitalWrite(redled,LOW);
-      actionType = "Arrived";
-    }
-  else
-    {
-      digitalWrite(redled, HIGH);
-      actionType ="Left";
-    }
+  
    studentUID = readNFC();
    if(studentUID)
    {
@@ -59,4 +58,22 @@ void loop()
     noTone(BUZZER);
     delay(200);
    }
+}
+
+void changeMode()
+{
+  Serial.println("Interrupt Code");
+      delayMicroseconds(200000);
+      digitalWrite(redled,!digitalRead(redled));
+      
+      if(digitalRead(redled)==HIGH)
+        {
+          actionType ="Left";
+        }else
+        {
+          actionType = "Arrived";
+        }
+        Serial.println(actionType);
+        Serial.println("-----------");
+    
 }
