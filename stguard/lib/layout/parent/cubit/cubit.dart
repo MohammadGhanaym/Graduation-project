@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -15,7 +13,6 @@ import 'package:st_tracker/models/student_model.dart';
 import 'package:st_tracker/models/product_model.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/background_service.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
@@ -237,7 +234,7 @@ class ParentCubit extends Cubit<ParentStates> {
           batch.commit().then((value) async {
             emit(AddFamilyMemberSuccess());
             await getMyStudents();
-            await refreshBackgroundService();
+            //await refreshBackgroundService();
           }).catchError((error) {
             print(error.toString());
             emit(AddFamilyMemberError());
@@ -497,7 +494,7 @@ class ParentCubit extends Cubit<ParentStates> {
 
       emit(UnpairDigitalIDSuccess());
       await getMyStudents();
-      await refreshBackgroundService();
+      //await refreshBackgroundService();
     }).catchError((error) {
       print(error);
       emit(UnpairDigitalIDError());
@@ -551,6 +548,7 @@ class ParentCubit extends Cubit<ParentStates> {
       await studentsPaths[id]!
           .update({'pocket money': pocket_money}).then((value) async {
         emit(SetPocketMoneySuccessState());
+        hideBottomSheet(); 
         await getMaxPocketMoney(id: id);
       }).catchError((error) {
         print(error);
@@ -630,7 +628,7 @@ class ParentCubit extends Cubit<ParentStates> {
       emit(UpdateAllergiesErrorState(error.toString()));
     });
   }
-
+/*
   Future<void> startBackgroundService() async {
     if (!await FlutterBackgroundService().isRunning()) {
       await BackgroundService.initializeService();
@@ -646,7 +644,7 @@ class ParentCubit extends Cubit<ParentStates> {
   void stopBackgroundService() {
     FlutterBackgroundService().invoke('stopService');
   }
-
+*/
   String cardNumber = '';
   String expiryDate = '';
   String cardHolderName = '';

@@ -28,6 +28,10 @@ class CanteenCubit extends Cubit<CanteenStates> {
   CanteenWorkerModel? canteen;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
+  void initialize() {
+    DioHelper.init();
+  }
+
   void getCanteenInfo() async {
     emit(GetUserInfoLoading());
     if (userID != null) {
@@ -223,22 +227,22 @@ class CanteenCubit extends Cubit<CanteenStates> {
     }
   }
 
-  Future<void> getProducts({String category = 'All'}) async {
+  Future<void> getProducts(
+      {String category = 'All', String search = ""}) async {
     emit(GetProductsLoadingState());
     products = {};
     if (schoolCanteenPath != null) {
       if (category == 'All') {
         categories.forEach((category) async {
-          await getProductbyCategory(category);
+          await getProductbyCategory(category, search);
         });
       } else {
-        await getProductbyCategory(category);
+        await getProductbyCategory(category, search);
       }
     }
-    getInventorySearchResults();
   }
 
-  Future<void> getProductbyCategory(category) async {
+  Future<void> getProductbyCategory(String category, String search) async {
     await schoolCanteenPath!.collection('Canteen').get().then((value) async {
       await schoolCanteenPath!
           .collection('Canteen')
@@ -250,8 +254,17 @@ class CanteenCubit extends Cubit<CanteenStates> {
           .then((value) {
         value.docs.forEach(
           (product) {
-            products[product.id] =
-                CanteenProductModel.fromMap(product.data(), category);
+            if (search.isNotEmpty) {
+              if (product['name']
+                  .toLowerCase()
+                  .contains(search.toLowerCase())) {
+                products[product.id] =
+                    CanteenProductModel.fromMap(product.data(), category);
+              }
+            } else {
+              products[product.id] =
+                  CanteenProductModel.fromMap(product.data(), category);
+            }
           },
         );
 
@@ -319,7 +332,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
     emit(ShowBottomSheetState());
   }
 
-  Map<String, CanteenProductModel> inventorySearchResults = {};
+  /*Map<String, CanteenProductModel> inventorySearchResults = {};
   void getInventorySearchResults({String search = 'All'}) {
     inventorySearchResults = {};
     if (search == 'All') {
@@ -332,7 +345,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
       });
     }
     emit(GetInventorySearchResultssSuccessState());
-  }
+  }*/
 
   File? itemImage;
 
@@ -891,6 +904,24 @@ class CanteenCubit extends Cubit<CanteenStates> {
       });
     }).catchError((error) {
       emit(DeleteItemErrorState());
+    });
+  }
+
+  void deleteCategory(String category) async {
+    emit(DeleteCategoryLoadingState());
+
+    await schoolCanteenPath!.collection('Canteen').get().then((canteenData) {
+      canteenData.docs[0].reference
+          .collection('categories')
+          .doc(category)
+          .delete()
+          .then((value) async {
+        emit(DeleteCategorySuccessState());
+        await getCategories();
+      }).catchError((error) {
+        emit(DeleteCategoryErrorState());
+        print(error.toString());
+      });
     });
   }
 }

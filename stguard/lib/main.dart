@@ -10,7 +10,7 @@ import 'package:st_tracker/shared/bloc_observer.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 import 'package:st_tracker/shared/network/remote/dio_helper.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message.data.toString());
@@ -20,7 +20,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  DioHelper.init();
+
+
+  Bloc.observer = MyBlocObserver();
+  await CacheHelper.init();
+
+  userID = CacheHelper.getData(key: 'id');
+  userRole = CacheHelper.getData(key: 'role');
+  Widget startScreen = LoginScreen();
+  if (userID != null) {
+    if(userRole == 'parent')
+    {
   FirebaseMessaging.instance.getToken();
   FirebaseMessaging.onMessage.listen((event) {
     print(event.data.toString());
@@ -33,14 +43,7 @@ void main() async {
   });
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  Bloc.observer = MyBlocObserver();
-  await CacheHelper.init();
-
-  userID = CacheHelper.getData(key: 'id');
-  userRole = CacheHelper.getData(key: 'role');
-  Widget startScreen = LoginScreen();
-  if (userID != null) {
+    }
     startScreen = homeScreens[userRole]!;
   }
 
@@ -51,10 +54,9 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   Widget startScreen;
-  MyApp({required this.startScreen});
+  MyApp({super.key, required this.startScreen});
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -70,6 +72,7 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
             create: (context) => CanteenCubit()
+              ..initialize()
               ..getCanteenInfo()
               ..getCanteenPath())
       ],

@@ -33,12 +33,14 @@ class AttendanceHistoryScreen extends StatelessWidget {
                   Row(
                     children: const [
                       SizedBox(
-                        width: 150,
+                        width: 140,
                       ),
-                      Text(
-                        'Time',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w500),
+                      Expanded(
+                        child: Text(
+                          'Time',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
                       ),
                       SizedBox(width: 35),
                       Text(
@@ -49,19 +51,16 @@ class AttendanceHistoryScreen extends StatelessWidget {
                     ],
                   ),
                   const Divider(),
-                  SizedBox(
-                    height: 500,
-                    width: double.infinity,
-                    child: ListView.separated(
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) => AttendanceHistoryItem(
-                            model: ParentCubit.get(context)
-                                .attendance_history[index]),
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 10),
-                        itemCount:
-                            ParentCubit.get(context).attendance_history.length),
-                  )
+                  ListView.separated(
+                    shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) => AttendanceHistoryItem(
+                          model: ParentCubit.get(context)
+                              .attendance_history[index]),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 10),
+                      itemCount:
+                          ParentCubit.get(context).attendance_history.length)
                 ],
               ),
             ),

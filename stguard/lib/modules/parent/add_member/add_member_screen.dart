@@ -6,7 +6,7 @@ import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/layout/parent/parent_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class AddMember extends StatelessWidget {
   AddMember({super.key});
@@ -25,6 +25,8 @@ class AddMember extends StatelessWidget {
           ShowToast(message: state.message!, state: ToastStates.WARNING);
         } else if (state is IDNotFound) {
           ShowToast(message: state.message!, state: ToastStates.ERROR);
+        } else if (state is FamilyMemberAlreadyHasParent) {
+          ShowToast(message: state.message!, state: ToastStates.WARNING);
         }
       },
       builder: (context, state) {
@@ -81,12 +83,10 @@ class AddMember extends StatelessWidget {
                                   height: 55,
                                   color: defaultColor.withOpacity(0.8),
                                   onPressed: () async {
-                                    if(formKey.currentState!.validate())
-                                    {
+                                    if (formKey.currentState!.validate()) {
                                       await ParentCubit.get(context)
-                                        .addFamilyMember(idController.text);
+                                          .addFamilyMember(idController.text);
                                     }
-                                    
                                   },
                                 )
                               : LoadingOnWaiting(

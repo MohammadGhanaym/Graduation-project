@@ -136,20 +136,18 @@ class CanteenHomeScreen extends StatelessWidget {
                                   width: 100,
                                   image: AssetImage(
                                       'assets/images/canteen_sign.png')),
-                              Container(
-                                child: Column(
-                                  children: const [
-                                    SizedBox(
-                                      height: 60,
-                                    ),
-                                    Image(
-                                        color: Colors.white,
-                                        height: 200,
-                                        width: 200,
-                                        image: AssetImage(
-                                            'assets/images/home_store.png')),
-                                  ],
-                                ),
+                              Column(
+                                children: const [
+                                  SizedBox(
+                                    height: 60,
+                                  ),
+                                  Image(
+                                      color: Colors.white,
+                                      height: 200,
+                                      width: 200,
+                                      image: AssetImage(
+                                          'assets/images/home_store.png')),
+                                ],
                               ),
                             ],
                           ),

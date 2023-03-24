@@ -134,3 +134,9 @@ class DeleteItemSuccessState extends CanteenStates {}
 class DeleteItemLoadingState extends CanteenStates {}
 
 class DeleteItemErrorState extends CanteenStates {}
+
+class DeleteCategorySuccessState extends CanteenStates {}
+
+class DeleteCategoryLoadingState extends CanteenStates {}
+
+class DeleteCategoryErrorState extends CanteenStates {}

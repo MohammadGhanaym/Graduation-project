@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class AddProductScreen extends StatelessWidget {
   AddProductScreen({super.key});

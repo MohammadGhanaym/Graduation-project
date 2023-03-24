@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class AllergensScreen extends StatelessWidget {
   List<String> allergens = [
@@ -15,7 +14,7 @@ class AllergensScreen extends StatelessWidget {
     'Wheat',
     'Diabetic'
   ];
-  var student_id;
+  String student_id;
   AllergensScreen({super.key, required this.student_id});
 
   @override

@@ -4,7 +4,7 @@ import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/modules/canteen/tap_to_pay_screen/tap_to_pay_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class ProcessedScreen extends StatelessWidget {
   const ProcessedScreen({super.key});
@@ -13,7 +13,7 @@ class ProcessedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        
+        elevation: 0.0,
       ),
       body: BlocConsumer<CanteenCubit, CanteenStates>(
         listener: (context, state) {
@@ -23,90 +23,86 @@ class ProcessedScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    height: 110,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: defaultColor),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Total Price',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline5!
-                                  .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(
-                              width: 80,
-                            ),
-                            Text(
-                              CanteenCubit.get(context)
-                                  .totalPrice
-                                  .toStringAsFixed(2),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline5!
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'Items Count',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline5!
-                                  .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(
-                              width: 80,
-                            ),
-                            Text(
-                              '${CanteenCubit.get(context).itemsCount}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline5!
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  height: 200,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+                      color: defaultColor),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Total Price',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline5!
+                                .copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(
+                            width: 80,
+                          ),
+                          Text(
+                            CanteenCubit.get(context)
+                                .totalPrice
+                                .toStringAsFixed(2),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline5!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Items Count',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline5!
+                                .copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(
+                            width: 80,
+                          ),
+                          Text(
+                            '${CanteenCubit.get(context).itemsCount}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline5!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30,),
+                       DefaultButton(
+                           color: Colors.white,
+                           onPressed: () {
+                             CanteenCubit.get(context).listentoBuyer();
+                           },
+                           text: 'CONFIRM',
+                           textColor: defaultColor),
+                    ],
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    height: 50,
-                    child: DefaultButton(
-                        color: defaultColor.withOpacity(0.8),
-                        onPressed: () {
-                          CanteenCubit.get(context).listentoBuyer();
-                        },
-                        text: 'CONFIRM'),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const Divider(),
-                  ListView.separated(
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+               
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.separated(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemBuilder: (context, index) => ProductCartItem(
@@ -162,11 +158,11 @@ class ProcessedScreen extends StatelessWidget {
                           ),
                       itemCount:
                           CanteenCubit.get(context).selectedProducts.length),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+              ],
             ),
           );
         },

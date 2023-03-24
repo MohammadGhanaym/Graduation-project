@@ -21,6 +21,8 @@ class StudentModel {
 
       if (json.containsKey('pocket money')) {
         pocketMoney = json['pocket money'].toInt();
+      } else {
+        pocketMoney = 0.0;
       }
 
       if (json.containsKey('dailySpending')) {

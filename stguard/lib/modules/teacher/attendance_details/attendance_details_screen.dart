@@ -7,7 +7,7 @@ import 'package:st_tracker/layout/teacher/cubit/states.dart';
 import 'package:st_tracker/models/student_attendance.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class AttendanceDetailsScreen extends StatelessWidget {
   LessonModel lesson;

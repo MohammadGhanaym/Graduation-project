@@ -1,6 +1,4 @@
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/models/activity_model.dart';
 import 'package:st_tracker/models/canteen_product_model.dart';
@@ -24,7 +21,6 @@ import 'package:st_tracker/modules/parent/attendance_history/attendance_history_
 import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
 import 'package:st_tracker/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/background_service.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
@@ -227,10 +223,7 @@ class UserInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Profile',
-          style: Theme.of(context).textTheme.headline4
-        ),
+        Text('Profile', style: Theme.of(context).textTheme.headline4),
         const SizedBox(
           height: 10,
         ),
@@ -343,7 +336,8 @@ class ActivityItem extends StatelessWidget {
                         Image(
                           color: defaultColor,
                           image: model.trans_id != 'null'
-                              ? const AssetImage('assets/images/shopping-cart.png')
+                              ? const AssetImage(
+                                  'assets/images/shopping-cart.png')
                               : const AssetImage('assets/images/movement.png'),
                           width: 45,
                           height: 35,
@@ -372,7 +366,7 @@ class ActivityItem extends StatelessWidget {
                             const SizedBox(
                               height: 15,
                             ),
-                            Text('${getDate(model.date)}')
+                            Text(getDate(model.date))
                           ]),
                     ),
                     const SizedBox(
@@ -380,17 +374,17 @@ class ActivityItem extends StatelessWidget {
                     ),
                     model.trans_id != 'null'
                         ? Container(
-                          alignment: AlignmentDirectional.center,
-                          width: 60,
-                          child: Text(
+                            alignment: AlignmentDirectional.center,
+                            width: 60,
+                            child: Text(
                               '-${model.activity}',
                               style: const TextStyle(fontSize: 16),
                             ),
-                        )
+                          )
                         : Container(
-                          alignment: AlignmentDirectional.center,
-                          width: 60,
-                          child: Row(
+                            alignment: AlignmentDirectional.center,
+                            width: 60,
+                            child: Row(
                               children: [
                                 model.activity == 'Arrived'
                                     ? const SizedBox(
@@ -408,7 +402,7 @@ class ActivityItem extends StatelessWidget {
                                         'assets/images/${model.activity}.png')),
                               ],
                             ),
-                        )
+                          )
                   ],
                 ),
               ))),
@@ -489,8 +483,7 @@ class ProductItem extends StatelessWidget {
         flex: 4,
         child: Text(
           product.productName,
-                                          maxLines: 3,
-
+          maxLines: 3,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
@@ -537,14 +530,14 @@ class AttendanceHistoryItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${getDate(model.date, format: 'EEEE')}',
+                    getDate(model.date, format: 'EEEE'),
                     style: const TextStyle(
                         fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
                     height: 10,
                   ),
-                  Text('${getDate(model.date, format: 'yyyy-MM-dd')}',
+                  Text(getDate(model.date, format: 'dd/MM/yyyy'),
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.bold))
                 ],
@@ -553,14 +546,22 @@ class AttendanceHistoryItem extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
                 thickness: 0.5,
               ),
-              const SizedBox(width: 35),
-              Text('${getDate(model.date, format: 'hh:mm:ss')}'),
-              model.activity == 'Arrived'
-                  ? const SizedBox(width: 40)
-                  : const SizedBox(width: 50),
-              ImageIcon(AssetImage('assets/images/${model.activity}.png'),
-                  color:
-                      model.activity == 'Arrived' ? Colors.green : Colors.red)
+              const SizedBox(width: 25),
+              Expanded(child: Text(getDate(model.date, format: 'hh:mm a'))),
+              
+              SizedBox(
+                width: 50,
+                child: Row(
+                  children: [
+                    model.activity == 'Arrived'
+                  ? const SizedBox(width: 10)
+                  : const SizedBox(width: 20),
+                    ImageIcon(AssetImage('assets/images/${model.activity}.png'),
+                        color:
+                            model.activity == 'Arrived' ? Colors.green : Colors.red),
+                  ],
+                ),
+              )
             ],
           ),
         ),
@@ -625,13 +626,11 @@ class SliderBuilder extends StatelessWidget {
                 value: ParentCubit.get(context).pocket_money,
                 min: 0,
                 max: 500,
-                label:
-                    '${ParentCubit.get(context).pocket_money}',
+                label: '${ParentCubit.get(context).pocket_money}',
                 divisions: 500 ~/ 5,
                 onChanged: (value) {
                   if (value <= ParentCubit.get(context).parent!.balance) {
-                    ParentCubit.get(context)
-                        .setPocketMoney(money: value);
+                    ParentCubit.get(context).setPocketMoney(money: value);
                   }
                 },
                 onChangeStart: (value) {
@@ -1279,12 +1278,13 @@ class CanteenProductCard extends StatelessWidget {
                         width: 30,
                       ),
                       ImageIcon(
-                            color:CanteenCubit.get(context)
-                              .selectedProducts
-                              .keys
-                              .contains(productID)
-                          ?defaultColor:Colors.black,
-                            AssetImage('assets/images/shopping-cart.png'))
+                          color: CanteenCubit.get(context)
+                                  .selectedProducts
+                                  .keys
+                                  .contains(productID)
+                              ? defaultColor
+                              : Colors.black,
+                          const AssetImage('assets/images/shopping-cart.png'))
                     ],
                   ),
                 ],
@@ -1332,8 +1332,7 @@ class ProductSearchItem extends StatelessWidget {
               const SizedBox(
                 width: 10,
               ),
-              SizedBox(
-                width: 160,
+              Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1494,6 +1493,70 @@ class ProductCartItem extends StatelessWidget {
   }
 }
 
+class InventoryCategoryCard extends StatelessWidget {
+  String? category;
+  void Function()? onPressed;
+  InventoryCategoryCard({super.key, required this.category, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+        child: Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(category!),
+          const SizedBox(
+            width: 5,
+          ),
+          IconButton(
+              onPressed: onPressed,
+              icon: Icon(
+                Icons.delete,
+                color: defaultColor.withOpacity(0.8),
+              ),
+              padding: EdgeInsets.zero)
+        ],
+      ),
+    ));
+  }
+}
+
+class SearchTextFormField extends StatelessWidget {
+  TextEditingController searchController;
+  void Function(String)? onChanged;
+  SearchTextFormField(
+      {super.key, required this.searchController, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: IconButton(
+              onPressed: ()async {
+                searchController.clear();
+                await CanteenCubit.get(context).getProducts();
+              },
+              icon: const Icon(Icons.clear)),
+          contentPadding: const EdgeInsets.only(top: 10, bottom: 10, left: 10),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide.none),
+          hintText: 'Search...'),
+      controller: searchController,
+      keyboardType: TextInputType.text,
+      validator: (value) {
+        return null;
+      },
+      onChanged: onChanged,
+    );
+  }
+}
+
 Future<Widget?> showDefaultDialog(context,
     {Widget? content,
     required String title,
@@ -1519,5 +1582,3 @@ Future<Widget?> showDefaultDialog(context,
     ),
   );
 }
-
-

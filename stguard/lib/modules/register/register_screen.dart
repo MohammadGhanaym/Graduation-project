@@ -5,7 +5,7 @@ import 'package:st_tracker/modules/register/cubit/cubit.dart';
 import 'package:st_tracker/modules/register/cubit/states.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});

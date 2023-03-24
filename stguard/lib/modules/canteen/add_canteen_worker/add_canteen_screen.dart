@@ -6,7 +6,7 @@ import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/layout/canteen/Canteen_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:st_tracker/shared/styles/themes.dart';
 
 class AddCanteenScreen extends StatelessWidget {
   AddCanteenScreen({super.key});
