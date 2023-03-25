@@ -109,45 +109,38 @@ class ParentCubit extends Cubit<ParentStates> {
       print('paths error');
       emit(GetStudentsPathsError(error.toString()));
     });
-    await getStudentsData();
     await listentoNewData();
     await getDataFromActivityTable();
   }
 
-  List<StudentModel?> studentsData = [];
-  Future<void> getStudentsData() async {
-    studentsData = [];
+  Map<String,StudentModel?> studentsData = {};
+  Future<void> getStudentsData(
+      String stId, DocumentReference<Map<String, dynamic>> stDoc) async {
+    await stDoc.get().then((value) {
+      if (value.data() != null) {
+        studentsData[stId] = StudentModel.fromJson(value.data());
+        emit(GetStudentDataSuccess());
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetStudentDataError());
+    });
+  }
+
+
+  Future<void> listentoNewData() async {
     emit(GetStudentDataLoading());
+    studentsData = {};
+    cancelListeners();
     if (studentsPaths.isNotEmpty) {
-      studentsPaths.forEach(
-        (stId, stDoc) async {
-          await stDoc.get().then((value) {
-            if (value.data() != null) {
-              studentsData.add(StudentModel.fromJson(value.data()));
-              emit(GetStudentDataSuccess());
-            }
-          }).catchError((error) {
-            print(error.toString());
-            emit(GetStudentDataError());
-          });
-        },
-      );
+      studentsPaths.forEach((stId, stDoc) async {
+        await getStudentsData(stId, stDoc);
+        await addNewAttendance(stId, stDoc);
+        await addNewTranscation(stId, stDoc);
+      });
     } else {
       emit(GetStudentDataError());
     }
-  }
-
-  Future<void> listentoNewData() async {
-    cancelListeners();
-    print('*' * 100);
-    print(transListeners.length);
-    print(attendListeners.length);
-    print('*' * 100);
-
-    studentsPaths.forEach((stId, stDoc) async {
-      await addNewAttendance(stId, stDoc);
-      await addNewTranscation(stId, stDoc);
-    });
   }
 
   List<Country> countries = [];
@@ -428,6 +421,20 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
+  Future<void> getSettingsData(StudentModel st) async {
+    pocket_money = st.pocketMoney.toDouble();
+    allergies = [Icons.add];
+    selectedAllergies = [];
+    if (st.allergies != null) {
+      st.allergies!.forEach((element) {
+        allergies.add(element);
+        selectedAllergies.add(element);
+      });
+    }
+    active = st.parent;
+    await getLocation(st.id);
+  }
+
   bool isPaired = true; // child settings
   bool settingsVisibility = true;
   void changeSettingsVisibility() {
@@ -548,8 +555,9 @@ class ParentCubit extends Cubit<ParentStates> {
       await studentsPaths[id]!
           .update({'pocket money': pocket_money}).then((value) async {
         emit(SetPocketMoneySuccessState());
-        hideBottomSheet(); 
+        hideBottomSheet();
         await getMaxPocketMoney(id: id);
+        await getStudentsData(id, studentsPaths[id]!);
       }).catchError((error) {
         print(error);
         emit(SetPocketMoneyErrorState());
@@ -579,29 +587,29 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(ShowBottomSheetState());
   }
 
-  List<dynamic> selectedAllergens = [];
+  List<dynamic> selectedAllergies = [];
   void addAllergen(value) {
-    selectedAllergens.add(value);
+    selectedAllergies.add(value);
     emit(AddAllergenState());
   }
 
   void removeAllergen(value) {
-    selectedAllergens.remove(value);
+    selectedAllergies.remove(value);
     emit(RemoveAllergenState());
   }
 
-  List<dynamic> allergens = [];
+  List<dynamic> allergies = [];
   Future<void> getAllergies(id) async {
-    selectedAllergens = [];
-    allergens = [Icons.add];
+    selectedAllergies = [];
+    allergies = [Icons.add];
     emit(GetAllergiesLoadingState());
 
     await studentsPaths[id]!.get().then((value) {
       if (value.data()!.containsKey('allergies')) {
         if (value['allergies'] != null) {
           value['allergies'].forEach((element) {
-            allergens.add(element);
-            selectedAllergens.add(element);
+            allergies.add(element);
+            selectedAllergies.add(element);
           });
           emit(GetAllergiesSucessState());
         } else {
@@ -619,32 +627,17 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(UpdateAllergiesLoadingState());
 
     await studentsPaths[id]!.update({
-      'allergies': selectedAllergens.isNotEmpty ? selectedAllergens : null
+      'allergies': selectedAllergies.isNotEmpty ? selectedAllergies : null
     }).then((value) async {
       emit(UpdateAllergiesSuccessState());
       await getAllergies(id);
+      await getStudentsData(id, studentsPaths[id]!);
     }).catchError((error) {
       print(error);
       emit(UpdateAllergiesErrorState(error.toString()));
     });
   }
-/*
-  Future<void> startBackgroundService() async {
-    if (!await FlutterBackgroundService().isRunning()) {
-      await BackgroundService.initializeService();
-    }
-  }
 
-  Future<void> refreshBackgroundService() async {
-    FlutterBackgroundService().invoke('stopService');
-    await Future.delayed(const Duration(seconds: 5));
-    await BackgroundService.initializeService();
-  }
-
-  void stopBackgroundService() {
-    FlutterBackgroundService().invoke('stopService');
-  }
-*/
   String cardNumber = '';
   String expiryDate = '';
   String cardHolderName = '';

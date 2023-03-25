@@ -4,7 +4,6 @@ import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/modules/register/cubit/cubit.dart';
 import 'package:st_tracker/modules/register/cubit/states.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
 import 'package:st_tracker/shared/styles/themes.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -50,14 +49,14 @@ class RegisterScreen extends StatelessWidget {
                           color: Theme.of(context).primaryColor),
                           child:Column(
                             children: [
-                              Image(
+                              const Image(
                                 color: Colors.white,
                                 width: 150,
                                 height: 150,
                                 image: 
                               AssetImage(
                                         'assets/images/user.png')),
-                                        SizedBox(height: 10,),
+                                        const SizedBox(height: 10,),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           children: [
@@ -74,7 +73,7 @@ class RegisterScreen extends StatelessWidget {
                           ) ,
                         
                       ),
-                      SizedBox(height: 20,),
+                      const SizedBox(height: 20,),
                       // ID and password fields
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -91,7 +90,7 @@ class RegisterScreen extends StatelessWidget {
                                 },
                                 label: 'Name',
                                 prefix: Icons.person_outlined),
-                            SizedBox(
+                            const SizedBox(
                               height: 15,
                             ),
                             DefaultFormField(
@@ -105,7 +104,7 @@ class RegisterScreen extends StatelessWidget {
                                 },
                                 label: 'Email',
                                 prefix: Icons.email_outlined),
-                            SizedBox(
+                            const SizedBox(
                               height: 15,
                             ),
                             DefaultFormField(
@@ -137,7 +136,7 @@ class RegisterScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
+                      const SizedBox(height: 10,),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Column(
@@ -153,7 +152,7 @@ class RegisterScreen extends StatelessWidget {
                                           .isSelected(value);
                                     }, 
                                 title: 'Parent'),
-                               SizedBox(
+                               const SizedBox(
                                   width: 10,
                                 ),
                                 DefaultRadioListTile(value: 'teacher', 
@@ -166,7 +165,7 @@ class RegisterScreen extends StatelessWidget {
                                 title: 'Teacher')
                                 ],
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             DefaultRadioListTile(value: 'canteen worker', 
@@ -177,13 +176,13 @@ class RegisterScreen extends StatelessWidget {
                                 }, 
                             title: 'Canteen Worker')
                             ,
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       // sign in button

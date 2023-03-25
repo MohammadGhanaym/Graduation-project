@@ -13,10 +13,6 @@ class MemberSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ParentCubit.get(context).getLocation(student!.id!);
-    ParentCubit.get(context).getMaxPocketMoney(id: student!.id!);
-    ParentCubit.get(context).getAllergies(student!.id);
-    ParentCubit.get(context).getActiveState(student!.id!);
     return BlocConsumer<ParentCubit, ParentStates>(
       listener: (context, state) {
         if (state is UnpairDigitalIDSuccess) {
@@ -49,7 +45,7 @@ class MemberSettingsScreen extends StatelessWidget {
                         child: MaterialButton(
                             onPressed: () async {
                               await ParentCubit.get(context)
-                                  .updatePocketMoney(id: student!.id!);
+                                  .updatePocketMoney(id: student!.id);
                             },
                             child: const Text('Give',
                                 style: TextStyle(
@@ -59,7 +55,7 @@ class MemberSettingsScreen extends StatelessWidget {
                 : null,
             body: Padding(
               padding: const EdgeInsets.all(10.0),
-              child: ParentCubit.get(context).active == null
+              child: state is GetDigitalIDStateLoading
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
@@ -89,9 +85,9 @@ class MemberSettingsScreen extends StatelessWidget {
                                     textBaseline: TextBaseline.alphabetic,
                                     crossAxisAlignment: CrossAxisAlignment.baseline,
                                     children: [
-                                      Container(
+                                      const SizedBox(
                                           width: 160,
-                                          child: const Text(
+                                          child: Text(
                                             'Digital ID Number',
                                             style: TextStyle(
                                                 fontSize: 20,
@@ -112,7 +108,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                   ),
                                   Row(
                                     children: [
-                                      Container(
+                                      SizedBox(
                                           width: 180,
                                           child: Text(
                                             ParentCubit.get(context).isPaired &&
@@ -148,7 +144,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                         onChanged: (value) async {
                                           await ParentCubit.get(context)
                                               .changeDigitalIDState(
-                                                  student!.id!);
+                                                  student!.id);
                                         },
                                       )
                                     ],
@@ -241,7 +237,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 10,
                                     ),
-                                    Container(
+                                    SizedBox(
                                       width: 190,
                                       height: 40,
                                       child: OutlinedButton(
@@ -378,7 +374,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                       height: 80,
                                                       icon: ParentCubit.get(
                                                               context)
-                                                          .allergens
+                                                          .allergies
                                                           .reversed
                                                           .toList()[index],
                                                       context: context),
@@ -387,7 +383,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                       const SizedBox(width: 5),
                                               itemCount:
                                                   ParentCubit.get(context)
-                                                      .allergens
+                                                      .allergies
                                                       .length))
                                     ])
                               ],
@@ -413,7 +409,7 @@ class MemberSettingsScreen extends StatelessWidget {
                               },
                               onPressed2: () async {
                                 await ParentCubit.get(context)
-                                    .unpairDigitalID(student!.id!);
+                                    .unpairDigitalID(student!.id);
                               },
                             );
                           },

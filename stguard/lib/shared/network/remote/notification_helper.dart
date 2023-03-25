@@ -1,16 +1,10 @@
-//import 'package:dio/dio.dart';
-import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:convert';
+import 'package:http/http.dart';
 import 'package:st_tracker/shared/components/constants.dart';
+import 'package:http/http.dart' as http;
 
-class DioHelper {
-  static late Dio dio;
-  static init() {
-    dio = Dio(BaseOptions(
-      baseUrl: 'https://fcm.googleapis.com',
-      receiveDataWhenStatusError: true,
-    ));
-  }
+class NotificationHelper {
+
 
   static Map<String, Object> notificationMessage(
       {required String title, required String body,required String fcmToken}) {
@@ -36,12 +30,12 @@ class DioHelper {
     required String body,
     required String receiverToken
   }) async {
-    dio.options.headers = {
+
+    return await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        body:jsonEncode(notificationMessage(fcmToken: receiverToken ,
+            title: title, body: body)) , headers: {
       'Content-Type': 'application/json',
       'Authorization': fcmProjectToken
-    };
-    return await dio.post('https://fcm.googleapis.com/fcm/send',
-        data: notificationMessage(fcmToken: receiverToken ,
-            title: title, body: body));
+    });
   }
 }

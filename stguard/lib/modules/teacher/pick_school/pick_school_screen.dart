@@ -5,7 +5,6 @@ import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/states.dart';
 import 'package:st_tracker/modules/teacher/add_teacher/add_teacher_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class TeacherPickSchoolScreen extends StatelessWidget {
@@ -23,7 +22,7 @@ class TeacherPickSchoolScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Padding(
-            padding: EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
                 horizontal: 15,
                 vertical: 10),
             child: ListView.separated(

@@ -4,7 +4,6 @@ import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/states.dart';
 import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 
 class TakeAttendanceScreen extends StatelessWidget {
   TakeAttendanceScreen({

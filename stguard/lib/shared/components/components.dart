@@ -413,12 +413,17 @@ class ActivityItem extends StatelessWidget {
 
 class FamilyMemberCard extends StatelessWidget {
   StudentModel? model;
+  bool isErrorOccured = false;
   FamilyMemberCard(this.model, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => navigateTo(context, MemberSettingsScreen(student: model)),
+      onTap: () {
+        ParentCubit.get(context).getSettingsData(model!).then((value) {
+          navigateTo(context, MemberSettingsScreen(student: model));
+        });
+      },
       child: Container(
         padding: EdgeInsets.zero,
         height: 140,
@@ -439,7 +444,11 @@ class FamilyMemberCard extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.white,
-                      backgroundImage: NetworkImage(model!.image!),
+                      backgroundImage:!isErrorOccured? NetworkImage(model!.image!):const AssetImage('assets/images/no-image.png') as ImageProvider<Object>?,
+                      onBackgroundImageError: (exception, stackTrace) {
+                        isErrorOccured = true;
+                      },
+                   
                     ),
                   ),
                   const SizedBox(
@@ -548,17 +557,17 @@ class AttendanceHistoryItem extends StatelessWidget {
               ),
               const SizedBox(width: 25),
               Expanded(child: Text(getDate(model.date, format: 'hh:mm a'))),
-              
               SizedBox(
                 width: 50,
                 child: Row(
                   children: [
                     model.activity == 'Arrived'
-                  ? const SizedBox(width: 10)
-                  : const SizedBox(width: 20),
+                        ? const SizedBox(width: 10)
+                        : const SizedBox(width: 20),
                     ImageIcon(AssetImage('assets/images/${model.activity}.png'),
-                        color:
-                            model.activity == 'Arrived' ? Colors.green : Colors.red),
+                        color: model.activity == 'Arrived'
+                            ? Colors.green
+                            : Colors.red),
                   ],
                 ),
               )
@@ -668,57 +677,6 @@ class SliderSideLabel extends StatelessWidget {
         ));
   }
 }
-
-/*
-class RechargeItem extends StatelessWidget {
-  String leadIcon;
-  double? iconSize;
-  String text;
-  double width;
-  void Function()? ontap;
-  RechargeItem(
-      {super.key,
-      required this.leadIcon,
-      this.iconSize,
-      required this.text,
-      required this.width,
-      required this.ontap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: ontap,
-      child: SizedBox(
-          width: double.infinity,
-          height: screen_height * 0.15,
-          child: Card(
-              child: Padding(
-            padding: const EdgeInsets.only(top: 20, left: 20, bottom: 20),
-            child: Row(children: [
-              Image(
-                image: AssetImage(leadIcon),
-                width: iconSize,
-                height: iconSize,
-              ),
-              SizedBox(
-                width: screen_width * 0.05,
-              ),
-              Text(
-                text,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-              ),
-              SizedBox(
-                width: width,
-              ),
-              const Icon(Icons.arrow_forward_ios_outlined,
-                  size: 20, color: defaultColor)
-            ]),
-          ))),
-    );
-  }
-}
-*/
 
 class CountryItem extends StatelessWidget {
   String country;
@@ -861,19 +819,19 @@ class AllergenSelectionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        if (ParentCubit.get(context).selectedAllergens.contains(icon)) {
+        if (ParentCubit.get(context).selectedAllergies.contains(icon)) {
           ParentCubit.get(context).removeAllergen(icon);
         } else {
           ParentCubit.get(context).addAllergen(icon);
         }
-        print(ParentCubit.get(context).selectedAllergens);
+        print(ParentCubit.get(context).selectedAllergies);
       },
       child: Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadiusDirectional.circular(10),
             border: Border.all(
                 width: 3,
-                color: ParentCubit.get(context).selectedAllergens.contains(icon)
+                color: ParentCubit.get(context).selectedAllergies.contains(icon)
                     ? defaultColor
                     : Theme.of(context).scaffoldBackgroundColor)),
         width: 30,
@@ -935,61 +893,6 @@ class LoadingOnWaiting extends StatelessWidget {
         )));
   }
 }
-/*
-class MyDropdown extends StatelessWidget {
-  double width;
-  double height;
-  double radius;
-  Color borderColor;
-  MyDropdown(
-      {super.key,
-      required this.width,
-      required this.height,
-      required this.radius,
-      required this.borderColor});
-
-  @override
-  Widget build(BuildContext context) {
-    print(width);
-    return Container(
-      alignment: AlignmentDirectional.center,
-      width: width * 0.4,
-      height: height * 0.05,
-      margin: EdgeInsets.all(width * 0.01),
-      padding: EdgeInsets.symmetric(
-          horizontal: width * 0.02, vertical: height * 0.01),
-      decoration: BoxDecoration(
-          border: Border.all(color: borderColor, width: width * 0.002),
-          borderRadius: BorderRadiusDirectional.circular(radius)),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: TeacherCubit.get(context).selectedGrade,
-          hint: Text(
-            'Select Grade',
-            style: TextStyle(fontSize: width * 0.04),
-          ),
-          isExpanded: true,
-          onChanged: (value) {
-            TeacherCubit.get(context).selectGrade(value);
-          },
-          iconSize: width * 0.07,
-          icon: const Icon(Icons.arrow_drop_down_outlined),
-          items: TeacherCubit.get(context).grades.map((item) {
-            return DropdownMenuItem<String>(
-              alignment: AlignmentDirectional.center,
-              value: item,
-              child: Text(
-                item,
-                style: TextStyle(fontSize: width * 0.05),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-}
-*/
 
 class GradeItem extends StatelessWidget {
   String grade;
@@ -1030,9 +933,9 @@ class StudentAttendanceCard extends StatelessWidget {
             borderRadius: BorderRadiusDirectional.circular(5),
             border: Border.all(
                 width: 3,
-                color: TeacherCubit.get(context).attendance[student.id!] != null
+                color: TeacherCubit.get(context).attendance[student.id] != null
                     ? TeacherCubit.get(context)
-                                .attendance[student.id!]
+                                .attendance[student.id]
                                 .isPresent ==
                             1
                         ? defaultColor.withOpacity(0.8)
@@ -1078,7 +981,7 @@ class StudentAttendanceCard extends StatelessWidget {
                         height: 40,
                         onPressed: () {
                           TeacherCubit.get(context)
-                              .addtoAttendance(student.id!, student.name!, 1);
+                              .addtoAttendance(student.id, student.name!, 1);
                         },
                       ),
                       const SizedBox(
@@ -1091,7 +994,7 @@ class StudentAttendanceCard extends StatelessWidget {
                         height: 40,
                         onPressed: () {
                           TeacherCubit.get(context)
-                              .addtoAttendance(student.id!, student.name!, 0);
+                              .addtoAttendance(student.id, student.name!, 0);
                         },
                       )
                     ],
@@ -1535,7 +1438,7 @@ class SearchTextFormField extends StatelessWidget {
       decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
-              onPressed: ()async {
+              onPressed: () async {
                 searchController.clear();
                 await CanteenCubit.get(context).getProducts();
               },

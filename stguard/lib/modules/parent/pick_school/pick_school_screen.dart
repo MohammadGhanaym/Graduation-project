@@ -4,7 +4,6 @@ import 'package:st_tracker/layout/parent/cubit/cubit.dart';
 import 'package:st_tracker/layout/parent/cubit/states.dart';
 import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/themes.dart';
 
 class PickSchoolScreen extends StatelessWidget {

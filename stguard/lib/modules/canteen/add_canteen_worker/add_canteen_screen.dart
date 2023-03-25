@@ -5,7 +5,6 @@ import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
 import 'package:st_tracker/layout/canteen/cubit/states.dart';
 import 'package:st_tracker/layout/canteen/Canteen_home_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/themes.dart';
 
 class AddCanteenScreen extends StatelessWidget {
@@ -48,7 +47,7 @@ class AddCanteenScreen extends StatelessWidget {
                 ),
               ),
               
-                SizedBox(
+                const SizedBox(
                   height: 40,
                 ),
                 Padding(
@@ -65,7 +64,7 @@ class AddCanteenScreen extends StatelessWidget {
                             return null;
                           },
                           label: 'Canteen Worker ID'),
-                      SizedBox(
+                      const SizedBox(
                         height: 50,
                       ),
                       state is AddCanteenLoadingState

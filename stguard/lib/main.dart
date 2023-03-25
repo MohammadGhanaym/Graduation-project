@@ -1,3 +1,4 @@
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:st_tracker/modules/login/login_screen.dart';
 import 'package:st_tracker/shared/bloc_observer.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/network/remote/dio_helper.dart';
 import 'package:st_tracker/shared/styles/themes.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -20,7 +20,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
 
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
@@ -72,7 +71,6 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
             create: (context) => CanteenCubit()
-              ..initialize()
               ..getCanteenInfo()
               ..getCanteenPath())
       ],

@@ -40,15 +40,11 @@ dependencies:
   conditional_builder_null_safety: ^0.0.6
   shared_preferences: ^2.0.15
   webview_flutter: ^2.1.1
-  #smooth_page_indicator: ^1.0.0+2
   fluttertoast: ^8.1.1
-  #carousel_slider: ^4.1.1
   image_picker: ^0.8.6
   flutter_local_notifications: ^13.0.0
   flutter_background_service: ^2.4.6
-  #flutter_isolate: ^2.0.4
   map_launcher: ^2.4.0
-  dio: ^4.0.6
   permission_handler: ^10.2.0
   path_provider: ^2.0.12
   excel: ^2.0.1
@@ -60,6 +56,7 @@ dependencies:
   firebase_messaging: ^14.3.0
   firebase_analytics: ^10.1.6
   flutter_credit_card: ^3.0.6
+  http: ^0.13.5
 
   flutter_native_splash: ^2.0.1+1
   # The following adds the Cupertino Icons font to your application.

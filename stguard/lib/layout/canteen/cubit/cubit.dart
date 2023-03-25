@@ -19,7 +19,7 @@ import 'package:st_tracker/modules/canteen/products/products_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/components/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:st_tracker/shared/network/remote/dio_helper.dart';
+import 'package:st_tracker/shared/network/remote/notification_helper.dart';
 
 class CanteenCubit extends Cubit<CanteenStates> {
   CanteenCubit() : super(CanteenInitState());
@@ -28,9 +28,6 @@ class CanteenCubit extends Cubit<CanteenStates> {
   CanteenWorkerModel? canteen;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
-  void initialize() {
-    DioHelper.init();
-  }
 
   void getCanteenInfo() async {
     emit(GetUserInfoLoading());
@@ -797,13 +794,13 @@ class CanteenCubit extends Cubit<CanteenStates> {
           print('device token');
           print(parent!.deviceToken);
           if (parent!.deviceToken != null) {
-            DioHelper.sendNotification(
+            NotificationHelper.sendNotification(
                     title: '${buyer!.name!.split(' ')[0]} Purchased',
                     body:
                         '-$totalPrice\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}',
                     receiverToken: parent!.deviceToken!)
                 .then((value) {
-              print(value.data);
+              print(value.body);
             }).catchError((error) {
               print(error.toString());
             });

@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:st_tracker/modules/login/cubit/states.dart';
-import 'package:st_tracker/shared/network/remote/dio_helper.dart';
+import 'package:st_tracker/shared/network/remote/notification_helper.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitState());

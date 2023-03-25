@@ -21,8 +21,8 @@ class AllergensScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          bottom:
-              const PreferredSize(preferredSize: Size(0.5, 0.5), child: Divider()),
+          bottom: const PreferredSize(
+              preferredSize: Size(0.5, 0.5), child: Divider()),
           title: const Text('Allergens'),
           centerTitle: true,
           titleTextStyle: const TextStyle(
@@ -40,7 +40,11 @@ class AllergensScreen extends StatelessWidget {
             ),
           )),
       body: BlocConsumer<ParentCubit, ParentStates>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is UpdateAllergiesSuccessState) {
+            Navigator.pop(context);
+          }
+        },
         builder: (context, state) {
           return Padding(
             padding: const EdgeInsets.all(20.0),
@@ -76,8 +80,8 @@ class AllergensScreen extends StatelessWidget {
                   children: List.generate(
                       allergens.length,
                       (index) => AllergenSelectionItem(
-                          icon: allergens[index],
-                         )),
+                            icon: allergens[index],
+                          )),
                 ),
                 const SizedBox(
                   height: 30,
@@ -92,10 +96,7 @@ class AllergensScreen extends StatelessWidget {
                     : DefaultButton(
                         onPressed: () async {
                           await ParentCubit.get(context)
-                              .updateAllergens(student_id)
-                              .then((value) {
-                            Navigator.pop(context);
-                          });
+                              .updateAllergens(student_id);
                         },
                         text: 'Confirm',
                         height: 55,

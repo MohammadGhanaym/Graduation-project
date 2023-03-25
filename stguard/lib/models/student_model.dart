@@ -1,5 +1,5 @@
 class StudentModel {
-  String? id;
+  late String id;
   String? className;
   String? image;
   String? name;

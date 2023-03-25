@@ -9,6 +9,8 @@ import 'package:st_tracker/shared/components/components.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class ParentHomeScreen extends StatelessWidget {
+  
+
   ParentHomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
@@ -280,7 +282,7 @@ class ParentHomeScreen extends StatelessWidget {
                                         itemBuilder: (context, index) =>
                                             FamilyMemberCard(
                                               ParentCubit.get(context)
-                                                  .studentsData[index],
+                                                  .studentsData.values.toList()[index],
                                             ),
                                         separatorBuilder: (context, index) =>
                                             const SizedBox(
@@ -379,7 +381,7 @@ class ParentHomeScreen extends StatelessWidget {
                                                   .activities[index],
                                           studentsData:
                                               ParentCubit.get(context)
-                                                  .studentsData),
+                                                  .studentsData.values.toList()),
                                   separatorBuilder: (context, index) =>
                                       const SizedBox(
                                         height: 5,

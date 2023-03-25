@@ -4,7 +4,6 @@ import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
 import 'package:st_tracker/layout/teacher/cubit/states.dart';
 import 'package:st_tracker/modules/teacher/pick_school/pick_school_screen.dart';
 import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
 import 'package:st_tracker/shared/styles/Themes.dart';
 
 class JoinCommunityScreen extends StatelessWidget {
@@ -70,7 +69,7 @@ class JoinCommunityScreen extends StatelessWidget {
               ),
             );
            } else if (state is GetSchoolsSucessState) {
-            navigateTo(context, TeacherPickSchoolScreen());
+            navigateTo(context, const TeacherPickSchoolScreen());
           } else if (state is PickCountryState) {
             TeacherCubit.get(context).getSchools();
           }
@@ -96,7 +95,7 @@ class JoinCommunityScreen extends StatelessWidget {
                       width: 180,
                       height: 180,
                       color: Colors.white,
-                    ),SizedBox(
+                    ),const SizedBox(
                       height: 40,
                     ),
                     Text(
@@ -112,7 +111,7 @@ class JoinCommunityScreen extends StatelessWidget {
               ),
               
               
-              SizedBox(
+              const SizedBox(
                 height: 100,
               ),
               Padding(

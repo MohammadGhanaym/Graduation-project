@@ -93,12 +93,12 @@ class CanteenJoinCommunityScreen extends StatelessWidget {
                                                       color: Theme.of(context).primaryColor),
                                               child: Column(
                                                 children: [
-                                                  Image(
+                                                  const Image(
                                                     image: AssetImage('assets/images/canteen.png'),
                                                     width: 250,
                                                     height: 250,
                                                     color: Colors.white,
-                                                  ),SizedBox(
+                                                  ),const SizedBox(
                                                     height: 40,
                                                   ),
                                                   Text(
