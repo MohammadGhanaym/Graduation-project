@@ -74,6 +74,7 @@ class AddNewAttendanceErrorState extends TeacherStates {
 }
 
 class GetLessonsSuccessState extends TeacherStates {}
+class GetLessonsLoadingState extends TeacherStates {}
 
 class GetLessonsErrorState extends TeacherStates {}
 
@@ -82,6 +83,9 @@ class GetLessonAttendanceSuccessState extends TeacherStates {}
 class GetLessonAttendanceErrorState extends TeacherStates {}
 
 class GetLessonAttendanceLoadingState extends TeacherStates {}
+
+class DeleteLessonAttendanceSuccessState extends TeacherStates {}
+class DeleteLessonAttendanceErrorState extends TeacherStates {}
 
 class SavetoExcelSuccessState extends TeacherStates {}
 

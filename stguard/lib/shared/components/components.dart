@@ -2,27 +2,26 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
-import 'package:st_tracker/models/activity_model.dart';
-import 'package:st_tracker/models/canteen_product_model.dart';
-import 'package:st_tracker/models/school_model.dart';
-import 'package:st_tracker/models/student_attendance.dart';
-import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/models/product_model.dart';
-import 'package:st_tracker/modules/parent/allergens/allergens_screen.dart';
-import 'package:st_tracker/modules/login/login_screen.dart';
-import 'package:st_tracker/modules/parent/attendance_history/attendance_history_screen.dart';
-import 'package:st_tracker/modules/parent/member_settings/member_settings.dart';
-import 'package:st_tracker/modules/parent/transaction_details/transaction_details_screen.dart';
-import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/teacher/cubit/cubit.dart';
+import 'package:stguard/models/activity_model.dart';
+import 'package:stguard/models/canteen_product_model.dart';
+import 'package:stguard/models/school_model.dart';
+import 'package:stguard/models/student_attendance.dart';
+import 'package:stguard/models/student_model.dart';
+import 'package:stguard/models/product_model.dart';
+import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
+import 'package:stguard/modules/login/login_screen.dart';
+import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
+import 'package:stguard/modules/parent/member_settings/member_settings.dart';
+import 'package:stguard/modules/parent/transaction_details/transaction_details_screen.dart';
+import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/network/local/cache_helper.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class DefaultButton extends StatelessWidget {
   double? width;
@@ -190,7 +189,8 @@ void signOut(BuildContext context) {
   CacheHelper.removeData(key: 'id');
   CacheHelper.removeData(key: 'role');
   cancelListeners();
-  FlutterBackgroundService().invoke('stopService');
+  userID = null;
+  userRole = null;
   navigateAndFinish(context, LoginScreen());
 }
 
@@ -444,11 +444,13 @@ class FamilyMemberCard extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.white,
-                      backgroundImage:!isErrorOccured? NetworkImage(model!.image!):const AssetImage('assets/images/no-image.png') as ImageProvider<Object>?,
+                      backgroundImage: !isErrorOccured
+                          ? NetworkImage(model!.image!)
+                          : const AssetImage('assets/images/no-image.png')
+                              as ImageProvider<Object>?,
                       onBackgroundImageError: (exception, stackTrace) {
                         isErrorOccured = true;
                       },
-                   
                     ),
                   ),
                   const SizedBox(
@@ -819,12 +821,14 @@ class AllergenSelectionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        if (ParentCubit.get(context).selectedAllergies.contains(icon)) {
-          ParentCubit.get(context).removeAllergen(icon);
-        } else {
-          ParentCubit.get(context).addAllergen(icon);
+        if (!ParentCubit.get(context).confirmAllergiesSelection) {
+          if (ParentCubit.get(context).selectedAllergies.contains(icon)) {
+            ParentCubit.get(context).removeAllergen(icon);
+          } else {
+            ParentCubit.get(context).addAllergen(icon);
+          }
+          print(ParentCubit.get(context).selectedAllergies);
         }
-        print(ParentCubit.get(context).selectedAllergies);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -903,8 +907,8 @@ class GradeItem extends StatelessWidget {
     return InkWell(
       onTap: () => TeacherCubit.get(context).selectGrade(grade),
       child: Container(
+        padding: const EdgeInsets.all(8),
         alignment: AlignmentDirectional.center,
-        width: 50,
         height: 20,
         decoration: BoxDecoration(
             border: Border.all(
@@ -1026,42 +1030,67 @@ class LessonCard extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               child: Row(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        child: Text(
-                          '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 150,
-                            child: Text(lesson.grade,
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 20,
+                              width: 100,
+                              child: Text(lesson.grade,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500)),
+                            ),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            Text(
+                                getDate(lesson.datetime,
+                                    format: 'MMM, EE, hh:mm a'),
                                 style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w500)),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                              getDate(lesson.datetime,
-                                  format: 'MMM, EE, hh:mm a'),
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w500))
-                        ],
-                      ),
-                    ],
+                                    fontSize: 15, fontWeight: FontWeight.w500))
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        showDefaultDialog(
+                          context,
+                          title: 'Are you sure?',
+                          content:Text("Are you sure you want to delete this lesson's attendance?",
+                          style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 15
+                          ),),
+                          buttonText1: 'Cancel',
+                          onPressed1: () =>Navigator.pop(context),
+                          buttonText2: 'Delete',
+                          onPressed2: () => TeacherCubit.get(context)
+                              .deleteLesson(lesson.name),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.delete,
+                        color: defaultColor,
+                      ))
                 ],
               ),
             )),
@@ -1314,7 +1343,9 @@ class ProductSearchItem extends StatelessWidget {
                           buttonText2: 'Delete',
                           onPressed2: () => CanteenCubit.get(context)
                               .deleteItem(
-                                  id: productID, category: product.category));
+                                  id: productID,
+                                  category: product.category,
+                                  image: product.image));
                     },
                   ),
                 ],

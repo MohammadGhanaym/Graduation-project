@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/modules/login/cubit/states.dart';
-import 'package:st_tracker/shared/network/remote/notification_helper.dart';
+import 'package:stguard/modules/login/cubit/states.dart';
+import 'package:stguard/shared/network/remote/notification_helper.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitState());
@@ -67,13 +67,13 @@ class LoginCubit extends Cubit<LoginStates> {
               .update({
             'device_token': await FirebaseMessaging.instance.getToken()
           }).then((value) {
-            emit(LoginSuccessState(uid));
+            emit(LoginSuccessState(uid, role));
           }).catchError((error) {
             print(error.toString());
             emit(LoginErrorState('Connection Error!'));
           });
         } else {
-          emit(LoginSuccessState(uid));
+          emit(LoginSuccessState(uid, role));
         }
       } else {
         emit(LoginErrorState('You are not a $role'));

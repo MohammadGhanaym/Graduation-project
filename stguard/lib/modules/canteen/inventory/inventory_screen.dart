@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/modules/canteen/add_product/add_product_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/modules/canteen/add_product/add_product_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class CanteenInventoryScreen extends StatelessWidget {
   CanteenInventoryScreen({super.key});
@@ -142,7 +142,7 @@ class CanteenInventoryScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.headline6),
                     ),
                     Padding(
-                        padding: const EdgeInsets.only(right:20.0, left: 20),
+                        padding: const EdgeInsets.only(right: 20.0, left: 20),
                         child: SearchTextFormField(
                             searchController: searchController,
                             onChanged: (p0) {

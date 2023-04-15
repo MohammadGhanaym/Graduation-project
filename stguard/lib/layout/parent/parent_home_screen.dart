@@ -1,12 +1,12 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/modules/parent/credit_card/credit_card_screen.dart';
-import 'package:st_tracker/modules/parent/pick_school/pick_school_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/states.dart';
+import 'package:stguard/modules/parent/credit_card/credit_card_screen.dart';
+import 'package:stguard/modules/parent/pick_school/pick_school_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/Themes.dart';
 
 class ParentHomeScreen extends StatelessWidget {
   

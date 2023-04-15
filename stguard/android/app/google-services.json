@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:738736511512:android:76e62828a4faf00f39416d",
         "android_client_info": {
-          "package_name": "com.example.st_tracker"
+          "package_name": "com.example.stguard"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "738736511512-c0lmlfiikd97p5bonkssn885anma83fe.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.st_tracker",
+            "package_name": "com.example.stguard",
             "certificate_hash": "052bd2d075352b67992d228f9a5c3c7e303c9b2c"
           }
         },

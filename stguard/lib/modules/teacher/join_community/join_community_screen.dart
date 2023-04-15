@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
-import 'package:st_tracker/layout/teacher/cubit/states.dart';
-import 'package:st_tracker/modules/teacher/pick_school/pick_school_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/teacher/cubit/cubit.dart';
+import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/modules/teacher/pick_school/pick_school_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/Themes.dart';
 
 class JoinCommunityScreen extends StatelessWidget {
   String image;
@@ -16,7 +16,7 @@ class JoinCommunityScreen extends StatelessWidget {
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
           if (state is GetCountriesSucessState) {
-           showModalBottomSheet(
+            showModalBottomSheet(
               context: context,
               builder: (context) => Padding(
                 padding:
@@ -32,8 +32,8 @@ class JoinCommunityScreen extends StatelessWidget {
                             margin: const EdgeInsets.only(top: 10),
                             decoration: BoxDecoration(
                                 color: defaultColor.withOpacity(0.8),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(10))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10))),
                           ),
                           const SizedBox(
                             height: 10,
@@ -68,7 +68,7 @@ class JoinCommunityScreen extends StatelessWidget {
                 ),
               ),
             );
-           } else if (state is GetSchoolsSucessState) {
+          } else if (state is GetSchoolsSucessState) {
             navigateTo(context, const TeacherPickSchoolScreen());
           } else if (state is PickCountryState) {
             TeacherCubit.get(context).getSchools();
@@ -78,16 +78,15 @@ class JoinCommunityScreen extends StatelessWidget {
           return Column(
             children: [
               Container(
-                    padding:
-                        const EdgeInsets.only(right: 20, left: 20, top: 100),
-                    alignment: AlignmentDirectional.center,
-                    height: 400,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(30),
-                            bottomRight: Radius.circular(30)),
-                        color: Theme.of(context).primaryColor),
+                padding: const EdgeInsets.only(right: 20, left: 20, top: 100),
+                alignment: AlignmentDirectional.center,
+                height: 400,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30)),
+                    color: Theme.of(context).primaryColor),
                 child: Column(
                   children: [
                     Image(
@@ -95,22 +94,21 @@ class JoinCommunityScreen extends StatelessWidget {
                       width: 180,
                       height: 180,
                       color: Colors.white,
-                    ),const SizedBox(
+                    ),
+                    const SizedBox(
                       height: 40,
                     ),
                     Text(
-                      
                       'Join your school community now and be a part of the team',
                       style: Theme.of(context)
-                                    .textTheme
-                                    .headline6!
-                                    .copyWith(color: Colors.white),textAlign: TextAlign.center,
+                          .textTheme
+                          .headline6!
+                          .copyWith(color: Colors.white),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              
-              
               const SizedBox(
                 height: 100,
               ),

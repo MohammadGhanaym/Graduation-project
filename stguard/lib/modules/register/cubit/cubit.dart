@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/models/canteen_model.dart';
-import 'package:st_tracker/models/parent_model.dart';
-import 'package:st_tracker/models/teacher_model.dart';
-import 'package:st_tracker/modules/register/cubit/states.dart';
+import 'package:stguard/models/canteen_model.dart';
+import 'package:stguard/models/parent_model.dart';
+import 'package:stguard/models/teacher_model.dart';
+import 'package:stguard/modules/register/cubit/states.dart';
 
 class RegisterCubit extends Cubit<RegisterStates> {
   RegisterCubit() : super(RegisterInitState());

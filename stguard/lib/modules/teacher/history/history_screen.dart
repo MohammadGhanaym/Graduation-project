@@ -1,10 +1,10 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
-import 'package:st_tracker/layout/teacher/cubit/states.dart';
-import 'package:st_tracker/modules/teacher/attendance_details/attendance_details_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
+import 'package:stguard/layout/teacher/cubit/cubit.dart';
+import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/modules/teacher/attendance_details/attendance_details_screen.dart';
+import 'package:stguard/shared/components/components.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -12,14 +12,16 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TeacherCubit, TeacherStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is DeleteLessonAttendanceSuccessState) {
+          Navigator.pop(context);
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           body: SingleChildScrollView(
               child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
             child: ConditionalBuilder(
               condition: TeacherCubit.get(context).lessons.isNotEmpty,
               builder: (context) => ListView.separated(
@@ -31,8 +33,8 @@ class HistoryScreen extends StatelessWidget {
                         navigateTo(
                             context,
                             AttendanceDetailsScreen(
-                                lesson: TeacherCubit.get(context)
-                                    .lessons[index]));
+                                lesson:
+                                    TeacherCubit.get(context).lessons[index]));
                       }),
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 10),

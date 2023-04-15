@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart';
-import 'package:st_tracker/shared/components/constants.dart';
+import 'package:stguard/shared/components/constants.dart';
 import 'package:http/http.dart' as http;
 
 class NotificationHelper {
-
-
   static Map<String, Object> notificationMessage(
-      {required String title, required String body,required String fcmToken}) {
+      {required String title, required String body, required String fcmToken}) {
     return {
       "to": fcmToken,
       "notification": {"title": title, "body": body, "sound": "default"},
@@ -25,17 +23,16 @@ class NotificationHelper {
     };
   }
 
-  static Future<Response> sendNotification({
-    required String title,
-    required String body,
-    required String receiverToken
-  }) async {
-
+  static Future<Response> sendNotification(
+      {required String title,
+      required String body,
+      required String receiverToken}) async {
     return await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        body:jsonEncode(notificationMessage(fcmToken: receiverToken ,
-            title: title, body: body)) , headers: {
-      'Content-Type': 'application/json',
-      'Authorization': fcmProjectToken
-    });
+        body: jsonEncode(notificationMessage(
+            fcmToken: receiverToken, title: title, body: body)),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': fcmProjectToken
+        });
   }
 }

@@ -6,16 +6,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:st_tracker/layout/teacher/cubit/states.dart';
-import 'package:st_tracker/models/country_model.dart';
-import 'package:st_tracker/models/school_model.dart';
-import 'package:st_tracker/models/student_attendance.dart';
-import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/models/teacher_model.dart';
-import 'package:st_tracker/modules/teacher/add_attendance/add_attendance_screen.dart';
-import 'package:st_tracker/modules/teacher/history/history_screen.dart';
-import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
+import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/models/country_model.dart';
+import 'package:stguard/models/school_model.dart';
+import 'package:stguard/models/student_attendance.dart';
+import 'package:stguard/models/student_model.dart';
+import 'package:stguard/models/teacher_model.dart';
+import 'package:stguard/modules/teacher/add_attendance/add_attendance_screen.dart';
+import 'package:stguard/modules/teacher/history/history_screen.dart';
+import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/network/local/cache_helper.dart';
 
 class TeacherCubit extends Cubit<TeacherStates> {
   TeacherCubit() : super(TeacherInitState());
@@ -123,6 +123,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
   List<LessonModel> lessons = [];
   void getLessons() async {
+    emit(GetLessonsLoadingState());
     await _database.rawQuery('''
       SELECT 
         $columnLessonName, 
@@ -140,6 +141,21 @@ class TeacherCubit extends Cubit<TeacherStates> {
     }).catchError((error) {
       print(error.toString());
       emit(GetLessonsErrorState());
+    });
+  }
+
+  Future<void> deleteLesson(String lesson) async {
+    await _database.delete(
+      tableLesson,
+      where: '$columnLessonName = ?',
+      whereArgs: [lesson],
+    ).then((value) {
+      emit(DeleteLessonAttendanceSuccessState());
+      getLessons();
+      
+    }).catchError((error) {
+      print(error.toString());
+      emit(DeleteLessonAttendanceErrorState());
     });
   }
 

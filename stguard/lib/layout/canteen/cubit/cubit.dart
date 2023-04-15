@@ -6,20 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/models/canteen_details_model.dart';
-import 'package:st_tracker/models/canteen_model.dart';
-import 'package:st_tracker/models/canteen_product_model.dart';
-import 'package:st_tracker/models/country_model.dart';
-import 'package:st_tracker/models/parent_model.dart';
-import 'package:st_tracker/models/school_model.dart';
-import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/modules/canteen/inventory/inventory_screen.dart';
-import 'package:st_tracker/modules/canteen/products/products_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
+
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:st_tracker/shared/network/remote/notification_helper.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/models/canteen_details_model.dart';
+import 'package:stguard/models/canteen_model.dart';
+import 'package:stguard/models/canteen_product_model.dart';
+import 'package:stguard/models/country_model.dart';
+import 'package:stguard/models/parent_model.dart';
+import 'package:stguard/models/school_model.dart';
+import 'package:stguard/models/student_model.dart';
+import 'package:stguard/modules/canteen/inventory/inventory_screen.dart';
+import 'package:stguard/modules/canteen/products/products_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/network/remote/notification_helper.dart';
 
 class CanteenCubit extends Cubit<CanteenStates> {
   CanteenCubit() : super(CanteenInitState());
@@ -27,7 +28,6 @@ class CanteenCubit extends Cubit<CanteenStates> {
 
   CanteenWorkerModel? canteen;
   FirebaseFirestore db = FirebaseFirestore.instance;
-
 
   void getCanteenInfo() async {
     emit(GetUserInfoLoading());
@@ -424,15 +424,22 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   Map<String, List<dynamic>> allergies = {};
+  List<String> allergens = [];
   void getAllergies() async {
+    allergies = {};
+    allergens = [];
     emit(GetAllergiesLoadingState());
     await db.collection('Allergies').get().then((value) {
       value.docs.forEach((allergy) {
         print(allergy);
         allergies[allergy['name']] = allergy['allergens'];
+        allergy['allergens'].forEach((allergen) {
+          allergens.add(allergen);
+        });
       });
       emit(GetAllergiesSuccessState());
       print(allergies);
+      print(allergens);
     }).catchError((error) {
       emit(GetAllergiesErrorState());
       print(error.toString());
@@ -728,21 +735,18 @@ class CanteenCubit extends Cubit<CanteenStates> {
         }).catchError((error) {
           cancelBuyerListener();
           cancelBuyer();
-          print('updateCanteenData');
           print(error.toString());
           emit(PaymentErrorState());
         });
       } else {
         cancelBuyerListener();
         cancelBuyer();
-        print('updateCanteenData');
         print('canteen is empty');
         emit(PaymentErrorState());
       }
     }).catchError((error) {
       cancelBuyerListener();
       cancelBuyer();
-      print('updateCanteenData');
       print(error.toString());
       emit(PaymentErrorState());
     });
@@ -884,7 +888,11 @@ class CanteenCubit extends Cubit<CanteenStates> {
     });
   }
 
-  void deleteItem({required String id, required String category}) async {
+  void deleteItem(
+      {required String id,
+      required String category,
+      required String image}) async {
+    batch = FirebaseFirestore.instance.batch();
     emit(DeleteItemLoadingState());
     await schoolCanteenPath!.collection('Canteen').get().then((canteenData) {
       canteenData.docs[0].reference
@@ -893,8 +901,16 @@ class CanteenCubit extends Cubit<CanteenStates> {
           .collection('Products')
           .doc(id)
           .delete()
-          .then((value) {
+          .then((value) async {
         emit(DeleteItemSuccessState());
+
+        await firebase_storage.FirebaseStorage.instanceFor(
+                bucket: 'smartschool-6aee1.appspot.com')
+            .refFromURL(image)
+            .delete()
+            .catchError((error) {
+          print(error.toString());
+        });
         getProducts();
       }).catchError((error) {
         emit(DeleteItemErrorState());

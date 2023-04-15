@@ -4,15 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/models/activity_model.dart';
-import 'package:st_tracker/models/country_model.dart';
-import 'package:st_tracker/models/parent_model.dart';
-import 'package:st_tracker/models/school_model.dart';
-import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/models/product_model.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
+import 'package:stguard/layout/parent/cubit/states.dart';
+import 'package:stguard/models/activity_model.dart';
+import 'package:stguard/models/country_model.dart';
+import 'package:stguard/models/parent_model.dart';
+import 'package:stguard/models/school_model.dart';
+import 'package:stguard/models/student_model.dart';
+import 'package:stguard/models/product_model.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/components/constants.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
@@ -113,7 +113,7 @@ class ParentCubit extends Cubit<ParentStates> {
     await getDataFromActivityTable();
   }
 
-  Map<String,StudentModel?> studentsData = {};
+  Map<String, StudentModel?> studentsData = {};
   Future<void> getStudentsData(
       String stId, DocumentReference<Map<String, dynamic>> stDoc) async {
     await stDoc.get().then((value) {
@@ -126,7 +126,6 @@ class ParentCubit extends Cubit<ParentStates> {
       emit(GetStudentDataError());
     });
   }
-
 
   Future<void> listentoNewData() async {
     emit(GetStudentDataLoading());
@@ -527,21 +526,6 @@ class ParentCubit extends Cubit<ParentStates> {
     }
   }
 
-  Future<void> updateBalance(double amount) async {
-    print(amount);
-    print(parent!.balance);
-    print(amount + parent!.balance);
-    emit(UpdateBalanceLoading());
-    await db
-        .collection('Parents')
-        .doc(userID)
-        .update({'balance': parent!.balance + amount}).then((value) {
-      emit(UpdateBalanceSuccess());
-    }).catchError((error) {
-      emit(UpdateBalanceError());
-    });
-  }
-
   double pocket_money = 0.0;
   void setPocketMoney({required double money}) {
     pocket_money = money.roundToDouble();
@@ -623,6 +607,20 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
+  void resetSelectedAllergies() {
+    selectedAllergies = [];
+    allergies.forEach((element) {
+      if (element.runtimeType != IconData) {
+        selectedAllergies.add(element);
+      }
+    });
+  }
+
+  bool confirmAllergiesSelection = false;
+  void changeAllergiesSelectionState({bool state = false}) {
+    confirmAllergiesSelection = state;
+  }
+
   Future<void> updateAllergens(id) async {
     emit(UpdateAllergiesLoadingState());
 
@@ -630,6 +628,7 @@ class ParentCubit extends Cubit<ParentStates> {
       'allergies': selectedAllergies.isNotEmpty ? selectedAllergies : null
     }).then((value) async {
       emit(UpdateAllergiesSuccessState());
+      confirmAllergiesSelection = false;
       await getAllergies(id);
       await getStudentsData(id, studentsPaths[id]!);
     }).catchError((error) {
@@ -659,5 +658,23 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(CreditCardModelChangeState());
   }
 
-  List<dynamic> rechargeAmounts = [200, 400, 600, 1000, 2000, 'Other'];
+  Future<void> updateBalance(double amount) async {
+    print(amount);
+    print(parent!.balance);
+    print(amount + parent!.balance);
+    emit(UpdateBalanceLoading());
+    await db
+        .collection('Parents')
+        .doc(userID)
+        .update({'balance': parent!.balance + amount}).then((value) {
+      emit(UpdateBalanceSuccess());
+      cardNumber = '';
+      expiryDate = '';
+      cardHolderName = '';
+      cvvCode = '';
+      isCvvFocused = false;
+    }).catchError((error) {
+      emit(UpdateBalanceError());
+    });
+  }
 }

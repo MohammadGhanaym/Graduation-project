@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/layout/parent/parent_home_screen.dart';
-import 'package:st_tracker/models/student_model.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/states.dart';
+import 'package:stguard/layout/parent/parent_home_screen.dart';
+import 'package:stguard/models/student_model.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/Themes.dart';
 
 class MemberSettingsScreen extends StatelessWidget {
   StudentModel? student;
@@ -83,7 +83,8 @@ class MemberSettingsScreen extends StatelessWidget {
                                 children: [
                                   Row(
                                     textBaseline: TextBaseline.alphabetic,
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
                                     children: [
                                       const SizedBox(
                                           width: 160,
@@ -331,17 +332,17 @@ class MemberSettingsScreen extends StatelessWidget {
                                     card_height: 180,
                                     children: [
                                       Row(
-                                        children: [
-                                          const ImageIcon(
+                                        children: const [
+                                          ImageIcon(
                                             AssetImage(
                                                 'assets/images/blood-drop.png'),
                                             size: 30,
                                             color: defaultColor,
                                           ),
-                                          const SizedBox(
+                                          SizedBox(
                                             width: 5,
                                           ),
-                                          const Text(
+                                          Text(
                                             'Allergens',
                                             style: TextStyle(
                                                 fontSize: 25,
@@ -375,7 +376,6 @@ class MemberSettingsScreen extends StatelessWidget {
                                                       icon: ParentCubit.get(
                                                               context)
                                                           .allergies
-                                                          .reversed
                                                           .toList()[index],
                                                       context: context),
                                               separatorBuilder:

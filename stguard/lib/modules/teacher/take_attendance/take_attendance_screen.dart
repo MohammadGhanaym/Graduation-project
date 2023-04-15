@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
-import 'package:st_tracker/layout/teacher/cubit/states.dart';
-import 'package:st_tracker/layout/teacher/teacher_home_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
+import 'package:stguard/layout/teacher/cubit/cubit.dart';
+import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/layout/teacher/teacher_home_screen.dart';
+import 'package:stguard/shared/components/components.dart';
 
 class TakeAttendanceScreen extends StatelessWidget {
   TakeAttendanceScreen({
@@ -40,14 +40,12 @@ class TakeAttendanceScreen extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.vertical,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                 child: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) => StudentAttendanceCard(
-
                           student: TeacherCubit.get(context).students[index],
                         ),
                     separatorBuilder: (context, index) => const SizedBox(

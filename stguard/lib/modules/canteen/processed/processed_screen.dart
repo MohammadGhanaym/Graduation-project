@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/modules/canteen/tap_to_pay_screen/tap_to_pay_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/modules/canteen/tap_to_pay_screen/tap_to_pay_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class ProcessedScreen extends StatelessWidget {
   const ProcessedScreen({super.key});
@@ -30,7 +30,9 @@ class ProcessedScreen extends StatelessWidget {
                   height: 200,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20)),
                       color: defaultColor),
                   child: Column(
                     children: [
@@ -85,21 +87,22 @@ class ProcessedScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 30,),
-                       DefaultButton(
-                           color: Colors.white,
-                           onPressed: () {
-                             CanteenCubit.get(context).listentoBuyer();
-                           },
-                           text: 'CONFIRM',
-                           textColor: defaultColor),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      DefaultButton(
+                          color: Colors.white,
+                          onPressed: () {
+                            CanteenCubit.get(context).listentoBuyer();
+                          },
+                          text: 'CONFIRM',
+                          textColor: defaultColor),
                     ],
                   ),
                 ),
                 const SizedBox(
                   height: 20,
                 ),
-               
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListView.separated(
@@ -112,7 +115,6 @@ class ProcessedScreen extends StatelessWidget {
                                 padding: EdgeInsets.zero,
                                 onPressed: () {
                                   CanteenCubit.get(context).addQuantity(
-                                     
                                       CanteenCubit.get(context)
                                           .selectedProducts
                                           .keys

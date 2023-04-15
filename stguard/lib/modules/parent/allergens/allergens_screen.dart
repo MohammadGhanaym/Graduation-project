@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/states.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class AllergensScreen extends StatelessWidget {
   List<String> allergens = [
@@ -31,7 +31,9 @@ class AllergensScreen extends StatelessWidget {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           leading: IconButton(
             onPressed: () {
+              ParentCubit.get(context).changeAllergiesSelectionState();
               Navigator.pop(context);
+              ParentCubit.get(context).resetSelectedAllergies();
             },
             icon: const ImageIcon(
               AssetImage('assets/images/x.png'),
@@ -95,6 +97,8 @@ class AllergensScreen extends StatelessWidget {
                       )
                     : DefaultButton(
                         onPressed: () async {
+                          ParentCubit.get(context)
+                              .changeAllergiesSelectionState(state: true);
                           await ParentCubit.get(context)
                               .updateAllergens(student_id);
                         },

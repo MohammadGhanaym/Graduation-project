@@ -1,12 +1,12 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/modules/canteen/processed/processed_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:stguard/layout/canteen/canteen_home_screen.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/modules/canteen/processed/processed_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class ProductsScreen extends StatelessWidget {
   var searchController = TextEditingController();
@@ -38,13 +38,16 @@ class ProductsScreen extends StatelessWidget {
                                         'If you leave this screen now, the selected product will be cancelled. Are you sure you want to proceed?'),
                                     buttonText1: 'Cancel',
                                     buttonText2: 'Leave',
-                                    onPressed1: () async{
+                                    onPressed1: ()  {
                                       Navigator.of(context).pop();
-                                      await CanteenCubit.get(context).getProducts();
+                                      
                                     },
-                                    onPressed2: () {
+                                    onPressed2: () async{
                                       CanteenCubit.get(context)
                                           .cancelSelectedProducts();
+                                      await CanteenCubit.get(context)
+                                          .getProducts();
+                                          
                                       navigateAndFinish(
                                           context, const CanteenHomeScreen());
                                     },

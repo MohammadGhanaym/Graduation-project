@@ -1,11 +1,11 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class AddProductScreen extends StatelessWidget {
   AddProductScreen({super.key});
@@ -111,6 +111,7 @@ class AddProductScreen extends StatelessWidget {
                             },
                             label: 'Category',
                             onTap: () async {
+                              categoryController.clear();
                               String? cat = await showDialog<String>(
                                   context: context,
                                   builder: (context) {
@@ -152,7 +153,7 @@ class AddProductScreen extends StatelessWidget {
                                                                   labelText:
                                                                       'Add New Category',
                                                                   border:
-                                                                      OutlineInputBorder(),
+                                                                      const OutlineInputBorder(),
                                                                   suffixIcon:
                                                                       IconButton(
                                                                           onPressed:
@@ -162,7 +163,7 @@ class AddProductScreen extends StatelessWidget {
                                                                             }
                                                                           }),
                                                                           icon:
-                                                                              Icon(Icons.add))),
+                                                                              const Icon(Icons.add))),
                                                         ),
                                                       ),
                                                     ],
@@ -220,7 +221,50 @@ class AddProductScreen extends StatelessWidget {
                                                       .textTheme
                                                       .caption),
                                               const SizedBox(height: 10),
-                                              DefaultFormField(
+                                              TypeAheadFormField(
+                                                textFieldConfiguration:
+                                                    TextFieldConfiguration(
+                                                        controller:
+                                                            ingredientController,
+                                                        decoration:
+                                                            const InputDecoration(
+                                                          label: Text(
+                                                              'Ingredient Name'),
+                                                          border:
+                                                              OutlineInputBorder(),
+                                                        )),
+                                                onSuggestionSelected:
+                                                    (suggestion) {
+                                                  ingredientController.text =
+                                                      suggestion;
+                                                },
+                                                itemBuilder:
+                                                    (context, itemData) {
+                                                  return ListTile(
+                                                    title: Text(itemData),
+                                                  );
+                                                },
+                                                suggestionsCallback: (pattern) {
+                                                  print(pattern);
+                                                  return CanteenCubit.get(context)
+                                                  .allergens
+                                                  .where((suggestion) =>
+                                                      suggestion.toLowerCase().contains(pattern.toLowerCase()))
+                                                  .toList();
+                                                },
+                                                validator: (value) {
+                                                  if (value!.isEmpty) {
+                                                    return 'Please enter an ingredient name';
+                                                  }
+                                                  if (CanteenCubit.get(context)
+                                                      .ingredients
+                                                      .contains(value)) {
+                                                    return 'You have already entered this ingredient before';
+                                                  }
+                                                  return null;
+                                                },
+                                              )
+                                              /*DefaultFormField(
                                                   controller:
                                                       ingredientController,
                                                   type: TextInputType.text,
@@ -237,6 +281,7 @@ class AddProductScreen extends StatelessWidget {
                                                     return null;
                                                   },
                                                   label: 'Ingredient Name')
+                                            */
                                             ],
                                           ),
                                         ),

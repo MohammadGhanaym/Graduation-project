@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/canteen_home_screen.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/canteen/canteen_home_screen.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/Themes.dart';
 
 class TapPayScreen extends StatelessWidget {
   const TapPayScreen({super.key});
@@ -115,17 +115,17 @@ class TapPayScreen extends StatelessWidget {
                                 CanteenCubit.get(context)
                                     .cancelSelectedProducts();
                                 CanteenCubit.get(context).resetResult();
-                                navigateAndFinish(context, const CanteenHomeScreen());
+                                navigateAndFinish(
+                                    context, const CanteenHomeScreen());
                               },
                             ),
                           if (state is StartListeningBuyerDataState)
-                          const Image(
-                            width: 200,
-                            height: 250,
-                            fit: BoxFit.scaleDown,
-                            image:AssetImage('assets/images/tap_to_pay.png'))
-
-
+                            const Image(
+                                width: 200,
+                                height: 250,
+                                fit: BoxFit.scaleDown,
+                                image:
+                                    AssetImage('assets/images/tap_to_pay.png'))
                         ],
                       ),
                     ));

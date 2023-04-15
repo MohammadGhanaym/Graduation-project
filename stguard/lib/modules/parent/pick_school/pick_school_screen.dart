@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/modules/parent/add_member/add_member_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/states.dart';
+import 'package:stguard/modules/parent/add_member/add_member_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class PickSchoolScreen extends StatelessWidget {
   const PickSchoolScreen({super.key});
@@ -21,9 +21,7 @@ class PickSchoolScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 15,
-                vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: ListView.separated(
                 itemBuilder: (context, index) => SchoolItem(
                       school: ParentCubit.get(context).schools[index],

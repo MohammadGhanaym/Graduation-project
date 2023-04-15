@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/credit_card_brand.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
-import 'package:st_tracker/layout/parent/cubit/cubit.dart';
-import 'package:st_tracker/layout/parent/cubit/states.dart';
-import 'package:st_tracker/modules/parent/recharge_success/recharge_success_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/states.dart';
+import 'package:stguard/modules/parent/recharge_success/recharge_success_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/Themes.dart';
 
 class CreditCardScreen extends StatelessWidget {
   final GlobalKey<FormState> creditCardFormKey = GlobalKey<FormState>();
@@ -36,12 +36,21 @@ class CreditCardScreen extends StatelessWidget {
       body: BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {
           if (state is UpdateBalanceSuccess) {
-            navigateAndFinish(context, RechargeStatusScreen(amount: rechargeController.text, status: 'Success',
-            statusImage: 'check-mark',));
-          } else if (state is UpdateBalanceError) 
-          {
-            navigateAndFinish(context, RechargeStatusScreen(amount: rechargeController.text, status: 'Failed',
-            statusImage: 'error',));
+            navigateAndFinish(
+                context,
+                RechargeStatusScreen(
+                  amount: rechargeController.text,
+                  status: 'Success',
+                  statusImage: 'check-mark',
+                ));
+          } else if (state is UpdateBalanceError) {
+            navigateAndFinish(
+                context,
+                RechargeStatusScreen(
+                  amount: rechargeController.text,
+                  status: 'Failed',
+                  statusImage: 'error',
+                ));
           }
         },
         builder: (context, state) {
@@ -163,22 +172,26 @@ class CreditCardScreen extends StatelessWidget {
                       const SizedBox(
                         height: 15,
                       ),
-                      state is UpdateBalanceLoading?
-                      LoadingOnWaiting(width: 280,
-                      color: defaultColor.withOpacity(0.8),):
-                      DefaultButton(
-                        width: 280,
-                        text: 'Recharge',
-                        color: defaultColor.withOpacity(0.8),
-                        onPressed: () {
-                          if (creditCardFormKey.currentState!.validate()) {
-                            if (rechargeFormKey.currentState!.validate()) {
-                              ParentCubit.get(context).updateBalance(
-                                  double.parse(rechargeController.text));
-                            }
-                          }
-                        },
-                      )
+                      state is UpdateBalanceLoading
+                          ? LoadingOnWaiting(
+                              width: 280,
+                              color: defaultColor.withOpacity(0.8),
+                            )
+                          : DefaultButton(
+                              width: 280,
+                              text: 'Recharge',
+                              color: defaultColor.withOpacity(0.8),
+                              onPressed: () {
+                                if (creditCardFormKey.currentState!
+                                    .validate()) {
+                                  if (rechargeFormKey.currentState!
+                                      .validate()) {
+                                    ParentCubit.get(context).updateBalance(
+                                        double.parse(rechargeController.text));
+                                  }
+                                }
+                              },
+                            )
                     ],
                   ),
                 ),

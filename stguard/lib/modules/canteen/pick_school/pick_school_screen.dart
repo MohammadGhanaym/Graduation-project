@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/modules/canteen/add_canteen_worker/add_canteen_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/modules/canteen/add_canteen_worker/add_canteen_screen.dart';
+import 'package:stguard/shared/components/components.dart';
 
 class CanteenPickSchoolScreen extends StatelessWidget {
   const CanteenPickSchoolScreen({super.key});
@@ -22,18 +21,16 @@ class CanteenPickSchoolScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 15,
-                vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: Column(
               children: [
                 Expanded(
                   child: ListView.separated(
-                    shrinkWrap: true,
+                      shrinkWrap: true,
                       itemBuilder: (context, index) => SchoolItem(
                             school: CanteenCubit.get(context).schools[index],
-                            onTap: () => CanteenCubit.get(context)
-                                .pickSchool(CanteenCubit.get(context).schools[index]),
+                            onTap: () => CanteenCubit.get(context).pickSchool(
+                                CanteenCubit.get(context).schools[index]),
                           ),
                       separatorBuilder: (context, index) => const Divider(
                             color: Colors.grey,

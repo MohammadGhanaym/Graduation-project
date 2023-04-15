@@ -1,13 +1,14 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/layout/canteen/cubit/cubit.dart';
-import 'package:st_tracker/layout/canteen/cubit/states.dart';
-import 'package:st_tracker/modules/canteen/inventory/inventory_screen.dart';
-import 'package:st_tracker/modules/canteen/join_community/join_community_screen.dart';
-import 'package:st_tracker/modules/canteen/products/products_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/modules/canteen/inventory/inventory_screen.dart';
+import 'package:stguard/modules/canteen/join_community/join_community_screen.dart';
+import 'package:stguard/modules/canteen/products/products_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
+
 
 class CanteenHomeScreen extends StatelessWidget {
   const CanteenHomeScreen({super.key});
@@ -191,9 +192,9 @@ class CanteenHomeScreen extends StatelessWidget {
                                   Row(
                                     children: [
                                       SizedBox(
-                                          width: 150,
+                                          width: 200,
                                           child: Text(
-                                            'Transactions',
+                                            'Orders Counts',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .headline5!
@@ -202,13 +203,15 @@ class CanteenHomeScreen extends StatelessWidget {
                                                         FontWeight.w500),
                                           )),
                                       const SizedBox(
-                                        width: 50,
+                                        width: 30,
                                       ),
-                                      Text(
-                                        '${CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyTransactions ?? 0 : 0}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6,
+                                      Expanded(
+                                        child: Text(
+                                          '${CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyTransactions ?? 0 : 0}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline6,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -220,7 +223,7 @@ class CanteenHomeScreen extends StatelessWidget {
                                       SizedBox(
                                           width: 150,
                                           child: Text(
-                                            'Revenue',
+                                            'Total Cash',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .headline5!
@@ -231,11 +234,13 @@ class CanteenHomeScreen extends StatelessWidget {
                                       const SizedBox(
                                         width: 25,
                                       ),
-                                      Text(
-                                        '${CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue.toStringAsFixed(2) : 0.toStringAsFixed(2) : 0.toStringAsFixed(2)} EGP',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6,
+                                      Expanded(
+                                        child: Text(
+                                          '${CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue.toStringAsFixed(2) : 0.toStringAsFixed(2) : 0.toStringAsFixed(2)} EGP',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline6,
+                                        ),
                                       ),
                                     ],
                                   ),

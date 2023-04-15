@@ -2,12 +2,12 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:st_tracker/layout/teacher/cubit/cubit.dart';
-import 'package:st_tracker/layout/teacher/cubit/states.dart';
-import 'package:st_tracker/models/student_attendance.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/styles/themes.dart';
+import 'package:stguard/layout/teacher/cubit/cubit.dart';
+import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/models/student_attendance.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/network/local/cache_helper.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class AttendanceDetailsScreen extends StatelessWidget {
   LessonModel lesson;
@@ -19,7 +19,10 @@ class AttendanceDetailsScreen extends StatelessWidget {
       builder: (context) {
         TeacherCubit.get(context).getLessonAttendance(lesson.name);
         return Scaffold(
-          appBar: AppBar(title: const Text('Attendance Details'),centerTitle: true,),
+          appBar: AppBar(
+            title: const Text('Attendance Details'),
+            centerTitle: true,
+          ),
           body: BlocConsumer<TeacherCubit, TeacherStates>(
             listener: (context, state) {
               if (state is SavetoExcelSuccessState) {
@@ -27,9 +30,8 @@ class AttendanceDetailsScreen extends StatelessWidget {
                   const SnackBar(
                     content: Text(
                       "Saved successfully to Excel file",
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                     ),
                     duration: Duration(seconds: 2),
                     backgroundColor: Colors.green,
@@ -74,7 +76,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(
-                                    width:10,
+                                    width: 10,
                                   ),
                                   Text(
                                       getDate(lesson.datetime,
@@ -95,22 +97,20 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                         image: AssetImage(
                                             'assets/images/excel.png')),
                                     onTap: () async {
-                                      if (await Permission
-                                          .storage.isDenied) {
+                                      if (await Permission.storage.isDenied) {
                                         print(Permission.storage.isDenied);
                                         await showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title:
-                                                const Text("Storage Permission"),
+                                            title: const Text(
+                                                "Storage Permission"),
                                             content: const Text(
                                                 "This app requires storage permission to save files."),
                                             actions: [
                                               TextButton(
                                                 child: const Text("OK"),
                                                 onPressed: () {
-                                                  Navigator.of(context)
-                                                      .pop();
+                                                  Navigator.of(context).pop();
                                                 },
                                               ),
                                               TextButton(
@@ -133,16 +133,14 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                 .saveAttendanceToExcel(
                                                     lesson,
                                                     path,
-                                                    TeacherCubit.get(
-                                                            context)
+                                                    TeacherCubit.get(context)
                                                         .lessonAttendance);
                                           } else {
                                             showDialog(
                                               context: context,
                                               builder: (context) {
                                                 return AlertDialog(
-                                                  title:
-                                                      const Text("Save to"),
+                                                  title: const Text("Save to"),
                                                   content: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -158,8 +156,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                                 .start,
                                                         children: [
                                                           Expanded(
-                                                            child:
-                                                                TextButton(
+                                                            child: TextButton(
                                                               child: const Text(
                                                                   "Documents"),
                                                               onPressed:
@@ -169,14 +166,17 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                                     filePath =
                                                                     "/storage/emulated/0/Documents";
                                                                 // Write the file
-                                                                TeacherCubit.get(context).saveAttendanceToExcel(
-                                                                    lesson,
-                                                                    filePath,
-                                                                    TeacherCubit.get(context)
-                                                                        .lessonAttendance);
-                    
-                                                                if (TeacherCubit.get(
+                                                                TeacherCubit.get(
                                                                         context)
+                                                                    .saveAttendanceToExcel(
+                                                                        lesson,
+                                                                        filePath,
+                                                                        TeacherCubit.get(context)
+                                                                            .lessonAttendance);
+
+                                                                if (TeacherCubit
+                                                                        .get(
+                                                                            context)
                                                                     .saveToThisLocation) {
                                                                   // Save the file path to the shared preferences
                                                                   CacheHelper.saveData(
@@ -185,7 +185,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                                       value:
                                                                           filePath);
                                                                 }
-                    
+
                                                                 Navigator.of(
                                                                         context)
                                                                     .pop();
@@ -193,29 +193,28 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                             ),
                                                           ),
                                                           const SizedBox(
-                                                            height:
-                                                                20
-                                                          ),
+                                                              height: 20),
                                                           Expanded(
-                                                            child:
-                                                                TextButton(
+                                                            child: TextButton(
                                                               child: const Text(
                                                                   "Downloads"),
-                                                              onPressed:
-                                                                  () {
+                                                              onPressed: () {
                                                                 // Save the file to the downloads directory
                                                                 String
                                                                     filePath =
                                                                     "/storage/emulated/0/Download";
                                                                 // Write the file
-                                                                TeacherCubit.get(context).saveAttendanceToExcel(
-                                                                    lesson,
-                                                                    filePath,
-                                                                    TeacherCubit.get(context)
-                                                                        .lessonAttendance);
-                    
-                                                                if (TeacherCubit.get(
+                                                                TeacherCubit.get(
                                                                         context)
+                                                                    .saveAttendanceToExcel(
+                                                                        lesson,
+                                                                        filePath,
+                                                                        TeacherCubit.get(context)
+                                                                            .lessonAttendance);
+
+                                                                if (TeacherCubit
+                                                                        .get(
+                                                                            context)
                                                                     .saveToThisLocation) {
                                                                   // Save the file path to the shared preferences
                                                                   CacheHelper.saveData(
@@ -224,7 +223,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                                       value:
                                                                           filePath);
                                                                 }
-                    
+
                                                                 Navigator.of(
                                                                         context)
                                                                     .pop();
@@ -300,7 +299,6 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                   .lessonAttendance
                                   .length),
                         ),
-                        
                       ],
                     ),
                   ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:st_tracker/modules/login/cubit/cubit.dart';
-import 'package:st_tracker/modules/login/cubit/states.dart';
-import 'package:st_tracker/modules/register/register_screen.dart';
-import 'package:st_tracker/shared/components/components.dart';
-import 'package:st_tracker/shared/components/constants.dart';
-import 'package:st_tracker/shared/network/local/cache_helper.dart';
-import 'package:st_tracker/shared/styles/Themes.dart';
+import 'package:stguard/modules/login/cubit/cubit.dart';
+import 'package:stguard/modules/login/cubit/states.dart';
+import 'package:stguard/modules/register/register_screen.dart';
+import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/network/local/cache_helper.dart';
+import 'package:stguard/shared/styles/Themes.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -26,12 +26,10 @@ class LoginScreen extends StatelessWidget {
                 key: 'role', value: LoginCubit.get(context).role);
             CacheHelper.saveData(key: 'id', value: state.userID).then((value) {
               userID = state.userID;
+              userRole = state.userRole;
               navigateAndFinish(
-                  context, homeScreens[LoginCubit.get(context).role]);
+                  context, homeScreens[userRole]);
               LoginCubit.get(context).changeReadOnly(value: true);
-
-              
-              
             });
           } else if (state is LoginErrorState) {
             ShowToast(message: state.error, state: ToastStates.ERROR);
@@ -121,7 +119,6 @@ class LoginScreen extends StatelessWidget {
                                 }
                                 return null;
                               },
-                              
                               label: 'Email',
                               prefix: Icons.email_outlined),
                           const SizedBox(
@@ -137,7 +134,6 @@ class LoginScreen extends StatelessWidget {
                               }
                               return null;
                             },
-                           
                             label: 'Password',
                             isClickable: LoginCubit.get(context).readOnly,
                             changeObscured: () => LoginCubit.get(context)
@@ -150,7 +146,6 @@ class LoginScreen extends StatelessWidget {
                                   email: emailController.text,
                                   password: passwordController.text,
                                 );
-                                
                               }
                             },
                           ),
@@ -234,11 +229,12 @@ class LoginScreen extends StatelessWidget {
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
                                 LoginCubit.get(context).login(
-                                  email: emailController.text.replaceAll(' ', ''),
+                                  email:
+                                      emailController.text.replaceAll(' ', ''),
                                   password: passwordController.text,
                                 );
-                                LoginCubit.get(context).changeReadOnly(value: false);
-
+                                LoginCubit.get(context)
+                                    .changeReadOnly(value: false);
                               }
                             },
                           )
