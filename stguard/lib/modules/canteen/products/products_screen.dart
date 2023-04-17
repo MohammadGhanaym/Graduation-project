@@ -149,7 +149,7 @@ class ProductsScreen extends StatelessWidget {
                                                       onPressed: () {
                                                         CanteenCubit.get(
                                                                 context)
-                                                            .calTotalPrice();
+                                                            .calTotalPriceAndCalories();
                                                         navigateTo(context,
                                                             const ProcessedScreen());
                                                       }),

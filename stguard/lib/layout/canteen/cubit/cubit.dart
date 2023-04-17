@@ -290,29 +290,33 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   double totalPrice = 0;
+  double totalCalories = 0.0;
+
   int itemsCount = 0;
-  void calTotalPrice() {
+  void calTotalPriceAndCalories() {
     totalPrice = 0;
     itemsCount = 0;
+    totalCalories = 0.0;
     selectedProducts.forEach((id, p) {
       totalPrice += p.price * itemQuantities[id]!;
+      totalCalories += p.calories * itemQuantities[id]!;
+
       itemsCount += itemQuantities[id]!;
-      print(p.price);
-      print(itemQuantities[id]);
     });
     print(totalPrice);
-    emit(CalculateTotalPriceState());
+    print(totalCalories);
+    emit(CalculateTotalPriceAndCaloriesState());
   }
 
   void addQuantity(String id) {
     itemQuantities[id] = itemQuantities[id]! + 1;
-    calTotalPrice();
+    calTotalPriceAndCalories();
   }
 
   void removeQuantity(String id) {
     if (itemQuantities[id]! > 1) {
       itemQuantities[id] = itemQuantities[id]! - 1;
-      calTotalPrice();
+      calTotalPriceAndCalories();
     }
   }
 
@@ -364,6 +368,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
       {required String name,
       required double price,
       required String category,
+      required double calories,
       required List<String> itemAllergies}) async {
     emit(UploadItemImageLoadingState());
     await firebase_storage.FirebaseStorage.instance
@@ -378,6 +383,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
             category: category,
             name: name,
             price: price,
+            calories: calories,
             image: value,
             itemAllergies: itemAllergies);
       }).catchError((error) {
@@ -391,20 +397,17 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   List<String> ingredients = [];
-  Future<void> checkAllergens({
-    required String name,
-    required double price,
-    required String category,
-  }) async {
+  Future<void> checkAllergens(
+      {required String name,
+      required double price,
+      required String category,
+      required double calories}) async {
     List<String> itemAllergies = [];
     print(allergies);
     ingredients.forEach((ingredient) {
       allergies.forEach((allergy, allergens) {
         for (String allergen in allergens) {
           if (allergen.toLowerCase().contains(ingredient.toLowerCase()) ||
-              allergen
-                  .toLowerCase()
-                  .contains(ingredient.toLowerCase().split(' ').last) ||
               ingredient.toLowerCase().contains(allergen.toLowerCase())) {
             print(allergy);
             if (!itemAllergies.contains(allergy)) {
@@ -420,6 +423,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
         name: name,
         price: price,
         category: category,
+        calories: calories,
         itemAllergies: itemAllergies);
   }
 
@@ -460,6 +464,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
       {required String name,
       required double price,
       required String category,
+      required double calories,
       required String image,
       required List<String> itemAllergies}) async {
     emit(UploadItemDataLoadingState());
@@ -481,6 +486,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
               {
                 'name': name,
                 'price': price,
+                'calories': calories,
                 'image': image,
                 'allergies': itemAllergies
               });
@@ -489,8 +495,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
           itemAllergies = [];
           ingredients = [];
           await getProducts();
-
-          getCategories();
+          await getCategories();
           emit(UploadItemDataSuccessState());
         }).catchError((error) {
           emit(UploadItemDataErrorState());
@@ -506,6 +511,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
             .set({
           'name': name,
           'price': price,
+          'calories': calories,
           'image': image,
           'allergies': itemAllergies
         }).then((value) async {
@@ -518,9 +524,15 @@ class CanteenCubit extends Cubit<CanteenStates> {
           emit(UploadItemDataErrorState());
         });
       }
-    }).catchError((error) {
+    }).catchError((error) async {
       emit(UploadItemDataErrorState());
-
+      await firebase_storage.FirebaseStorage.instanceFor(
+              bucket: 'smartschool-6aee1.appspot.com')
+          .refFromURL(image)
+          .delete()
+          .catchError((error) {
+        print(error.toString());
+      });
       print(error.toString());
     });
   }
@@ -532,6 +544,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? buyerListener;
   void listentoBuyer() {
+    buyer = null;
     emit(StartListeningBuyerDataState());
     buyerListener = schoolCanteenPath!
         .collection('Canteen')
@@ -569,20 +582,14 @@ class CanteenCubit extends Cubit<CanteenStates> {
           print(buyer);
           print(buyer!.dailySpending);
           if (buyer != null) {
-            print('buyer!.dailySpending != null');
             if (getDate(buyer!.dailySpending['updateTime'],
-                    format: 'yyyy-MM-dd') ==
+                    format: 'yyyy-MM-dd') !=
                 getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
-              print("I'm here");
-              await analyzeBuyerData();
-            } else {
-              print('buyer!.dailySpending == null');
               await value.docs[0].reference.update({
                 'dailySpending': {'value': 0.0, 'updateTime': DateTime.now()}
               }).then(
                 (value) async {
                   buyer!.resetDailySpending();
-                  await analyzeBuyerData();
                 },
               ).catchError((error) {
                 cancelBuyerListener();
@@ -590,6 +597,23 @@ class CanteenCubit extends Cubit<CanteenStates> {
                 emit(PaymentErrorState());
               });
             }
+            if (getDate(buyer!.dailyCalorie['updateTime'],
+                    format: 'yyyy-MM-dd') !=
+                getDate(DateTime.now(), format: 'yyyy-MM-dd')) {
+              await value.docs[0].reference.update({
+                'dailyCalorie': {'value': 0.0, 'updateTime': DateTime.now()}
+              }).then(
+                (value) async {
+                  buyer!.resetDailyCalorie();
+                },
+              ).catchError((error) {
+                cancelBuyerListener();
+                cancelBuyer();
+                emit(PaymentErrorState());
+              });
+            }
+
+            await analyzeBuyerData();
           } else {
             cancelBuyer();
             emit(PaymentErrorState());
@@ -609,32 +633,29 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   String? result;
-  void resetResult() {
-    result = null;
-  }
-
   Future<void> analyzeBuyerData() async {
-    print('analyzeBuyerData');
+    result = null;
+
     if (buyer!.parent == null) {
       print('ID is Deactivated');
       result = 'ID is Deactivated';
-      cancelBuyerListener();
-      cancelBuyer();
-      emit(PaymentErrorState());
     } else if (totalPrice > buyer!.pocketMoney!) {
-      cancelBuyerListener();
-      cancelBuyer();
       print('Daily spending limit exceeded1');
       result = 'Daily spending limit exceeded';
-      emit(PaymentErrorState());
     } else if (buyer!.dailySpending['value'] + totalPrice >
         buyer!.pocketMoney) {
-      print('Daily spending limit exceeded2');
-      cancelBuyerListener();
-      cancelBuyer();
+      print('Daily spending limit exceeded');
       result = 'Daily spending limit exceeded';
-      emit(PaymentErrorState());
-    } else if (buyer!.allergies != null) {
+    } 
+    else if (totalCalories > buyer!.calorieLimit) {
+      result = 'Daily calorie limit exceeded';
+      print('Daily calorie limit exceeded1');
+    } else if (buyer!.dailyCalorie['value'] + totalCalories >
+        buyer!.calorieLimit) {
+      result = 'Daily calorie limit exceeded';
+      print('Daily calorie limit exceeded2');
+    }
+    else if (buyer!.allergies != null) {
       print('One or more products contain allergens');
       print('checkallergies');
       bool hasAllergen = false;
@@ -644,23 +665,18 @@ class CanteenCubit extends Cubit<CanteenStates> {
             if (buyer!.allergies!.contains(allergy)) {
               result = 'One or more products contain allergens';
               hasAllergen = true;
-              cancelBuyerListener();
-              cancelBuyer();
-              emit(PaymentErrorState());
-
               break;
             }
           }
         }
       }
-      if (!hasAllergen) {
-        print('completePayment');
-
-        await completePayment(buyer!.parent!);
-      }
+    } 
+    if (result == null) {
+      completePayment(buyer!.parent!);
     } else {
-      print('completePayment');
-      await completePayment(buyer!.parent!);
+      cancelBuyerListener();
+      cancelBuyer();
+      emit(PaymentErrorState());
     }
   }
 
@@ -773,6 +789,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
         .get()
         .then((value) async {
       if (value.docs.isNotEmpty) {
+        // update daily spending
         if (value.docs[0].data().containsKey('dailySpending')) {
           batch.update(value.docs[0].reference, {
             'dailySpending': {
@@ -787,6 +804,20 @@ class CanteenCubit extends Cubit<CanteenStates> {
           });
         }
 
+        // update calorie
+        if (value.docs[0].data().containsKey('dailyCalorie')) {
+          batch.update(value.docs[0].reference, {
+            'dailyCalorie': {
+              'value':
+                  totalCalories + value.docs[0].data()['dailyCalorie']['value'],
+              'updateTime': DateTime.now()
+            }
+          });
+        } else {
+          batch.update(value.docs[0].reference, {
+            'dailyCalorie': {'value': totalPrice, 'updateTime': DateTime.now()}
+          });
+        }
         batch.set(
             value.docs[0].reference.collection('CanteenTransactions').doc(),
             createTranscation());
@@ -903,14 +934,22 @@ class CanteenCubit extends Cubit<CanteenStates> {
           .delete()
           .then((value) async {
         emit(DeleteItemSuccessState());
+        try {
+          await firebase_storage.FirebaseStorage.instanceFor(
+                  bucket: 'smartschool-6aee1.appspot.com')
+              .refFromURL(image)
+              .delete()
+              .catchError((error) {
+            print(error.toString());
+          });
+        } on FirebaseException catch (e) {
+          // Handle the Firebase exception
+          print('Firebase error: $e');
+        } catch (e) {
+          // Handle other exceptions
+          print('Error: $e');
+        }
 
-        await firebase_storage.FirebaseStorage.instanceFor(
-                bucket: 'smartschool-6aee1.appspot.com')
-            .refFromURL(image)
-            .delete()
-            .catchError((error) {
-          print(error.toString());
-        });
         getProducts();
       }).catchError((error) {
         emit(DeleteItemErrorState());

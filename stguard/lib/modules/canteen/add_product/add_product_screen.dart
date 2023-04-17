@@ -12,11 +12,12 @@ class AddProductScreen extends StatelessWidget {
   var formKey = GlobalKey<FormState>();
   var formKeyIngredient = GlobalKey<FormState>();
   var formKeyCategory = GlobalKey<FormState>();
-
+  
   TextEditingController priceController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController categoryController = TextEditingController();
   TextEditingController ingredientController = TextEditingController();
+  TextEditingController calorieController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,6 +192,21 @@ class AddProductScreen extends StatelessWidget {
                         const SizedBox(
                           height: 20,
                         ),
+                                               
+                        DefaultFormField(
+                            controller: calorieController,
+                            type: TextInputType.number,
+                            validate: (value) {
+                              if (value!.isEmpty) {
+                                return 'Calories must not be empty';
+                              }
+                               if (double.tryParse(value) == null) {
+                                return 'Please enter a valid number';
+                              }
+                              return null;
+                            },
+                            label: 'Calories (kcal)'),
+                        const SizedBox(height: 20),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -264,25 +280,7 @@ class AddProductScreen extends StatelessWidget {
                                                   return null;
                                                 },
                                               )
-                                              /*DefaultFormField(
-                                                  controller:
-                                                      ingredientController,
-                                                  type: TextInputType.text,
-                                                  validate: (value) {
-                                                    if (value!.isEmpty) {
-                                                      return 'Please enter an ingredient name';
-                                                    }
-                                                    if (CanteenCubit.get(
-                                                            context)
-                                                        .ingredients
-                                                        .contains(value)) {
-                                                      return 'You have already entered this ingredient before';
-                                                    }
-                                                    return null;
-                                                  },
-                                                  label: 'Ingredient Name')
-                                            */
-                                            ],
+                                    ],
                                           ),
                                         ),
                                         buttonText1: 'Done',
@@ -379,6 +377,7 @@ class AddProductScreen extends StatelessWidget {
                                         price:
                                             double.parse(priceController.text),
                                         category: categoryController.text,
+                                        calories: double.parse(calorieController.text)
                                       );
                                     }
                                   }

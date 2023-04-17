@@ -13,6 +13,7 @@ import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/product_model.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
@@ -422,6 +423,7 @@ class ParentCubit extends Cubit<ParentStates> {
 
   Future<void> getSettingsData(StudentModel st) async {
     pocket_money = st.pocketMoney.toDouble();
+    calorie = st.calorieLimit;
     allergies = [Icons.add];
     selectedAllergies = [];
     if (st.allergies != null) {
@@ -675,6 +677,31 @@ class ParentCubit extends Cubit<ParentStates> {
       isCvvFocused = false;
     }).catchError((error) {
       emit(UpdateBalanceError());
+    });
+  }
+
+  double calorie = 0.0;
+
+  void updateCalorie({required String id, required double value}) async {
+    emit(UpdateCalorieLoadingState());
+    await studentsPaths[id]!.update({'calorie': value}).then((value) async {
+      emit(UpdateCalorieSuccessState());
+      await getStudentsData(id, studentsPaths[id]!);
+      await getCalorie(id: id);
+    }).catchError((error) {
+      emit(UpdateCalorieErrorState());
+      print(error.toString());
+    });
+  }
+
+  Future<void> getCalorie({required String id}) async {
+    emit(GetCalorieLoadingState());
+    await studentsPaths[id]!.get().then((value) {
+      calorie = value['calorie'].toDouble();
+      emit(GetCalorieSuccessState());
+    }).catchError((error) {
+      print(error);
+      emit(GetCalorieErrorState());
     });
   }
 }

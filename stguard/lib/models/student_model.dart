@@ -3,9 +3,11 @@ class StudentModel {
   String? className;
   String? image;
   String? name;
+  dynamic calorieLimit;
   dynamic pocketMoney;
   List<dynamic>? allergies;
   late Map<String, dynamic> dailySpending;
+  late Map<String, dynamic> dailyCalorie;
   String? parent;
   StudentModel.fromJson(Map<String, dynamic>? json) {
     if (json != null) {
@@ -33,11 +35,24 @@ class StudentModel {
       if (json.containsKey('allergies')) {
         allergies = json['allergies'];
       }
+      if (json.containsKey('calorie')) {
+        calorieLimit = json['calorie'].toDouble();
+      } else {
+        calorieLimit = 0.0;
+      }
+      if (json.containsKey('dailyCalorie')) {
+        dailyCalorie = json['dailyCalorie'];
+      } else {
+        dailyCalorie = {'value': 0.0, 'updateTime': DateTime.now()};
+      }
     }
   }
 
   void resetDailySpending() {
     dailySpending = {'value': 0.0, 'updateTime': DateTime.now()};
+  }
+    void resetDailyCalorie() {
+    dailyCalorie = {'value': 0.0, 'updateTime': DateTime.now()};
   }
 }
 

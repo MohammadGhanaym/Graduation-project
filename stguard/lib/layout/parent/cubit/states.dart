@@ -13,6 +13,7 @@ class FamilyMemberAlreadyHasParent extends ParentStates {
   String? message;
   FamilyMemberAlreadyHasParent(this.message);
 }
+
 class IDNotFound extends ParentStates {
   String? message;
   IDNotFound(this.message);
@@ -140,6 +141,7 @@ class UpdateAllergiesErrorState extends ParentStates {
   var error;
   UpdateAllergiesErrorState(this.error);
 }
+
 class GetDigitalIDStateLoading extends ParentStates {}
 
 class GetDigitalIDStateSuccess extends ParentStates {}
@@ -148,6 +150,7 @@ class GetDigitalIDStateError extends ParentStates {
   var error;
   GetDigitalIDStateError(this.error);
 }
+
 class GetCountriesSucessState extends ParentStates {}
 
 class GetCountriesLoadingState extends ParentStates {}
@@ -172,4 +175,16 @@ class PickCountryState extends ParentStates {}
 
 class CreditCardModelChangeState extends ParentStates {}
 
+class SetCalorieState extends ParentStates {}
 
+class GetCalorieSuccessState extends ParentStates {}
+
+class GetCalorieLoadingState extends ParentStates {}
+
+class GetCalorieErrorState extends ParentStates {}
+
+class UpdateCalorieSuccessState extends ParentStates {}
+
+class UpdateCalorieLoadingState extends ParentStates {}
+
+class UpdateCalorieErrorState extends ParentStates {}

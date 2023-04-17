@@ -69,7 +69,7 @@ class GetAllProductsSuccessState extends CanteenStates {}
 
 class SelectProductState extends CanteenStates {}
 
-class CalculateTotalPriceState extends CanteenStates {}
+class CalculateTotalPriceAndCaloriesState extends CanteenStates {}
 
 class CancelSelectedProductState extends CanteenStates {}
 

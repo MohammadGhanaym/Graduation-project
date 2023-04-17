@@ -114,7 +114,7 @@ class TapPayScreen extends StatelessWidget {
                                 CanteenCubit.get(context).getCanteenDetails();
                                 CanteenCubit.get(context)
                                     .cancelSelectedProducts();
-                                CanteenCubit.get(context).resetResult();
+                                
                                 navigateAndFinish(
                                     context, const CanteenHomeScreen());
                               },

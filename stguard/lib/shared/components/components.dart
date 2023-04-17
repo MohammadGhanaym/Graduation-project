@@ -603,7 +603,7 @@ class SettingsCard extends StatelessWidget {
       child: Card(
         elevation: 0.0,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(10.0),
           child: condition
               ? Column(
                   children: children,
@@ -618,7 +618,11 @@ class SettingsCard extends StatelessWidget {
 }
 
 class SliderBuilder extends StatelessWidget {
-  SliderBuilder({super.key});
+  dynamic max;
+  double value;
+  void Function(double)? onChanged;
+  void Function(double)? onChangeStart;
+  SliderBuilder({super.key, required this.max, required this.value, required this.onChangeStart, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -634,24 +638,18 @@ class SliderBuilder extends StatelessWidget {
             data: const SliderThemeData(trackHeight: 3),
             child: Expanded(
               child: Slider(
-                value: ParentCubit.get(context).pocket_money,
+                value: value,
                 min: 0,
-                max: 500,
-                label: '${ParentCubit.get(context).pocket_money}',
-                divisions: 500 ~/ 5,
-                onChanged: (value) {
-                  if (value <= ParentCubit.get(context).parent!.balance) {
-                    ParentCubit.get(context).setPocketMoney(money: value);
-                  }
-                },
-                onChangeStart: (value) {
-                  ParentCubit.get(context).showBottomSheet();
-                },
+                max: max,
+                label: '$value',
+                divisions: max ~/ 5,
+                onChanged: onChanged,
+                onChangeStart: onChangeStart,
               ),
             ),
           ),
           SliderSideLabel(
-            value: 500,
+            value: max,
             type: 'max',
           )
         ],
@@ -1077,11 +1075,15 @@ class LessonCard extends StatelessWidget {
                         showDefaultDialog(
                           context,
                           title: 'Are you sure?',
-                          content:Text("Are you sure you want to delete this lesson's attendance?",
-                          style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 15
-                          ),),
+                          content: Text(
+                            "Are you sure you want to delete this lesson's attendance?",
+                            style: Theme.of(context)
+                                .textTheme
+                                .caption!
+                                .copyWith(fontSize: 15),
+                          ),
                           buttonText1: 'Cancel',
-                          onPressed1: () =>Navigator.pop(context),
+                          onPressed1: () => Navigator.pop(context),
                           buttonText2: 'Delete',
                           onPressed2: () => TeacherCubit.get(context)
                               .deleteLesson(lesson.name),
