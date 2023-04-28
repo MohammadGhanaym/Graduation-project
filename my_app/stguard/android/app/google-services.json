@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "738736511512",
+    "project_id": "smartschool-6aee1",
+    "storage_bucket": "smartschool-6aee1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738736511512:android:76e62828a4faf00f39416d",
+        "android_client_info": {
+          "package_name": "com.example.stguard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "738736511512-c0lmlfiikd97p5bonkssn885anma83fe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.stguard",
+            "certificate_hash": "052bd2d075352b67992d228f9a5c3c7e303c9b2c"
+          }
+        },
+        {
+          "client_id": "738736511512-5erps33b0k31cae1ukb5mcijvosqs8p1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl-4h3e1_HFGirw7gJGnnV3HmR64lmd8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "738736511512-5erps33b0k31cae1ukb5mcijvosqs8p1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "738736511512-t3n5l5dldao52dpjit9qjh7t8rcrjnnj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stTracker"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738736511512:android:48a8b55fe0e2f81d39416d",
+        "android_client_info": {
+          "package_name": "com.example.stguard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "738736511512-4utua7mv4i45820bhibbi1coc645cm15.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.stguard",
+            "certificate_hash": "052bd2d075352b67992d228f9a5c3c7e303c9b2c"
+          }
+        },
+        {
+          "client_id": "738736511512-5erps33b0k31cae1ukb5mcijvosqs8p1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl-4h3e1_HFGirw7gJGnnV3HmR64lmd8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "738736511512-5erps33b0k31cae1ukb5mcijvosqs8p1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "738736511512-t3n5l5dldao52dpjit9qjh7t8rcrjnnj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stTracker"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
