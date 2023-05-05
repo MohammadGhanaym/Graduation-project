@@ -15,6 +15,7 @@ import 'package:stguard/models/teacher_model.dart';
 import 'package:stguard/models/upload_file_info.dart';
 import 'package:stguard/modules/teacher/add_new_task/add_new_task.dart';
 import 'package:stguard/modules/teacher/history/history_screen.dart';
+import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -125,6 +126,8 @@ class TeacherCubit extends Cubit<TeacherStates> {
       }).catchError((error) {
         emit(AddNewAttendanceErrorState(error.toString()));
       });
+    } else {
+      emit(AttendanceNotTakenState());
     }
   }
 
@@ -348,6 +351,8 @@ class TeacherCubit extends Cubit<TeacherStates> {
       } catch (e) {
         emit(SavetoExcelErrorState());
       }
+    } else {
+      requestWritePermission();
     }
   }
 

@@ -1,4 +1,4 @@
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +9,9 @@ import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/shared/bloc_observer.dart';
 import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/internet_cubit/cubit.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:stguard/shared/styles/themes.dart';
-
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message.data.toString());
@@ -29,26 +29,29 @@ void main() async {
   userRole = CacheHelper.getData(key: 'role');
   Widget startScreen = LoginScreen();
   if (userID != null) {
-    if(userRole == 'parent')
-    {
-  FirebaseMessaging.instance.getToken();
-  FirebaseMessaging.onMessage.listen((event) {
-    print(event.data.toString());
-    print('onMessage');
-  });
+    if (userRole == 'parent') {
+      FirebaseMessaging.instance.getToken();
+      FirebaseMessaging.onMessage.listen((event) {
+        print(event.data.toString());
+        print('onMessage');
+      });
 
-  FirebaseMessaging.onMessageOpenedApp.listen((event) {
-    print(event.data.toString());
-    print('onMessageOpenedApp');
-  });
+      FirebaseMessaging.onMessageOpenedApp.listen((event) {
+        print(event.data.toString());
+        print('onMessageOpenedApp');
+      });
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
     }
     startScreen = homeScreens[userRole]!;
   }
 
-  runApp(MyApp(
-    startScreen: startScreen,
+  runApp(BlocProvider(
+    create: (context) => InternetCubit(Connectivity()),
+    child: MyApp(
+      startScreen: startScreen,
+    ),
   ));
 }
 
@@ -57,17 +60,20 @@ class MyApp extends StatelessWidget {
   MyApp({super.key, required this.startScreen});
   @override
   Widget build(BuildContext context) {
+    
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => ParentCubit()..createDatabase()..getMyStudents()..getParentInfo()
-      ,
+          create: (context) =>
+              ParentCubit()
+                ..createDatabase()
+                ..getMyStudents()
+                ..getParentInfo(),
         ),
         BlocProvider(
           create: (context) => TeacherCubit()
             ..initDatabase()
-            ..getTeacherPath()
-            ,
+            ..getTeacherPath(),
         ),
         BlocProvider(
             create: (context) => CanteenCubit()

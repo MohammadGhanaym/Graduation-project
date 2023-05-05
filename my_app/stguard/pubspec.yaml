@@ -41,7 +41,7 @@ dependencies:
   shared_preferences: ^2.0.15
   fluttertoast: ^8.1.1
   image_picker: ^0.8.6
-  file_picker: 3.0.0
+  file_picker: ^3.0.0
   map_launcher: ^2.4.0
   permission_handler: ^10.2.0
   path_provider: ^2.0.12
@@ -57,6 +57,7 @@ dependencies:
   flutter_typeahead: ^3.0.0
   flutter_native_splash: ^2.0.1+1
   open_file: ^3.2.1
+  connectivity_plus: ^3.0.6
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2

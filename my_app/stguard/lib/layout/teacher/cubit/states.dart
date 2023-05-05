@@ -71,6 +71,7 @@ class GetStudentNamesLoading extends TeacherStates {}
 class AddStudenttoAttendanceState extends TeacherStates {}
 
 class AddNewAttendanceSuccessState extends TeacherStates {}
+class AttendanceNotTakenState extends TeacherStates {}
 
 class AddNewAttendanceErrorState extends TeacherStates {
   String error;

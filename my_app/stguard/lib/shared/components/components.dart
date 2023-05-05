@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -17,14 +16,11 @@ import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/product_model.dart';
-import 'package:stguard/models/teacher_model.dart';
 import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
-import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:stguard/modules/parent/member_settings/member_settings.dart';
 import 'package:stguard/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:stguard/shared/components/constants.dart';
-import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
 class DefaultButton extends StatelessWidget {
@@ -1756,4 +1752,17 @@ class DownloadItem extends StatelessWidget {
       ),
     );
   }
+}
+
+void showSnackBar(BuildContext context, {required String message, required IconData icon})
+{
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  ScaffoldMessenger.of(context)
+                  .showSnackBar( SnackBar(content: Row(
+                    children:  [
+                       Icon(icon, color: Colors.white,),
+                      const SizedBox(width: 5,),
+                      Text(message),
+                    ],
+                  )));
 }

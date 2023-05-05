@@ -208,3 +208,5 @@ class CancelDownloadState extends ParentStates{}
 
 class UserSignOutSuccessState extends ParentStates{}
 class UserSignOutErrorState extends ParentStates{}
+
+class InternetConnectionLostState extends ParentStates{}

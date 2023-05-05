@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -24,9 +25,7 @@ import 'package:stguard/shared/network/local/cache_helper.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
-
   static ParentCubit get(context) => BlocProvider.of(context);
-
   late Database database;
 
   void createDatabase() async {
@@ -72,7 +71,6 @@ class ParentCubit extends Cubit<ParentStates> {
       onOpen: (db) async {
         database = db;
         print('db opened');
-        await getDataFromActivityTable();
       },
     );
   }
@@ -358,6 +356,7 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(ParentGetDataBaseLoadingState());
     if (studentsPaths.isNotEmpty) {
       //SELECT * FROM student_activity ORDER BY date DESC
+      Database database = await openDatabase('activities.db');
       await database
           .query('student_activity',
               orderBy: 'date DESC',
@@ -375,7 +374,9 @@ class ParentCubit extends Cubit<ParentStates> {
         print(activities);
 
         emit(ParentGeStudentActivitySuccessState());
-      }).catchError((error) {});
+      }).catchError((error) {
+        emit(ParentGeStudentActivityErrorState());
+      });
     } else {
       activities = [];
       emit(ParentGeStudentActivityErrorState());
