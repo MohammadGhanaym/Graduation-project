@@ -33,20 +33,6 @@ class LoginScreen extends StatelessWidget {
                 .then((value) {
               userID = state.userID;
               userRole = state.userRole;
-              if (userRole == 'parent') {
-                ParentCubit.get(context)
-                  ..createDatabase()
-                  ..getMyStudents()
-                  ..getParentInfo();
-              } else if (userRole == 'teacher') {
-                TeacherCubit.get(context)
-                  ..initDatabase()
-                  ..getTeacherPath();
-              } else if (userRole == 'canteen worker') {
-                CanteenCubit.get(context)
-                  ..getCanteenInfo()
-                  ..getCanteenPath();
-              }
               navigateAndFinish(context, homeScreens[userRole]);
             });
           } else if (state is LoginErrorState) {

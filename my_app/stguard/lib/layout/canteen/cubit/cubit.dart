@@ -816,7 +816,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
           });
         } else {
           batch.update(value.docs[0].reference, {
-            'dailyCalorie': {'value': totalPrice, 'updateTime': DateTime.now()}
+            'dailyCalorie': {'value': totalCalories, 'updateTime': DateTime.now()}
           });
         }
         batch.set(

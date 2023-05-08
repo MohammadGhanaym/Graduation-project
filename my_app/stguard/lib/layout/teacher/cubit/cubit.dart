@@ -582,7 +582,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
   Future<void> uploadFile(File file) async {
     String fileName = file.path.split('/').last;
     String uniqueFileName =
-        '${DateTime.now().millisecondsSinceEpoch}_${fileName}';
+        '${DateTime.now().millisecondsSinceEpoch}_$fileName';
 
     String progressText = '0%';
 
@@ -775,5 +775,15 @@ class TeacherCubit extends Cubit<TeacherStates> {
       emit(UserSignOutSuccessState());
       _database.close();
     });
+  }
+
+
+
+  void downloadTemplate() {
+    // TODO: Implement download logic
+  }
+
+  void uploadGradesCsv() {
+    // TODO: Implement upload logic
   }
 }
