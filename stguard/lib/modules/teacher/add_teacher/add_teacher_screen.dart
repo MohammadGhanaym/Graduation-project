@@ -63,13 +63,10 @@ class AddTeacherScreen extends StatelessWidget {
                       const SizedBox(
                         height: 40,
                       ),
-                      state is AddTeacherLoadingState
-                          ? LoadingOnWaiting(
-                              color: defaultColor.withOpacity(0.8),
-                            )
-                          : DefaultButton(
+                       DefaultButton(
                               text: 'CONFIRM',
                               color: defaultColor.withOpacity(0.8),
+                              showCircularProgressIndicator: state is AddTeacherLoadingState,
                               onPressed: () {
                                 TeacherCubit.get(context)
                                     .addTeacher(teacherController.text);

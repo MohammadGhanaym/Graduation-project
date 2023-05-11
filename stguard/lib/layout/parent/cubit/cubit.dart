@@ -1,23 +1,32 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:map_launcher/map_launcher.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/models/activity_model.dart';
+import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/country_model.dart';
+import 'package:stguard/models/download_file.dart';
 import 'package:stguard/models/parent_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/product_model.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
-import 'package:stguard/shared/styles/themes.dart';
+import 'package:stguard/shared/network/local/cache_helper.dart';
+
+import '../../../modules/parent/grades/Exam_Rseult.dart';
 
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
-
   static ParentCubit get(context) => BlocProvider.of(context);
   late Database database;
 
@@ -61,10 +70,8 @@ class ParentCubit extends Cubit<ParentStates> {
           });
         });
       },
-      onOpen: (db) {
+      onOpen: (db) async {
         database = db;
-        getMyStudents();
-
         print('db opened');
       },
     );
@@ -78,10 +85,11 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   Map<String, DocumentReference<Map<String, dynamic>>> studentsPaths = {};
+  Map<String, DocumentReference<Map<String, dynamic>>> schoolPaths = {};
   FirebaseFirestore db = FirebaseFirestore.instance;
   Future<void> getMyStudents() async {
     studentsPaths = {};
-
+    schoolPaths = {};
     emit(GetStudentsPathsLoading());
     await db
         .collection('Parents')
@@ -92,6 +100,11 @@ class ParentCubit extends Cubit<ParentStates> {
       if (value.docs.isNotEmpty) {
         value.docs.forEach((st) {
           print(st.data());
+          schoolPaths[st.id] = db
+              .collection('Countries')
+              .doc(st['country'])
+              .collection('Schools')
+              .doc(st['school']);
 
           studentsPaths[st.id] = db
               .collection('Countries')
@@ -225,9 +238,14 @@ class ParentCubit extends Cubit<ParentStates> {
                   .doc(id),
               {'country': pickedCountry!.id, 'school': pickedSchool!.id});
           batch.commit().then((value) async {
+            FirebaseMessaging.instance
+                .subscribeToTopic(st.docs[0]['class_name'])
+                .then((value) {
+              print('subscribed to ${st.docs[0]['class_name']}');
+            }).catchError((error) {
+              print(error.toString());
+            });
             emit(AddFamilyMemberSuccess());
-            await getMyStudents();
-            //await refreshBackgroundService();
           }).catchError((error) {
             print(error.toString());
             emit(AddFamilyMemberError());
@@ -341,6 +359,7 @@ class ParentCubit extends Cubit<ParentStates> {
     emit(ParentGetDataBaseLoadingState());
     if (studentsPaths.isNotEmpty) {
       //SELECT * FROM student_activity ORDER BY date DESC
+      Database database = await openDatabase('activities.db');
       await database
           .query('student_activity',
               orderBy: 'date DESC',
@@ -358,7 +377,9 @@ class ParentCubit extends Cubit<ParentStates> {
         print(activities);
 
         emit(ParentGeStudentActivitySuccessState());
-      }).catchError((error) {});
+      }).catchError((error) {
+        emit(ParentGeStudentActivityErrorState());
+      });
     } else {
       activities = [];
       emit(ParentGeStudentActivityErrorState());
@@ -434,6 +455,7 @@ class ParentCubit extends Cubit<ParentStates> {
     }
     active = st.parent;
     await getLocation(st.id);
+    await getClassNotes(st);
   }
 
   bool isPaired = true; // child settings
@@ -486,6 +508,11 @@ class ParentCubit extends Cubit<ParentStates> {
         db.collection('Parents').doc(userID).collection('Students').doc(id));
     batch.update(studentsPaths[id]!, {'parent': null});
     batch.commit().then((value) async {
+      FirebaseMessaging.instance
+          .unsubscribeFromTopic(studentsData[id]!.className!)
+          .then((value) {
+        print('unsbuscribe');
+      });
       active = null;
       studentsPaths.remove(id);
       if (attendListeners[id] != null) {
@@ -501,7 +528,7 @@ class ParentCubit extends Cubit<ParentStates> {
       print(studentsPaths.keys.toList());
 
       emit(UnpairDigitalIDSuccess());
-      await getMyStudents();
+
       //await refreshBackgroundService();
     }).catchError((error) {
       print(error);
@@ -703,5 +730,196 @@ class ParentCubit extends Cubit<ParentStates> {
       print(error);
       emit(GetCalorieErrorState());
     });
+  }
+
+  List<ClassNote> notes = [];
+  Future<void> getClassNotes(StudentModel st) async {
+    notes = [];
+    emit(GetNotesLoadingState());
+    schoolPaths[st.id]!
+        .collection('classes')
+        .where('name', isEqualTo: st.className)
+        .get()
+        .then((value) {
+      print('note here');
+      if (value.docs.isNotEmpty) {
+        print('note here2');
+        print(value.docs);
+        value.docs[0].reference
+            .collection('notes')
+            .where('to', whereIn: ['All', st.name])
+            .orderBy('datetime', descending: true)
+            .get()
+            .then((value) {
+              print('note here3');
+              if (value.docs.isNotEmpty) {
+                print('note here4');
+                value.docs.forEach((element) {
+                  notes.add(ClassNote.fromMap(element.data()));
+                });
+                print(notes);
+                emit(GetNotesSuccessState());
+              } else {
+                emit(GetNotesErrorState());
+              }
+            })
+            .catchError((error) {
+              print(error);
+              emit(GetNotesErrorState());
+            });
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetNotesErrorState());
+    });
+  }
+
+  Future<bool> checkFileExists(String fileName) async {
+    Directory tempDir = await getTemporaryDirectory();
+    File file = File('${tempDir.path}/$fileName');
+    return await file.exists();
+  }
+
+  Future<void> openDownloadedFile(String fileName) async {
+    requestWritePermission();
+    Directory tempDir = await getTemporaryDirectory();
+    File downloadedFile = File('${tempDir.path}/$fileName');
+
+    if (await downloadedFile.exists()) {
+      print('File exists at path: ${downloadedFile.path}');
+      // Open the downloaded file using the default system application
+      await OpenFile.open(downloadedFile.path).then((value) {
+        print('File opened');
+      }).catchError((error) {
+        print(error.toString());
+      });
+    } else {
+      print('File does not exist at path: ${downloadedFile.path}');
+      // Handle the case where the file does not exist
+    }
+  }
+
+  Map<String, DownloadFileInfo> downloadFilesInfo = {};
+  Future<void> downloadFile(
+      {required String fileName, required String fileUrl}) async {
+    emit(FileDownloadLoadingState());
+    double progress = 0.0;
+    try {
+      // Create a reference to the file in Firebase Storage
+      print(fileUrl);
+      firebase_storage.Reference ref =
+          firebase_storage.FirebaseStorage.instanceFor(
+                  bucket: 'smartschool-6aee1.appspot.com')
+              .refFromURL(fileUrl);
+
+      // Download the file to a temporary directory
+      Directory tempDir = await getTemporaryDirectory();
+      print(tempDir.path);
+      print(fileName);
+      //String filePath = "/storage/emulated/0/Documents";
+      File file = File('${tempDir.path}/$fileName');
+      firebase_storage.DownloadTask downloadTask = ref.writeToFile(file);
+      downloadFilesInfo[fileName] =
+          DownloadFileInfo(progress: progress, downloadTask: downloadTask);
+
+      downloadTask.snapshotEvents.listen((snapshot) async {
+        // You can access the download progress from the `snapshot.bytesTransferred` and `snapshot.totalBytes` properties
+        double progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        print('Download Progress: $progress%');
+        downloadFilesInfo[fileName]!.progress = progress;
+        emit(DownloadFileProgress());
+        if (progress == 1 &&
+            snapshot.state == firebase_storage.TaskState.success) {
+          emit(FileDownloadSuccessState());
+          downloadFilesInfo.remove(fileName);
+        }
+      }).onError((error) {
+        print('Error: ${error.toString()}');
+        emit(FileDownloadErrorState());
+      });
+    } catch (e) {
+      emit(FileDownloadErrorState());
+      print('Error: ${e.toString()}');
+    }
+  }
+
+  Future<void> deleteFile(String fileName) async {
+    if (downloadFilesInfo.keys.contains(fileName)) {
+      downloadFilesInfo[fileName]!.downloadTask.cancel().then((value) {
+        print('download cancel');
+        downloadFilesInfo.remove(fileName);
+        emit(CancelDownloadState());
+      }).onError((error, stackTrace) {
+        print(error.toString());
+      });
+    }
+    Directory tempDir = await getTemporaryDirectory();
+    try {
+      File file = File('${tempDir.path}/$fileName');
+      await file.delete().then((value) {
+        emit(DeleteFileSuccessState());
+      });
+      print('File deleted successfully');
+    } catch (e) {
+      print('Failed to delete file: $e');
+    }
+  }
+
+  @override
+  Future<void> close() {
+    // TODO: implement close
+    return super.close();
+  }
+
+  void signOut() async {
+    await CacheHelper.removeData(key: 'id').then((value) async {
+      cancelListeners();
+      userID = null;
+      userRole = null;
+      await CacheHelper.removeData(key: 'role');
+      emit(UserSignOutSuccessState());
+      database.close();
+    });
+  }
+
+  void query() async {
+    emit(GetGradesLoading());
+    List<dynamic> student_id = [];
+
+    var students;
+    await FirebaseFirestore.instance
+        .collection('Parents')
+        .doc(userID)
+        .collection('Students')
+        .get()
+        .then((value) {
+      students = value.docs.length;
+      value.docs.forEach((element) {
+        student_country2.add(element['country']);
+        student_school2.add(element['school']);
+        student_id.add(element.id);
+      });
+    });
+    for (int i = 0; i < students; i++) {
+      await FirebaseFirestore.instance
+          .collection('Countries')
+          .doc(student_country2[i])
+          .collection('Schools')
+          .doc(student_school2[i])
+          .collection('Students')
+          .where('uid', isEqualTo: student_id[i])
+          .get()
+          .then((value) {
+        students_num = value.docs.length;
+
+        value.docs.forEach(
+          (element) {
+            Names.add(element['name']);
+            clas.add(element['class_name']);
+          },
+        );
+      });
+    }
+    emit(GetGradeSuccess());
   }
 }

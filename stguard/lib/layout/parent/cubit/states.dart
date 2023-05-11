@@ -188,3 +188,29 @@ class UpdateCalorieSuccessState extends ParentStates {}
 class UpdateCalorieLoadingState extends ParentStates {}
 
 class UpdateCalorieErrorState extends ParentStates {}
+
+class GetNotesSuccessState extends ParentStates {}
+
+class GetNotesLoadingState extends ParentStates {}
+
+class GetNotesErrorState extends ParentStates {}
+
+class FileDownloadSuccessState extends ParentStates{}
+class FileDownloadLoadingState extends ParentStates{}
+
+class FileDownloadErrorState extends ParentStates{}
+
+class DownloadFileProgress extends ParentStates{}
+
+class DeleteFileSuccessState extends ParentStates{}
+
+class CancelDownloadState extends ParentStates{}
+
+class UserSignOutSuccessState extends ParentStates{}
+class UserSignOutErrorState extends ParentStates{}
+
+class InternetConnectionLostState extends ParentStates{}
+
+class GetGradesLoading extends ParentStates {}
+
+class GetGradeSuccess extends ParentStates {}

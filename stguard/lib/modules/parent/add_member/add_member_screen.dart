@@ -19,6 +19,7 @@ class AddMember extends StatelessWidget {
           ShowToast(
               message: 'Member is added successfully',
               state: ToastStates.SUCCESS);
+              
           navigateAndFinish(context, ParentHomeScreen());
         } else if (state is FamilyMemberAlreadyExisted) {
           ShowToast(message: state.message!, state: ToastStates.WARNING);
@@ -76,8 +77,7 @@ class AddMember extends StatelessWidget {
                           const SizedBox(
                             height: 40,
                           ),
-                          state is! AddFamilyMemberLoading
-                              ? DefaultButton(
+                          DefaultButton(
                                   text: 'Confirm',
                                   height: 55,
                                   color: defaultColor.withOpacity(0.8),
@@ -87,11 +87,9 @@ class AddMember extends StatelessWidget {
                                           .addFamilyMember(idController.text);
                                     }
                                   },
+                                  showCircularProgressIndicator:state is AddFamilyMemberLoading ,
                                 )
-                              : LoadingOnWaiting(
-                                  height: 55,
-                                  color: defaultColor.withOpacity(0.8),
-                                ),
+                            
                         ])),
               ),
             ),

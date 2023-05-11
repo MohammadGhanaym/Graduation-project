@@ -172,15 +172,11 @@ class CreditCardScreen extends StatelessWidget {
                       const SizedBox(
                         height: 15,
                       ),
-                      state is UpdateBalanceLoading
-                          ? LoadingOnWaiting(
-                              width: 280,
-                              color: defaultColor.withOpacity(0.8),
-                            )
-                          : DefaultButton(
+                      DefaultButton(
                               width: 280,
                               text: 'Recharge',
                               color: defaultColor.withOpacity(0.8),
+                              showCircularProgressIndicator: state is UpdateBalanceLoading,
                               onPressed: () {
                                 if (creditCardFormKey.currentState!
                                     .validate()) {

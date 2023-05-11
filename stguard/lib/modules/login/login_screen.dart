@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/modules/login/cubit/cubit.dart';
 import 'package:stguard/modules/login/cubit/states.dart';
 import 'package:stguard/modules/register/register_screen.dart';
+import 'package:stguard/modules/reset_password/reset_password_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
@@ -20,16 +21,16 @@ class LoginScreen extends StatelessWidget {
     return BlocProvider<LoginCubit>(
       create: (context) => LoginCubit(),
       child: BlocConsumer<LoginCubit, LoginStates>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is LoginSuccessState) {
-            CacheHelper.saveData(
+            LoginCubit.get(context).changeReadOnly(value: true);
+            await CacheHelper.saveData(
                 key: 'role', value: LoginCubit.get(context).role);
-            CacheHelper.saveData(key: 'id', value: state.userID).then((value) {
+            await CacheHelper.saveData(key: 'id', value: state.userID)
+                .then((value) {
               userID = state.userID;
               userRole = state.userRole;
-              navigateAndFinish(
-                  context, homeScreens[userRole]);
-              LoginCubit.get(context).changeReadOnly(value: true);
+              navigateAndFinish(context, homeScreens[userRole]);
             });
           } else if (state is LoginErrorState) {
             ShowToast(message: state.error, state: ToastStates.ERROR);
@@ -106,125 +107,117 @@ class LoginScreen extends StatelessWidget {
 
                     // ID and password fields
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
-                          DefaultFormField(
-                              controller: emailController,
-                              type: TextInputType.emailAddress,
-                              isClickable: LoginCubit.get(context).readOnly,
-                              validate: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Email must not be empty';
-                                }
-                                return null;
+                          Column(
+                            children: [
+                              DefaultFormField(
+                                  controller: emailController,
+                                  type: TextInputType.emailAddress,
+                                  isClickable: LoginCubit.get(context).readOnly,
+                                  validate: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Email must not be empty';
+                                    }
+                                    return null;
+                                  },
+                                  label: 'Email',
+                                  prefix: Icons.email_outlined),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              DefaultFormField(
+                                controller: passwordController,
+                                isPassword: LoginCubit.get(context).isPassword,
+                                type: TextInputType.visiblePassword,
+                                validate: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Password must not be empty';
+                                  }
+                                  return null;
+                                },
+                                label: 'Password',
+                                isClickable: LoginCubit.get(context).readOnly,
+                                changeObscured: () => LoginCubit.get(context)
+                                    .changePasswordVisibility(),
+                                prefix: Icons.password_outlined,
+                                suffix: LoginCubit.get(context).suffix,
+                                onSubmit: (p0) {
+                                  if (formKey.currentState!.validate()) {
+                                    LoginCubit.get(context).login(
+                                      email: emailController.text,
+                                      password: passwordController.text,
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                navigateTo(
+                                    context,
+                                    BlocProvider.value(
+                                        value: LoginCubit.get(context),
+                                        child: ResetPasswordScreen()));
                               },
-                              label: 'Email',
-                              prefix: Icons.email_outlined),
+                              child: const Text('Forgot password?')),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    DefaultRadioListTile(
+                                        value: 'parent',
+                                        groupValue:
+                                            LoginCubit.get(context).role,
+                                        onChanged: (value) {
+                                          print(value);
+                                          LoginCubit.get(context)
+                                              .isSelected(value);
+                                        },
+                                        title: 'Parent'),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    DefaultRadioListTile(
+                                        value: 'teacher',
+                                        groupValue:
+                                            LoginCubit.get(context).role,
+                                        onChanged: (value) {
+                                          print(value);
+                                          LoginCubit.get(context)
+                                              .isSelected(value);
+                                        },
+                                        title: 'Teacher'),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                DefaultRadioListTile(
+                                    value: 'canteen worker',
+                                    groupValue: LoginCubit.get(context).role,
+                                    onChanged: (value) {
+                                      print(value);
+                                      LoginCubit.get(context).isSelected(value);
+                                    },
+                                    title: 'Canteen Worker'),
+                              ],
+                            ),
+                          ),
                           const SizedBox(
                             height: 15,
                           ),
-                          DefaultFormField(
-                            controller: passwordController,
-                            isPassword: LoginCubit.get(context).isPassword,
-                            type: TextInputType.visiblePassword,
-                            validate: (value) {
-                              if (value!.isEmpty) {
-                                return 'Password must not be empty';
-                              }
-                              return null;
-                            },
-                            label: 'Password',
-                            isClickable: LoginCubit.get(context).readOnly,
-                            changeObscured: () => LoginCubit.get(context)
-                                .changePasswordVisibility(),
-                            prefix: Icons.password_outlined,
-                            suffix: LoginCubit.get(context).suffix,
-                            onSubmit: (p0) {
-                              if (formKey.currentState!.validate()) {
-                                LoginCubit.get(context).login(
-                                  email: emailController.text,
-                                  password: passwordController.text,
-                                );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account?",
-                          style: Theme.of(context).textTheme.bodyText1,
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              navigateTo(context, RegisterScreen());
-                            },
-                            child: const Text('Register Now'))
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              DefaultRadioListTile(
-                                  value: 'parent',
-                                  groupValue: LoginCubit.get(context).role,
-                                  onChanged: (value) {
-                                    print(value);
-                                    LoginCubit.get(context).isSelected(value);
-                                  },
-                                  title: 'Parent'),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              DefaultRadioListTile(
-                                  value: 'teacher',
-                                  groupValue: LoginCubit.get(context).role,
-                                  onChanged: (value) {
-                                    print(value);
-                                    LoginCubit.get(context).isSelected(value);
-                                  },
-                                  title: 'Teacher'),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          DefaultRadioListTile(
-                              value: 'canteen worker',
-                              groupValue: LoginCubit.get(context).role,
-                              onChanged: (value) {
-                                print(value);
-                                LoginCubit.get(context).isSelected(value);
-                              },
-                              title: 'Canteen Worker'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    // sign in button
-                    state is LoginLoadingState
-                        ? LoadingOnWaiting(
-                            height: 55,
-                            width: 200,
-                            color: defaultColor.withOpacity(0.8),
-                          )
-                        : DefaultButton(
+                          // sign in button
+                          DefaultButton(
                             text: 'SIGN IN',
                             height: 55,
-                            width: 200,
+                            showCircularProgressIndicator:
+                                state is LoginLoadingState,
                             color: defaultColor.withOpacity(0.8),
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
@@ -237,7 +230,30 @@ class LoginScreen extends StatelessWidget {
                                     .changeReadOnly(value: false);
                               }
                             },
-                          )
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account?",
+                                style: Theme.of(context).textTheme.bodyText1,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              TextButton(
+                                  onPressed: () {
+                                    navigateTo(context, RegisterScreen());
+                                  },
+                                  child: const Text('Register Now'))
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -65,14 +65,10 @@ class AddCanteenScreen extends StatelessWidget {
                       const SizedBox(
                         height: 50,
                       ),
-                      state is AddCanteenLoadingState
-                          ? LoadingOnWaiting(
-                              color: defaultColor.withOpacity(0.8),
-                              height: 55,
-                            )
-                          : DefaultButton(
+                      DefaultButton(
                               text: 'Confirm',
                               height: 55,
+                              showCircularProgressIndicator: state is AddCanteenLoadingState,
                               color: defaultColor.withOpacity(0.8),
                               onPressed: () {
                                 CanteenCubit.get(context)

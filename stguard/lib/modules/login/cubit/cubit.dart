@@ -3,8 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/parent/cubit/cubit.dart';
+import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/modules/login/cubit/states.dart';
-import 'package:stguard/shared/network/remote/notification_helper.dart';
+import 'package:stguard/shared/components/constants.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitState());
@@ -79,5 +82,25 @@ class LoginCubit extends Cubit<LoginStates> {
         emit(LoginErrorState('You are not a $role'));
       }
     });
+  }
+
+  bool isLoading = false;
+  void changeLoading(bool value) {
+    isLoading = value;
+    emit(ChangeLoadingState());
+  }
+
+  void forgotPassword(String email) async {
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: email)
+          .then((value) {
+        emit(SendPasswordResetEmailSuccessState());
+      });
+    } catch (e) {
+      emit(SendPasswordResetEmailErrorState(e.toString()));
+    } finally {
+      isLoading = false;
+    }
   }
 }

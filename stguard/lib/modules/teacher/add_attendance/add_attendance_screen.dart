@@ -13,10 +13,15 @@ class AddAttendanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+      ),
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
           if (state is GetStudentNamesSuccess) {
             navigateTo(context, TakeAttendanceScreen());
+          } else if (state is GetStudentNamesError) {
+            ShowToast(message: state.error, state: ToastStates.ERROR);
           }
         },
         builder: (context, state) {
@@ -110,12 +115,12 @@ class AddAttendanceScreen extends StatelessWidget {
                                     shrinkWrap: true,
                                     scrollDirection: Axis.horizontal,
                                     itemBuilder: (context, index) => GradeItem(
-                                        grade: TeacherCubit.get(context)
-                                            .grades[index]),
+                                        className: TeacherCubit.get(context)
+                                            .classes[index]),
                                     separatorBuilder: (context, index) =>
                                         SizedBox(width: 10),
                                     itemCount: TeacherCubit.get(context)
-                                        .grades
+                                        .classes
                                         .length),
                               )
                             ],
@@ -125,36 +130,24 @@ class AddAttendanceScreen extends StatelessWidget {
                       const SizedBox(
                         height: 10,
                       ),
-                      state is GetStudentNamesLoading
-                          ? Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: LoadingOnWaiting(
-                                  height: 55,
-                                  color: defaultColor.withOpacity(0.8),
-                                ),
-                              ),
-                            )
-                          : Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: DefaultButton(
-                                  text: 'Add',
-                                  onPressed: () {
-                                    if (formKey.currentState!.validate()) {
-                                      TeacherCubit.get(context)
-                                          .setLessonName(lessonController.text);
-                                      TeacherCubit.get(context)
-                                          .getStudentsNames();
-                                      lessonController.clear();
-                                    }
-                                  },
-                                  color: defaultColor.withOpacity(0.8),
-                                ),
-                              ),
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0),
+                        child: DefaultButton(
+                          text: 'Add',
+                          showCircularProgressIndicator: state is GetStudentNamesLoading,
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              TeacherCubit.get(context)
+                                  .setLessonName(lessonController.text);
+                              TeacherCubit.get(context)
+                                  .getStudentsNames();
+                              lessonController.clear();
+                            }
+                          },
+                          color: defaultColor.withOpacity(0.8),
+                        ),
+                      ),
                       const SizedBox(
                         height: 10,
                       )

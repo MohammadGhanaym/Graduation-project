@@ -189,13 +189,11 @@ class RegisterScreen extends StatelessWidget {
                         height: 10,
                       ),
                       // sign in button
-                      state is RegisterLoadingState
-                          ? LoadingOnWaiting(
-                              color: defaultColor.withOpacity(0.8), width: 200)
-                          : DefaultButton(
+                     DefaultButton(
                               color: defaultColor.withOpacity(0.8),
                               width: 200,
                               text: 'SIGN UP',
+                              showCircularProgressIndicator: state is RegisterLoadingState,
                               onPressed: () {
                                 if (formKey.currentState!.validate()) {
                                   RegisterCubit.get(context).userRegister(

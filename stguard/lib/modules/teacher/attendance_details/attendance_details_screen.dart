@@ -97,34 +97,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                         image: AssetImage(
                                             'assets/images/excel.png')),
                                     onTap: () async {
-                                      if (await Permission.storage.isDenied) {
-                                        print(Permission.storage.isDenied);
-                                        await showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: const Text(
-                                                "Storage Permission"),
-                                            content: const Text(
-                                                "This app requires storage permission to save files."),
-                                            actions: [
-                                              TextButton(
-                                                child: const Text("OK"),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                              TextButton(
-                                                child:
-                                                    const Text("Open settings"),
-                                                onPressed: () async {
-                                                  // Open the app settings to let the user grant the permission
-                                                  openAppSettings();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      } else {
+                                    
                                         TeacherCubit.get(context)
                                             .getSelectedFolder()
                                             .then((path) {
@@ -197,7 +170,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                           Expanded(
                                                             child: TextButton(
                                                               child: const Text(
-                                                                  "Downloads"),
+                                                                  "Download"),
                                                               onPressed: () {
                                                                 // Save the file to the downloads directory
                                                                 String
@@ -269,7 +242,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                             );
                                           }
                                         });
-                                      }
+                                      
                                     }),
                               ),
                             ],

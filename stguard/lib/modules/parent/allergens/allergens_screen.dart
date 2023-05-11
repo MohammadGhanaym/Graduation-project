@@ -88,20 +88,14 @@ class AllergensScreen extends StatelessWidget {
                 const SizedBox(
                   height: 30,
                 ),
-                state is UpdateAllergiesLoadingState
-                    ? LoadingOnWaiting(
-                        width: double.infinity,
-                        height: 55,
-                        color: defaultColor.withOpacity(0.8),
-                        radius: 10,
-                      )
-                    : DefaultButton(
+                DefaultButton(
                         onPressed: () async {
                           ParentCubit.get(context)
                               .changeAllergiesSelectionState(state: true);
                           await ParentCubit.get(context)
                               .updateAllergens(student_id);
                         },
+                        showCircularProgressIndicator: state is UpdateAllergiesLoadingState,
                         text: 'Confirm',
                         height: 55,
                         color: defaultColor.withOpacity(0.8),

@@ -24,3 +24,12 @@ class LoginErrorState extends LoginStates {
 class EmailVerificationSendSuccess extends LoginStates {}
 
 class EmailVerificationSendError extends LoginStates {}
+
+class SendPasswordResetEmailSuccessState extends LoginStates {}
+
+class SendPasswordResetEmailErrorState extends LoginStates {
+  String error;
+  SendPasswordResetEmailErrorState(this.error);
+}
+
+class ChangeLoadingState extends LoginStates {}

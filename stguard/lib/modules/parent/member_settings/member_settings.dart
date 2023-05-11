@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/layout/parent/parent_home_screen.dart';
 import 'package:stguard/models/student_model.dart';
+import 'package:stguard/modules/parent/notes_list/notes_list.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
@@ -82,7 +82,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                           .contains(student!.id) &&
                                       ParentCubit.get(context).active != null
                                   ? defaultColor
-                                  : Colors.red,
+                                  : defaultColor2,
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                     top: 20, left: 10, bottom: 10, right: 10),
@@ -106,7 +106,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                           width: 10,
                                         ),
                                         Expanded(
-                                          child: Text('${student!.id}',
+                                          child: Text(student!.id,
                                               style: const TextStyle(
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.bold,
@@ -185,6 +185,79 @@ class MemberSettingsScreen extends StatelessWidget {
                               duration: const Duration(milliseconds: 500),
                               child: Column(
                                 children: [
+                                  InkWell(
+                                    onTap: () => navigateTo(
+                                        context,
+                                        const NotesListsScreen()),
+                                    child: SettingsCard(
+                                        condition:
+                                            state is! GetNotesLoadingState,
+                                        children: [
+                                          Container(
+                                            height: 55,
+                                            child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: const [
+                                                  ImageIcon(
+                                                    AssetImage(
+                                                        'assets/images/notepad.png'),
+                                                    size: 30,
+                                                    color: defaultColor,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                    'Class Notes',
+                                                    style: TextStyle(
+                                                        fontSize: 25,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                  Spacer(),
+                                                  Icon(
+                                                    Icons.arrow_forward_ios,
+                                                    color: defaultColor,
+                                                  )
+                                                ]),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          if (ParentCubit.get(context)
+                                              .notes
+                                              .isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 8.0),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    'Recent',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .headline6,
+                                                  ),
+                                                  const Spacer(),
+                                                  Text(
+                                                    ParentCubit.get(context)
+                                                        .notes[0]
+                                                        .title,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyLarge,
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                        ]),
+                                  ),
+                                  const SizedBox(height: 10),
                                   // location
                                   SettingsCard(
                                     condition: state
@@ -199,6 +272,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                             CrossAxisAlignment.center,
                                         children: [
                                           const Image(
+                                            color: defaultColor,
                                               width: 30,
                                               height: 30,
                                               image: AssetImage(
@@ -550,7 +624,7 @@ class MemberSettingsScreen extends StatelessWidget {
                           ),
                           const Divider(),
                           MaterialButton(
-                            color: Colors.red,
+                            color: defaultColor2,
                             onPressed: () {
                               ParentCubit.get(context).showSettings();
                               showDefaultDialog(

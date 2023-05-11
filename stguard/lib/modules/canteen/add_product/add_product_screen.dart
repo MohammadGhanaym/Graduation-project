@@ -348,12 +348,8 @@ class AddProductScreen extends StatelessWidget {
                         const SizedBox(
                           height: 30,
                         ),
-                        state is UploadItemDataLoadingState
-                            ? LoadingOnWaiting(
-                                height: 50,
-                                color: defaultColor.withOpacity(0.8),
-                              )
-                            : DefaultButton(
+                        DefaultButton(
+                              showCircularProgressIndicator: state is UploadItemDataLoadingState,
                                 color: defaultColor.withOpacity(0.8),
                                 text: 'Confirm',
                                 onPressed: (() async {

@@ -20,6 +20,7 @@ import 'package:stguard/modules/canteen/inventory/inventory_screen.dart';
 import 'package:stguard/modules/canteen/products/products_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
+import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:stguard/shared/network/remote/notification_helper.dart';
 
 class CanteenCubit extends Cubit<CanteenStates> {
@@ -188,13 +189,6 @@ class CanteenCubit extends Cubit<CanteenStates> {
     emit(PickSchoolState());
   }
 
-  List<Widget> screens = [ProductsScreen(), CanteenInventoryScreen()];
-  int currentIndex = 0;
-  void switchScreen(var index) {
-    currentIndex = index;
-    emit(SwitchScreenState());
-  }
-
   List<String> categories = ['All'];
   Map<String, CanteenProductModel> products = {};
   Future<void> getCategories() async {
@@ -332,21 +326,6 @@ class CanteenCubit extends Cubit<CanteenStates> {
     bottomSheetShown = sheetState;
     emit(ShowBottomSheetState());
   }
-
-  /*Map<String, CanteenProductModel> inventorySearchResults = {};
-  void getInventorySearchResults({String search = 'All'}) {
-    inventorySearchResults = {};
-    if (search == 'All') {
-      inventorySearchResults = products;
-    } else {
-      products.forEach((id, product) {
-        if (product.name.toLowerCase().contains(search.toLowerCase())) {
-          inventorySearchResults[id] = product;
-        }
-      });
-    }
-    emit(GetInventorySearchResultssSuccessState());
-  }*/
 
   File? itemImage;
 
@@ -646,16 +625,14 @@ class CanteenCubit extends Cubit<CanteenStates> {
         buyer!.pocketMoney) {
       print('Daily spending limit exceeded');
       result = 'Daily spending limit exceeded';
-    } 
-    else if (totalCalories > buyer!.calorieLimit) {
+    } else if (totalCalories > buyer!.calorieLimit) {
       result = 'Daily calorie limit exceeded';
       print('Daily calorie limit exceeded1');
     } else if (buyer!.dailyCalorie['value'] + totalCalories >
         buyer!.calorieLimit) {
       result = 'Daily calorie limit exceeded';
       print('Daily calorie limit exceeded2');
-    }
-    else if (buyer!.allergies != null) {
+    } else if (buyer!.allergies != null) {
       print('One or more products contain allergens');
       print('checkallergies');
       bool hasAllergen = false;
@@ -670,7 +647,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
           }
         }
       }
-    } 
+    }
     if (result == null) {
       completePayment(buyer!.parent!);
     } else {
@@ -815,7 +792,10 @@ class CanteenCubit extends Cubit<CanteenStates> {
           });
         } else {
           batch.update(value.docs[0].reference, {
-            'dailyCalorie': {'value': totalPrice, 'updateTime': DateTime.now()}
+            'dailyCalorie': {
+              'value': totalCalories,
+              'updateTime': DateTime.now()
+            }
           });
         }
         batch.set(
@@ -974,6 +954,18 @@ class CanteenCubit extends Cubit<CanteenStates> {
         emit(DeleteCategoryErrorState());
         print(error.toString());
       });
+    });
+  }
+
+  void signOut() {
+    CacheHelper.removeData(key: 'id').then((value) {
+      CacheHelper.removeData(key: 'role');
+      userID = null;
+      userRole = null;
+      canteen = null;
+      canteenDetails = null;
+      schoolCanteenPath = null;
+      emit(UserSignOutSuccessState());
     });
   }
 }

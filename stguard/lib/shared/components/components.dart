@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -10,17 +10,16 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/models/activity_model.dart';
 import 'package:stguard/models/canteen_product_model.dart';
+import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/product_model.dart';
 import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
-import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:stguard/modules/parent/member_settings/member_settings.dart';
 import 'package:stguard/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:stguard/shared/components/constants.dart';
-import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
 class DefaultButton extends StatelessWidget {
@@ -31,10 +30,12 @@ class DefaultButton extends StatelessWidget {
   String text;
   Color? textColor;
   double? textSize;
+  bool showCircularProgressIndicator;
   void Function()? onPressed;
   DefaultButton(
       {this.width = double.infinity,
       this.height = 55,
+      this.showCircularProgressIndicator = false,
       this.color = defaultColor,
       this.radius = 10,
       required this.text,
@@ -45,21 +46,25 @@ class DefaultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        height: height,
-        width: width,
-        decoration:
-            BoxDecoration(borderRadius: BorderRadiusDirectional.circular(10)),
-        child: Card(
-          color: color,
-          child: MaterialButton(
-            onPressed: onPressed,
-            child: Text(
-              text,
-              style: TextStyle(color: textColor, fontSize: textSize),
+    return ConditionalBuilder(
+      condition: !showCircularProgressIndicator,
+      builder: (context) => Container(
+          height: height,
+          width: width,
+          decoration:
+              BoxDecoration(borderRadius: BorderRadiusDirectional.circular(10)),
+          child: Card(
+            color: color,
+            child: MaterialButton(
+              onPressed: onPressed,
+              child: Text(
+                text,
+                style: TextStyle(color: textColor, fontSize: textSize),
+              ),
             ),
-          ),
-        ));
+          )),
+      fallback: (context) => const CircularProgressIndicator(),
+    );
   }
 }
 
@@ -75,6 +80,7 @@ class DefaultFormField extends StatelessWidget {
   String? errorText;
   IconData? prefix;
   IconData? suffix;
+  int? maxLines;
   void Function()? changeObscured;
   bool isClickable;
   bool readOnly;
@@ -89,6 +95,7 @@ class DefaultFormField extends StatelessWidget {
       required this.validate,
       required this.label,
       this.prefix,
+      this.maxLines = 1,
       IconData? this.suffix,
       this.changeObscured,
       this.isClickable = true,
@@ -102,6 +109,7 @@ class DefaultFormField extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextFormField(
+        
         controller: controller,
         keyboardType: type,
         obscureText: isPassword,
@@ -109,12 +117,17 @@ class DefaultFormField extends StatelessWidget {
         onFieldSubmitted: onSubmit,
         onChanged: onChange,
         onTap: onTap,
+        maxLines: maxLines,
         readOnly: readOnly,
+        cursorColor: defaultColor,
         decoration: InputDecoration(
+            focusColor: defaultColor,
             labelText: label,
             errorText: errorText,
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: defaultColor)),
             border: const OutlineInputBorder(),
             prefixIcon: Icon(prefix),
+
             suffixIcon: suffix != null
                 ? IconButton(icon: Icon(suffix), onPressed: changeObscured)
                 : null),
@@ -185,15 +198,6 @@ Color chooseToastColor(ToastStates State) {
   }
 }
 
-void signOut(BuildContext context) {
-  CacheHelper.removeData(key: 'id');
-  CacheHelper.removeData(key: 'role');
-  cancelListeners();
-  userID = null;
-  userRole = null;
-  navigateAndFinish(context, LoginScreen());
-}
-
 void cancelListeners() {
   if (transListeners.isNotEmpty) {
     transListeners.forEach((key, value) {
@@ -246,7 +250,7 @@ class UserInfo extends StatelessWidget {
             style: const TextStyle(
               fontSize: 15,
               color: Colors.grey,
-            ))
+            )),
       ],
     );
   }
@@ -334,7 +338,7 @@ class ActivityItem extends StatelessWidget {
                           backgroundColor: Colors.grey[50],
                         ),
                         Image(
-                          color: defaultColor,
+                          color: defaultColor2,
                           image: model.trans_id != 'null'
                               ? const AssetImage(
                                   'assets/images/shopping-cart.png')
@@ -421,7 +425,9 @@ class FamilyMemberCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         ParentCubit.get(context).getSettingsData(model!).then((value) {
-          navigateTo(context, MemberSettingsScreen(student: model));
+          navigateTo(
+              context,
+              MemberSettingsScreen(student: model));
         });
       },
       child: Container(
@@ -622,7 +628,12 @@ class SliderBuilder extends StatelessWidget {
   double value;
   void Function(double)? onChanged;
   void Function(double)? onChangeStart;
-  SliderBuilder({super.key, required this.max, required this.value, required this.onChangeStart, required this.onChanged});
+  SliderBuilder(
+      {super.key,
+      required this.max,
+      required this.value,
+      required this.onChangeStart,
+      required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -635,7 +646,8 @@ class SliderBuilder extends StatelessWidget {
             type: 'min',
           ),
           SliderTheme(
-            data: const SliderThemeData(trackHeight: 3),
+            data:  SliderThemeData(trackHeight: 3, thumbColor: defaultColor, activeTrackColor: defaultColor,
+            inactiveTrackColor: defaultColor.withOpacity(0.2)),
             child: Expanded(
               child: Slider(
                 value: value,
@@ -749,7 +761,7 @@ class SchoolItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          const Icon(
+           const Icon(
             Icons.arrow_forward_ios,
             color: defaultColor,
             size: 20,
@@ -869,52 +881,25 @@ class AllergenSelectionItem extends StatelessWidget {
   }
 }
 
-class LoadingOnWaiting extends StatelessWidget {
-  double height;
-  double? width;
-  Color? color;
-  double? radius;
-  LoadingOnWaiting(
-      {super.key,
-      this.color = defaultColor,
-      this.height = 55,
-      this.radius = 10,
-      this.width = double.infinity});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-            color: defaultColor.withOpacity(0.8),
-            borderRadius: BorderRadiusDirectional.circular(10)),
-        child: const Center(
-            child: CircularProgressIndicator(
-          color: Colors.white,
-        )));
-  }
-}
-
 class GradeItem extends StatelessWidget {
-  String grade;
-  GradeItem({super.key, required this.grade});
+  String className;
+  GradeItem({super.key, required this.className});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => TeacherCubit.get(context).selectGrade(grade),
+      onTap: () => TeacherCubit.get(context).selectClass(className),
       child: Container(
         padding: const EdgeInsets.all(8),
         alignment: AlignmentDirectional.center,
         height: 20,
         decoration: BoxDecoration(
             border: Border.all(
-                color: TeacherCubit.get(context).selectedGrade == grade
+                color: TeacherCubit.get(context).selectedClassName == className
                     ? defaultColor.withOpacity(0.8)
                     : Colors.grey),
             borderRadius: BorderRadiusDirectional.circular(5)),
-        child: Text(grade),
+        child: Text(className),
       ),
     );
   }
@@ -930,6 +915,7 @@ class StudentAttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool backgroundError = false;
     return Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadiusDirectional.circular(5),
@@ -950,10 +936,18 @@ class StudentAttendanceCard extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(student.image!),
-              ),
+              Container(
+                  width: 70,
+                  height: 70,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadiusDirectional.circular(30),
+                  ),
+                  child: Image.network(
+                    student.image!,
+                    errorBuilder: (context, error, stackTrace) => const Image(
+                        image: AssetImage('assets/images/no-image.png')),
+                  )),
               const SizedBox(
                 width: 10,
               ),
@@ -1508,9 +1502,10 @@ Future<Widget?> showDefaultDialog(context,
       actions: [
         TextButton(
           onPressed: onPressed1,
-          child: Text(buttonText1),
+          child: Text(buttonText1, style: TextStyle(color: defaultColor),),
         ),
         ElevatedButton(
+          style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => defaultColor) ),
           onPressed: onPressed2,
           child: Text(buttonText2),
         )
@@ -1518,3 +1513,266 @@ Future<Widget?> showDefaultDialog(context,
     ),
   );
 }
+
+class DefaultButton2 extends StatelessWidget {
+  void Function()? onPressed;
+  double width;
+  double height;
+  String text;
+  double sizedboxHeight;
+  TextStyle? textStyle;
+  String image;
+  double imageWidth;
+  double imageHeight;
+
+  DefaultButton2(
+      {super.key,
+      required this.width,
+      required this.height,
+      this.sizedboxHeight = 5,
+      required this.image,
+      required this.text,
+      this.textStyle,
+      required this.imageWidth,
+      required this.imageHeight,
+      required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialButton(
+        onPressed: onPressed,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(
+                      color: defaultColor,
+                      image: AssetImage(image),
+                      width: 70,
+                      height: 70),
+                  SizedBox(
+                    height: sizedboxHeight,
+                  ),
+                  Text(
+                    text,
+                    style: textStyle,
+                  )
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+}
+
+class FileItem extends StatelessWidget {
+  String fileName;
+  void Function()? onPressed;
+  String progress;
+  FileItem(
+      {super.key,
+      required this.fileName,
+      required this.onPressed,
+      required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(fileName),
+      subtitle: Text(progress),
+      trailing: IconButton(
+        icon: const Icon(Icons.cancel),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class NoteItem extends StatelessWidget {
+  final void Function()? onTap;
+  final ClassNote note;
+
+  NoteItem({required this.onTap, required this.note});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 2.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                note.title,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24.0,
+                ),
+              ),
+              const SizedBox(height: 8.0),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: Text(
+                      note.subject,
+                      style: const TextStyle(fontSize: 18.0),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    getDate(note.datetime, format: 'EE, hh:mm a'),
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 18.0),
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ParentFileItem extends StatelessWidget {
+  final String name;
+  final String url;
+
+  ParentFileItem({required this.name, required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: const TextStyle(fontSize: 16.0),
+        ),
+        InkWell(
+          child: Text(
+            url,
+            style: const TextStyle(fontSize: 14.0, color: Colors.blue),
+          ),
+          onTap: () {
+            ParentCubit.get(context).downloadFile(fileName: name, fileUrl: url);
+          },
+        ),
+        const Divider(),
+      ],
+    );
+  }
+}
+
+class DownloadItem extends StatelessWidget {
+  final String fileName;
+  final String fileUrl;
+  final bool fileExists;
+
+  DownloadItem({
+    required this.fileName,
+    required this.fileUrl,
+    required this.fileExists,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 80,
+      child: Row(
+        children: [
+          InkWell(
+            onTap: () {
+              if (fileExists) {
+                ParentCubit.get(context).openDownloadedFile(fileName);
+              } else {
+                ParentCubit.get(context)
+                    .downloadFile(fileName: fileName, fileUrl: fileUrl);
+              }
+            },
+            child: SizedBox(
+              width: 250,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 25,
+                    height: 25,
+                    child: ParentCubit.get(context)
+                            .downloadFilesInfo
+                            .keys
+                            .contains(fileName)
+                        ? CircularProgressIndicator(
+                            value: ParentCubit.get(context)
+                                .downloadFilesInfo[fileName]!
+                                .progress,
+                          )
+                        : Icon(
+                            Icons.download_rounded,
+                            color: fileExists ? defaultColor : null,
+                          ),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Text(
+                        fileName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Spacer(),
+          if (fileExists)
+            IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => ParentCubit.get(context).deleteFile(fileName),
+                icon: const Icon(
+                  Icons.cancel,
+                  color: Colors.grey,
+                ))
+        ],
+      ),
+    );
+  }
+}
+
+void showSnackBar(BuildContext context, {required String message, required IconData icon})
+{
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  ScaffoldMessenger.of(context)
+                  .showSnackBar( SnackBar(content: Row(
+                    children:  [
+                       Icon(icon, color: Colors.white,),
+                      const SizedBox(width: 5,),
+                      Text(message),
+                    ],
+                  )));
+}
+
+
+
+

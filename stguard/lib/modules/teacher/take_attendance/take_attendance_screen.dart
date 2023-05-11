@@ -18,6 +18,10 @@ class TakeAttendanceScreen extends StatelessWidget {
           TeacherCubit.get(context).switchScreen(0);
           navigateAndFinish(context, const TeacherHomeScreen());
         }
+        if (state is AttendanceNotTakenState) {
+          ShowToast(
+              message: 'Attendance not taken yet', state: ToastStates.WARNING);
+        }
       },
       builder: (context, state) {
         return Scaffold(
