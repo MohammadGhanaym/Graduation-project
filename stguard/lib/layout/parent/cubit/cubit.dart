@@ -141,18 +141,33 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
+  bool studentDataLoading = true;
+
   Future<void> listentoNewData() async {
     emit(GetStudentDataLoading());
+
     studentsData = {};
-    cancelListeners();
-    if (studentsPaths.isNotEmpty) {
-      studentsPaths.forEach((stId, stDoc) async {
-        await getStudentsData(stId, stDoc);
-        await addNewAttendance(stId, stDoc);
-        await addNewTranscation(stId, stDoc);
-      });
-    } else {
-      emit(GetStudentDataError());
+
+    try {
+      studentDataLoading = true;
+      cancelListeners();
+
+      if (studentsPaths.isNotEmpty) {
+        await Future.forEach(studentsPaths.entries, (entry) async {
+          final stId = entry.key;
+          final stDoc = entry.value;
+
+          await getStudentsData(stId, stDoc);
+          await addNewAttendance(stId, stDoc);
+          await addNewTranscation(stId, stDoc);
+        });
+      } else {
+        emit(GetStudentDataError());
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      studentDataLoading = false;
     }
   }
 
@@ -352,10 +367,10 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<ActivityModel> activities = [];
-
+  bool activityLoading = true;
   Future<void> getDataFromActivityTable() async {
     print('getDataFromActivityTable');
-
+    activityLoading = true;
     emit(ParentGetDataBaseLoadingState());
     if (studentsPaths.isNotEmpty) {
       //SELECT * FROM student_activity ORDER BY date DESC
@@ -377,12 +392,15 @@ class ParentCubit extends Cubit<ParentStates> {
         print(activities);
 
         emit(ParentGeStudentActivitySuccessState());
+        activityLoading = false;
       }).catchError((error) {
         emit(ParentGeStudentActivityErrorState());
+        activityLoading = false;
       });
     } else {
       activities = [];
       emit(ParentGeStudentActivityErrorState());
+      activityLoading = false;
     }
   }
 
@@ -456,6 +474,8 @@ class ParentCubit extends Cubit<ParentStates> {
     active = st.parent;
     await getLocation(st.id);
     await getClassNotes(st);
+    settingsVisibility = true;
+    isPaired = true;
   }
 
   bool isPaired = true; // child settings
@@ -528,8 +548,6 @@ class ParentCubit extends Cubit<ParentStates> {
       print(studentsPaths.keys.toList());
 
       emit(UnpairDigitalIDSuccess());
-
-      //await refreshBackgroundService();
     }).catchError((error) {
       print(error);
       emit(UnpairDigitalIDError());
@@ -732,7 +750,7 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  List<ClassNote> notes = [];
+  List<NoteModel> notes = [];
   Future<void> getClassNotes(StudentModel st) async {
     notes = [];
     emit(GetNotesLoadingState());
@@ -755,7 +773,7 @@ class ParentCubit extends Cubit<ParentStates> {
               if (value.docs.isNotEmpty) {
                 print('note here4');
                 value.docs.forEach((element) {
-                  notes.add(ClassNote.fromMap(element.data()));
+                  notes.add(NoteModel.fromMap(element.data()));
                 });
                 print(notes);
                 emit(GetNotesSuccessState());
@@ -865,17 +883,15 @@ class ParentCubit extends Cubit<ParentStates> {
     }
   }
 
-  @override
-  Future<void> close() {
-    // TODO: implement close
-    return super.close();
-  }
-
   void signOut() async {
     await CacheHelper.removeData(key: 'id').then((value) async {
       cancelListeners();
       userID = null;
       userRole = null;
+      parent = null;
+      studentsPaths.clear();
+      schoolPaths.clear();
+      activities.clear();
       await CacheHelper.removeData(key: 'role');
       emit(UserSignOutSuccessState());
       database.close();

@@ -78,6 +78,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
   Future<void> verifyEmail() async {
     var user = FirebaseAuth.instance.currentUser;
+    
     print(user!.emailVerified);
     if (user.emailVerified == false) {
       await user.sendEmailVerification().then((value) {

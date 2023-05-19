@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -16,8 +15,6 @@ import 'package:stguard/models/country_model.dart';
 import 'package:stguard/models/parent_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_model.dart';
-import 'package:stguard/modules/canteen/inventory/inventory_screen.dart';
-import 'package:stguard/modules/canteen/products/products_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
@@ -49,7 +46,9 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   DocumentReference<Map<String, dynamic>>? schoolCanteenPath;
+  bool canteenPathLoading = true;
   void getCanteenPath() {
+    canteenPathLoading = true;
     schoolCanteenPath = null;
     emit(GetCanteenPathLoadingState());
     db
@@ -68,12 +67,15 @@ class CanteenCubit extends Cubit<CanteenStates> {
         emit(GetCanteenPathSuccessState());
         await getCategories();
         await getCanteenDetails();
+        canteenPathLoading = false;
       } else {
         emit(NeedtoJoinCommunityState());
+        canteenPathLoading = false;
       }
     }).catchError((error) {
       print(error.toString());
       emit(GetCanteenPathErrorState());
+      canteenPathLoading = false;
     });
   }
 

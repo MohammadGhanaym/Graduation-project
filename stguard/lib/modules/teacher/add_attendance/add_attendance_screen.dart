@@ -18,10 +18,12 @@ class AddAttendanceScreen extends StatelessWidget {
       ),
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {
-          if (state is GetStudentNamesSuccess) {
-            navigateTo(context, TakeAttendanceScreen());
-          } else if (state is GetStudentNamesError) {
-            ShowToast(message: state.error, state: ToastStates.ERROR);
+          if (state is GetStudentNamesError) {
+            if (TeacherCubit.get(context).students.isEmpty) {
+              ShowToast(message: 'No Students Found', state: ToastStates.ERROR);
+            } else {
+              ShowToast(message: state.error, state: ToastStates.ERROR);
+            }
           }
         },
         builder: (context, state) {
@@ -131,18 +133,23 @@ class AddAttendanceScreen extends StatelessWidget {
                         height: 10,
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: DefaultButton(
                           text: 'Add',
-                          showCircularProgressIndicator: state is GetStudentNamesLoading,
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
-                              TeacherCubit.get(context)
+                              if (TeacherCubit.get(context).selectedClassName !=
+                                  null) {
+                                    TeacherCubit.get(context)
                                   .setLessonName(lessonController.text);
-                              TeacherCubit.get(context)
-                                  .getStudentsNames();
+                              navigateTo(context, TakeAttendanceScreen());
                               lessonController.clear();
+                              } else {
+                                ShowToast(
+                                    message: 'Please select a class',
+                                    state: ToastStates.WARNING);
+                              }
+                              
                             }
                           },
                           color: defaultColor.withOpacity(0.8),

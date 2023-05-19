@@ -6,7 +6,7 @@ import 'package:stguard/models/class_note.dart';
 import 'package:stguard/shared/components/components.dart';
 
 class NoteDetailScreen extends StatelessWidget {
-  ClassNote note;
+  NoteModel note;
 
   NoteDetailScreen({super.key, required this.note});
 

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/country_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
@@ -223,7 +224,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
   }
 
   List<dynamic> classes = [];
-  List<dynamic> exams = [];
 
   Future<void> getClasses() async {
     classes = [];
@@ -234,8 +234,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
         print(value.data());
         if (value.data() != null) {
           classes = value['classes names'];
-        
-          selectedClassName = classes[0];
           emit(GetClassesSuccessState());
         }
       }).catchError((error) {
@@ -259,9 +257,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
   int currentIndex = 0;
   void switchScreen(var index) {
     currentIndex = index;
-    if (index == 1) {
-      getClasses();
-    }
     emit(SwitchScreenState());
   }
 
@@ -361,14 +356,17 @@ class TeacherCubit extends Cubit<TeacherStates> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   DocumentReference<Map<String, dynamic>>? teacherPath;
   List<dynamic> subjects = [];
+  String? teacherName;
+  bool teacherPathLoading = true;
   Future<void> getTeacherPath() async {
+    teacherPathLoading = true;
     emit(GetTeacherPathLoadingState());
     await db
         .collection('Teachers')
         .doc(userID)
         .collection('Community')
         .get()
-        .then((accountInfo) {
+        .then((accountInfo) async {
       if (accountInfo.docs.isNotEmpty) {
         teacherPath = db
             .collection('Countries')
@@ -377,7 +375,9 @@ class TeacherCubit extends Cubit<TeacherStates> {
             .doc(accountInfo.docs[0]['school']);
 
         emit(GetTeacherPathSuccessState());
-        teacherPath!
+        await getClasses();
+        teacherPathLoading = false;
+        await teacherPath!
             .collection('SchoolStaff')
             .doc(accountInfo.docs[0]['uid'])
             .get()
@@ -386,6 +386,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
           if (value.exists) {
             print(value.data());
             subjects = value['subjects'];
+            if (value.data()!.containsKey('name')) {
+              teacherName = value['name'];
+              print(teacherName);
+            }
             if (subjects.isNotEmpty) {
               selectedSubject = subjects[0];
             }
@@ -395,10 +399,12 @@ class TeacherCubit extends Cubit<TeacherStates> {
         });
       } else {
         emit(NeedtoJoinCommunityState());
+        teacherPathLoading = false;
       }
     }).catchError((error) {
       print(error.toString());
       emit(GetTeacherPathErrorState());
+      teacherPathLoading = false;
     });
     await getTeacherInfo();
   }
@@ -624,7 +630,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
     });
   }
 
-
   Future<void> cancelFileUpload(int index) async {
     await uploadFileInfos[index].uploadTask.cancel().then((value) {
       uploadFileInfos.removeAt(index);
@@ -690,7 +695,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
                 'content': content.isEmpty ? null : content,
                 'subject': selectedSubject,
                 'to': 'All',
-                'from': teacher != null ? teacher!.name : null,
+                'from': teacherName,
                 'files': filesURLs.isEmpty ? null : filesURLs,
                 'datetime': DateTime.now()
               });
@@ -726,17 +731,12 @@ class TeacherCubit extends Cubit<TeacherStates> {
               .then(
             (value) {
               if (value.docs.isNotEmpty) {
-                teacherPath!
-                    .collection('classes')
-                    .doc(value.docs[0].id)
-                    .collection('notes')
-                    .doc()
-                    .set({
+                value.docs[0].reference.collection('notes').doc().set({
                   'title': title,
                   'content': content.isEmpty ? null : content,
                   'subject': selectedSubject,
                   'to': studentReceiver,
-                  'from': teacher != null ? teacher!.name : null,
+                  'from': teacherName,
                   'files': filesURLs.isEmpty ? null : filesURLs,
                   'datetime': DateTime.now()
                 });
@@ -787,11 +787,73 @@ class TeacherCubit extends Cubit<TeacherStates> {
     return null;
   }
 
+  List<NoteModel>? notes;
+  void filterNotesByClass(dynamic className) {
+    try {
+      notes = [];
+      emit(GetNotesByClassLoadingState());
+      selectedClassName = className;
+      teacherPath!
+          .collection('classes')
+          .where('name', isEqualTo: className)
+          .get()
+          .then((value) {
+        if (value.docs.isNotEmpty) {
+          value.docs[0].reference
+              .collection('notes')
+              .where('from', isEqualTo: teacherName)
+              .get()
+              .then((value) {
+            
+            value.docs.forEach((element) {
+              notes!.add(NoteModel.fromMap(element.data(), id: element.id));
+            });
+            print(notes);
+            print(value.docs.length);
+            emit(GetNotesByClassSuccessState());
+          }).catchError((error) {
+            emit(GetNotesByClassErrorState());
+            print(error.toString());
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+      emit(SomethingWentWrong());
+    }
+  }
+
+  void resetSelection() {
+    notes = null;
+    
+    selectedClassName = null;
+    selectedStudents = [];
+    selectedSubject = null;
+  }
+
+  void deleteNote(String noteId) async {
+    emit(DeleteNotesByClassLoadingState());
+    await teacherPath!
+        .collection('classes')
+        .doc(selectedClassName)
+        .collection('notes')
+        .doc(noteId)
+        .delete()
+        .then((value) {
+      emit(DeleteNotesByClassSuccessState());
+      filterNotesByClass(selectedClassName);
+    }).catchError((error) {
+      emit(DeleteNotesByClassErrorState());
+    });
+  }
+
   void signOut() {
     CacheHelper.removeData(key: 'id').then((value) {
       CacheHelper.removeData(key: 'role');
       userID = null;
       userRole = null;
+      teacherPath = null;
+      teacher = null;
       emit(UserSignOutSuccessState());
       _database.close();
     });

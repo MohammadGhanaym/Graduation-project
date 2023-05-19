@@ -17,7 +17,11 @@ class NotesListsScreen extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Notes'),
+            title:  Text('Notes', style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white
+            ),),
+            
             centerTitle: true,
           ),
           body: ConditionalBuilder(

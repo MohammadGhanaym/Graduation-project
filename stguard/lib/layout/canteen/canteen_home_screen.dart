@@ -49,7 +49,7 @@ class CanteenHomeScreen extends StatelessWidget {
                       child: SizedBox(
                         height: 300,
                         child: DrawerHeader(
-                          padding: const EdgeInsets.only(left: 20, top: 40),
+                          padding: const EdgeInsets.only(left: 20, top: 20),
                           child: CanteenCubit.get(context).canteen != null
                               ? UserInfo(
                                   userModel: CanteenCubit.get(context).canteen!,
@@ -69,7 +69,7 @@ class CanteenHomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Settings',
-                              style: Theme.of(context).textTheme.headline4,
+                              style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: defaultColor),
                             ),
                             const SizedBox(
                               height: 20,
@@ -122,7 +122,7 @@ class CanteenHomeScreen extends StatelessWidget {
                       ),
                     ),
                   ])),
-              body: state is GetCanteenPathLoadingState
+              body: CanteenCubit.get(context).canteenPathLoading
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
@@ -201,11 +201,11 @@ class CanteenHomeScreen extends StatelessWidget {
                                                     'Daily Sales Report',
                                                     style: Theme.of(context)
                                                         .textTheme
-                                                        .headline5!
+                                                        .headlineSmall!
                                                         .copyWith(
                                                             fontWeight:
                                                                 FontWeight
-                                                                    .w700),
+                                                                    .w700,fontFamily: 'OpenSans'),
                                                   ),
                                                 ],
                                               ),
@@ -220,51 +220,51 @@ class CanteenHomeScreen extends StatelessWidget {
                                                         'Orders Counts',
                                                         style: Theme.of(context)
                                                             .textTheme
-                                                            .headline5!
+                                                            .headlineSmall!
                                                             .copyWith(
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w500),
                                                       )),
                                                   const SizedBox(
-                                                    width: 30,
+                                                    width: 10,
                                                   ),
                                                   Expanded(
                                                     child: Text(
                                                       '${CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyTransactions ?? 0 : 0}',
                                                       style: Theme.of(context)
                                                           .textTheme
-                                                          .headline6,
+                                                          .titleLarge,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                               const SizedBox(
-                                                height: 10,
+                                                height: 5,
                                               ),
                                               Row(
                                                 children: [
                                                   SizedBox(
-                                                      width: 150,
+                                                      width: 200,
                                                       child: Text(
                                                         'Total Cash',
                                                         style: Theme.of(context)
                                                             .textTheme
-                                                            .headline5!
+                                                            .headlineSmall!
                                                             .copyWith(
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w500),
                                                       )),
                                                   const SizedBox(
-                                                    width: 25,
+                                                    width: 10,
                                                   ),
                                                   Expanded(
                                                     child: Text(
-                                                      '${CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue.toStringAsFixed(2) : 0.toStringAsFixed(2) : 0.toStringAsFixed(2)} EGP',
+                                                      currencyFormat(CanteenCubit.get(context).canteenDetails != null ? CanteenCubit.get(context).canteenDetails!.dailyRevenue ?? 0:0),
                                                       style: Theme.of(context)
                                                           .textTheme
-                                                          .headline6,
+                                                          .titleLarge!,overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                 ],
@@ -293,7 +293,7 @@ class CanteenHomeScreen extends StatelessWidget {
                                       imageWidth: 70,
                                       imageHeight: 70,
                                       textStyle:
-                                          Theme.of(context).textTheme.headline6,
+                                          Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                                       onPressed: () =>
                                           navigateTo(context, ProductsScreen()),
                                     )),
@@ -303,7 +303,7 @@ class CanteenHomeScreen extends StatelessWidget {
                                       height: 130,
                                       text: 'Inventory',
                                       textStyle:
-                                          Theme.of(context).textTheme.headline6,
+                                          Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                                       image: 'assets/images/inventory.png',
                                       imageHeight: 70,
                                       imageWidth: 70,

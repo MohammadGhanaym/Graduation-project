@@ -81,6 +81,13 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           appBarTheme: const AppBarTheme(color: defaultColor),
           primaryColor: defaultColor,
+          textTheme: TextTheme(
+          titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(fontFamily: 'OpenSans'),
+          titleMedium: Theme.of(context).textTheme.titleMedium!.copyWith(fontFamily: 'OpenSans'),
+          headlineSmall: Theme.of(context).textTheme.headlineSmall!.copyWith(fontFamily: 'OpenSans'),
+          headlineMedium: Theme.of(context).textTheme.headlineMedium!.copyWith(fontFamily: 'OpenSans'),
+          bodyLarge:Theme.of(context).textTheme.bodyLarge!.copyWith(fontFamily: 'OpenSans'),
+          bodySmall:Theme.of(context).textTheme.bodySmall!.copyWith(fontFamily: 'OpenSans', fontSize: 15) )
         ),
       ),
     );

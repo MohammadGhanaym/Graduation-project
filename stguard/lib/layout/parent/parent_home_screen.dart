@@ -100,19 +100,17 @@ class ParentHomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                     Expanded(
-                      child: SizedBox(
-                        height: 300,
-                        child: DrawerHeader(
-                          padding: const EdgeInsets.only(
-                              top: 40, left: 20, right: 20),
-                          child: ParentCubit.get(context).parent != null
-                              ? UserInfo(
-                                  userModel: ParentCubit.get(context).parent!,
-                                )
-                              : const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                        ),
+                      flex: 1,
+                      child: DrawerHeader(
+                        padding: const EdgeInsets.only(
+                            top: 20, left: 20, right: 20),
+                        child: ParentCubit.get(context).parent != null
+                            ? UserInfo(
+                                userModel: ParentCubit.get(context).parent!,
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                       ),
                     ),
                     Expanded(
@@ -124,7 +122,7 @@ class ParentHomeScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Settings',
-                                  style: Theme.of(context).textTheme.headline4),
+                                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: defaultColor)),
                               const SizedBox(
                                 height: 20,
                               ),
@@ -258,19 +256,19 @@ class ParentHomeScreen extends StatelessWidget {
                                             'Balance',
                                             style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 40),
+                                                fontSize: 40, fontFamily: 'OpenSans'),
                                           ),
                                           const SizedBox(
                                             height: 5,
                                           ),
-                                          Text(
-                                            ParentCubit.get(context).parent !=
+                                          Text(currencyFormat(ParentCubit.get(context).parent !=
                                                     null
                                                 ? ParentCubit.get(context)
                                                     .parent!
                                                     .balance
-                                                    .toStringAsFixed(2)
-                                                : '0.00',
+                                                   
+                                                : 0)
+                                            ,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
@@ -307,12 +305,12 @@ class ParentHomeScreen extends StatelessWidget {
                         children: [
                           const Text('Family',
                               style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold)),
+                                  fontSize: 25, fontWeight: FontWeight.bold,fontFamily: 'OpenSans')),
                           const SizedBox(
                             height: 5,
                           ),
                           ConditionalBuilder(
-                              condition: state is! GetStudentDataLoading,
+                              condition: !ParentCubit.get(context).studentDataLoading,
                               builder: (context) => ParentCubit.get(context)
                                       .studentsData
                                       .isNotEmpty
@@ -341,7 +339,7 @@ class ParentHomeScreen extends StatelessWidget {
                                       children: [
                                         Container(
                                           padding: EdgeInsets.zero,
-                                          height: 150,
+                                          height: 140,
                                           width: 130,
                                           child: Card(
                                             child: SizedBox(
@@ -376,10 +374,13 @@ class ParentHomeScreen extends StatelessWidget {
                                                     const SizedBox(
                                                       height: 10,
                                                     ),
-                                                    const SizedBox(
+                                                     SizedBox(
                                                         width: 80,
                                                         child: Text(
-                                                            'Add Family Member'))
+                                                          
+                                                            'Add Family Member', 
+                                                            style: Theme.of(context).textTheme.bodyLarge,textAlign: TextAlign.center,),
+                                                            )
                                                   ]),
                                             ),
                                           ),
@@ -387,7 +388,7 @@ class ParentHomeScreen extends StatelessWidget {
                                       ],
                                     ),
                               fallback: (context) => const SizedBox(
-                                    height: 150,
+                                    height: 140,
                                     child: Center(
                                       child: CircularProgressIndicator(),
                                     ),
@@ -405,13 +406,13 @@ class ParentHomeScreen extends StatelessWidget {
                         children: [
                           const Text('Activity',
                               style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold)),
+                                  fontSize: 25, fontWeight: FontWeight.bold,fontFamily: 'OpenSans')),
                           const SizedBox(
                             height: 5,
                           ),
                           //activity
                           ConditionalBuilder(
-                            condition: state is! ParentGetDataBaseLoadingState,
+                            condition: !ParentCubit.get(context).activityLoading,
                             builder: (context) => ParentCubit.get(context)
                                         .activities
                                         .isNotEmpty &&
@@ -467,8 +468,9 @@ class ParentHomeScreen extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                            fallback: (context) => const Center(
-                              child: CircularProgressIndicator(),
+                            fallback: (context) => const Padding(
+                              padding: EdgeInsets.only(top:50.0),
+                              child: Center(child: CircularProgressIndicator()),
                             ),
                           )
                         ],

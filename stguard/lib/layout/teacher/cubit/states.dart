@@ -120,3 +120,13 @@ class UserSignOutSuccessState extends TeacherStates{}
 class UserSignOutErrorState extends TeacherStates{}
 
 class SelectStudentState extends TeacherStates{}
+
+class SomethingWentWrong extends TeacherStates{}
+
+class GetNotesByClassLoadingState extends TeacherStates{}
+class GetNotesByClassSuccessState extends TeacherStates{}
+class GetNotesByClassErrorState extends TeacherStates{}
+
+class DeleteNotesByClassLoadingState extends TeacherStates{}
+class DeleteNotesByClassSuccessState extends TeacherStates{}
+class DeleteNotesByClassErrorState extends TeacherStates{}

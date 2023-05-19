@@ -6,6 +6,7 @@ import 'package:multiselect/multiselect.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
 import 'package:stguard/layout/teacher/teacher_home_screen.dart';
 import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class AddNoteScreen extends StatelessWidget {
  
@@ -41,7 +42,7 @@ class AddNoteScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Title', style: Theme.of(context).textTheme.headline5),
+                    Text('Title', style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(
                       height: 10,
                     ),
@@ -60,7 +61,7 @@ class AddNoteScreen extends StatelessWidget {
                       height: 20,
                     ),
                     Text('Content (optional)',
-                        style: Theme.of(context).textTheme.headline5),
+                        style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(
                       height: 10,
                     ),
@@ -81,7 +82,7 @@ class AddNoteScreen extends StatelessWidget {
                       children: [
                         InkWell(
                           onTap: TeacherCubit.get(context).pickFile,
-                          child: Container(
+                          child: SizedBox(
                             height: 55,
                             child: Row(
                               children: const [
@@ -121,45 +122,53 @@ class AddNoteScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Subject',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 10),
-                        DropdownButton<String>(
-                          value: TeacherCubit.get(context).selectedSubject,
-                          onChanged: (value) {
-                            TeacherCubit.get(context).selectSubject(value);
-                          },
-                          items: TeacherCubit.get(context)
-                              .subjects
-                              .map((subjectName) => DropdownMenuItem<String>(
-                                  value: subjectName, child: Text(subjectName)))
-                              .toList(),
-                          isExpanded: true,
-                          underline: Container(
-                            height: 1,
-                            color: Colors.black54,
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            borderRadius: BorderRadius.circular(10),
+                            hint: Text('Select Subject', style: Theme.of(context).textTheme.bodySmall,),
+                            value: TeacherCubit.get(context).selectedSubject,
+                            onChanged: (value) {
+                              TeacherCubit.get(context).selectSubject(value);
+                            },
+                            items: TeacherCubit.get(context)
+                                .subjects
+                                .map((subjectName) => DropdownMenuItem<String>(
+                                    value: subjectName, child: Text(subjectName)))
+                                .toList(),
+                            isExpanded: true,
+                            underline: Container(
+                              height: 1,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20),
                         Text(
                           'Class',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 10),
-                        DropdownButton<String>(
-                          value: TeacherCubit.get(context).selectedClassName,
-                          onChanged: (value) {
-                            TeacherCubit.get(context).selectClass(value);
-                          },
-                          items: TeacherCubit.get(context)
-                              .classes
-                              .map((className) => DropdownMenuItem<String>(
-                                  value: className, child: Text(className)))
-                              .toList(),
-                          isExpanded: true,
-                          underline: Container(
-                            height: 1,
-                            color: Colors.black54,
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            borderRadius: BorderRadius.circular(10),
+                            hint: Text('Select Class', style: Theme.of(context).textTheme.bodySmall,),
+                            value: TeacherCubit.get(context).selectedClassName,
+                            onChanged: (value) {
+                              TeacherCubit.get(context).selectClass(value);
+                            },
+                            items: TeacherCubit.get(context)
+                                .classes
+                                .map((className) => DropdownMenuItem<String>(
+                                    value: className, child: Text(className)))
+                                .toList(),
+                            isExpanded: true,
+                            underline: Container(
+                              height: 1,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -180,7 +189,7 @@ class AddNoteScreen extends StatelessWidget {
                                 const SizedBox(height: 10),
                                 Text(
                                   'Student',
-                                  style: Theme.of(context).textTheme.headline5,
+                                  style: Theme.of(context).textTheme.headlineSmall,
                                 ),
                                 const SizedBox(height: 10),
                                 ConditionalBuilder(
@@ -188,6 +197,7 @@ class AddNoteScreen extends StatelessWidget {
                                       .students
                                       .isNotEmpty,
                                   builder: (context) => DropDownMultiSelect<String>(
+                                    hint: Text('Select Student', style: Theme.of(context).textTheme.bodySmall,),
                                     selectedValues: TeacherCubit.get(context)
                                         .selectedStudents,
                                     onChanged: TeacherCubit.get(context).getSelectedStudents,
@@ -211,6 +221,7 @@ class AddNoteScreen extends StatelessWidget {
                     DefaultButton(
                       showCircularProgressIndicator: state is NoteSendLoadingState,
                       text: 'Send',
+                      color: defaultColor.withOpacity(0.8),
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
                           TeacherCubit.get(context).sendNote(
