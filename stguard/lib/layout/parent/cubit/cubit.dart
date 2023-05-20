@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/credit_card_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -421,25 +422,51 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   StudentLocationModel? location;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? locationListener;
+  GoogleMapController? mapControllerl;
+  void setMapController(GoogleMapController controller) {
+    mapControllerl = controller;
+  }
+
+
   Future<void> getLocation(String id) async {
+    location = null;
     emit(GetStudentLocationLoadingState());
-    await studentsPaths[id]!.collection('Location').get().then((value) {
-      location = StudentLocationModel.fromJson(value.docs[0].data());
-      emit(GetStudentLocationSuccessState());
-    }).catchError((error) {
-      print(error);
+    locationListener = studentsPaths[id]!
+        .collection('Location')
+        .doc('location')
+        .snapshots()
+        .listen((event) {
+      if (event.exists) {
+        if (event.data() != null) {
+          location = StudentLocationModel.fromJson(event.data()!);
+          if (mapControllerl != null) {
+            mapControllerl!
+                .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+              target: LatLng(location!.lat, location!.long),
+              zoom: 14.4746,
+            )));
+          }
+
+          emit(GetStudentLocationSuccessState());
+        }
+      }
     });
   }
 
   void openMap({required double lat, required double long}) async {
-    final availableMaps = await MapLauncher.installedMaps;
-    print(
-        availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
+    try {
+      final availableMaps = await MapLauncher.installedMaps;
+      print(
+          availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
 
-    await availableMaps.first.showMarker(
-      coords: Coords(lat, long),
-      title: "Location",
-    );
+      await availableMaps.first.showMarker(
+        coords: Coords(lat, long),
+        title: "Location",
+      );
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   List<ActivityModel> attendance_history = [];

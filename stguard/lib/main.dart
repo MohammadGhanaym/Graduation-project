@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stguard/layout/canteen/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
@@ -21,7 +22,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
 

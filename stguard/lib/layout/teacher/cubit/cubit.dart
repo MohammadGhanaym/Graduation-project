@@ -347,6 +347,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
         emit(SavetoExcelSuccessState());
       } catch (e) {
         emit(SavetoExcelErrorState());
+        print(e.toString());
       }
     } else {
       requestWritePermission();
@@ -804,7 +805,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
               .where('from', isEqualTo: teacherName)
               .get()
               .then((value) {
-            
             value.docs.forEach((element) {
               notes!.add(NoteModel.fromMap(element.data(), id: element.id));
             });
@@ -825,7 +825,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
   void resetSelection() {
     notes = null;
-    
+
     selectedClassName = null;
     selectedStudents = [];
     selectedSubject = null;
@@ -833,6 +833,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
   void deleteNote(String noteId) async {
     emit(DeleteNotesByClassLoadingState());
+    // don't forget to delete files
     await teacherPath!
         .collection('classes')
         .doc(selectedClassName)

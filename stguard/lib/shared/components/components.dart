@@ -1810,3 +1810,17 @@ void showSnackBar(BuildContext context,
 String currencyFormat(dynamic money) {
   return NumberFormat.currency(decimalDigits: 2, symbol: '').format(money);
 }
+
+
+Future<void> requestLocationPermission() async {
+  final status = await Permission.location.request();
+
+  if (status.isGranted) {
+    // Permission granted, continue with your app logic
+    // You can proceed with getting the user's location
+  } else if (status.isDenied) {
+    // Permission denied, show a message or UI to inform the user
+  } else if (status.isPermanentlyDenied) {
+    // Permission permanently denied, show a message or UI to guide the user to app settings
+  }
+}
