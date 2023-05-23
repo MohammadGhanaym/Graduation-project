@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/models/activity_model.dart';
 import 'package:stguard/models/canteen_product_model.dart';
 import 'package:stguard/models/class_note.dart';
+import 'package:stguard/models/exam_results_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
@@ -60,11 +60,15 @@ class DefaultButton extends StatelessWidget {
               onPressed: onPressed,
               child: Text(
                 text,
-                style: TextStyle(color: textColor, fontSize: textSize),
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: textSize,
+                    fontFamily: 'OpenSans',
+                    fontWeight: FontWeight.bold),
               ),
             ),
           )),
-      fallback: (context) => const CircularProgressIndicator(),
+      fallback: (context) => const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -119,9 +123,13 @@ class DefaultFormField extends StatelessWidget {
         onTap: onTap,
         maxLines: maxLines,
         readOnly: readOnly,
+        cursorColor: defaultColor,
         decoration: InputDecoration(
+            focusColor: defaultColor,
             labelText: label,
             errorText: errorText,
+            focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: defaultColor)),
             border: const OutlineInputBorder(),
             prefixIcon: Icon(prefix),
             suffixIcon: suffix != null
@@ -223,30 +231,46 @@ class UserInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Profile', style: Theme.of(context).textTheme.headline4),
+        Text(
+          'Profile',
+          style: Theme.of(context)
+              .textTheme
+              .headlineMedium!
+              .copyWith(color: defaultColor),
+        ),
         const SizedBox(
           height: 10,
         ),
-        const Text('Name',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+        Text('Name',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge!
+                .copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(
           height: 5,
         ),
-        Text(userModel.name,
-            style: const TextStyle(fontSize: 15, color: Colors.grey)),
+        Text(
+          userModel.name,
+          style: Theme.of(context).textTheme.bodySmall,
+          overflow: TextOverflow.ellipsis,
+        ),
         const SizedBox(
           height: 10,
         ),
-        const Text('Email',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+        Text('Email',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge!
+                .copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(
           height: 5,
         ),
-        Text(userModel.email,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.grey,
-            )),
+        Text(
+          userModel.email,
+          maxLines: 1,
+          style: Theme.of(context).textTheme.bodySmall,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
@@ -279,7 +303,7 @@ class DrawerItem extends StatelessWidget {
           ),
           Text(
             text,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            style: Theme.of(context).textTheme.titleLarge,
           )
         ],
       ),
@@ -361,12 +385,17 @@ class ActivityItem extends StatelessWidget {
                                   : '$name ${model.activity}',
                               maxLines: 2,
                               style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w700),
+                                  fontSize: 15,
+                                  fontFamily: 'OpenSans',
+                                  fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(
                               height: 15,
                             ),
-                            Text(getDate(model.date))
+                            Text(
+                              getDate(model.date),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
                           ]),
                     ),
                     const SizedBox(
@@ -421,9 +450,7 @@ class FamilyMemberCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         ParentCubit.get(context).getSettingsData(model!).then((value) {
-          navigateTo(
-              context,
-              MemberSettingsScreen(student: model));
+          navigateTo(context, MemberSettingsScreen(student: model));
         });
       },
       child: Container(
@@ -440,19 +467,26 @@ class FamilyMemberCard extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  CircleAvatar(
-                    radius: 41,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      backgroundImage: !isErrorOccured
-                          ? NetworkImage(model!.image!)
-                          : const AssetImage('assets/images/no-image.png')
-                              as ImageProvider<Object>?,
-                      onBackgroundImageError: (exception, stackTrace) {
-                        isErrorOccured = true;
-                      },
+                  Container(
+                    width: 81,
+                    height: 81,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: defaultColor)),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                      child: Image(
+                        image: NetworkImage(
+                          model!.image!,
+                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Image(
+                                image:
+                                    AssetImage('assets/images/no-image.png')),
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -464,8 +498,11 @@ class FamilyMemberCard extends StatelessWidget {
                           child: Text(
                         model!.name!.split(' ')[0],
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w500),
+                            fontSize: 15,
+                            fontFamily: 'OpenSans',
+                            fontWeight: FontWeight.w500),
                       )))
                 ]),
           ),
@@ -642,7 +679,11 @@ class SliderBuilder extends StatelessWidget {
             type: 'min',
           ),
           SliderTheme(
-            data: const SliderThemeData(trackHeight: 3),
+            data: SliderThemeData(
+                trackHeight: 3,
+                thumbColor: defaultColor,
+                activeTrackColor: defaultColor,
+                inactiveTrackColor: defaultColor.withOpacity(0.2)),
             child: Expanded(
               child: Slider(
                 value: value,
@@ -843,7 +884,6 @@ class AllergenSelectionItem extends StatelessWidget {
                 color: ParentCubit.get(context).selectedAllergies.contains(icon)
                     ? defaultColor
                     : Theme.of(context).scaffoldBackgroundColor)),
-        width: 30,
         height: 50,
         child: Card(
             child: Padding(
@@ -862,11 +902,7 @@ class AllergenSelectionItem extends StatelessWidget {
                 const SizedBox(
                   height: 5,
                 ),
-                Text(
-                  '$icon',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w500),
-                )
+                Text('$icon', style: Theme.of(context).textTheme.titleMedium)
               ],
             ),
           ),
@@ -877,24 +913,24 @@ class AllergenSelectionItem extends StatelessWidget {
 }
 
 class GradeItem extends StatelessWidget {
-  String grade;
-  GradeItem({super.key, required this.grade});
+  String className;
+  GradeItem({super.key, required this.className});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => TeacherCubit.get(context).selectGrade(grade),
+      onTap: () => TeacherCubit.get(context).selectClass(className),
       child: Container(
         padding: const EdgeInsets.all(8),
         alignment: AlignmentDirectional.center,
         height: 20,
         decoration: BoxDecoration(
             border: Border.all(
-                color: TeacherCubit.get(context).selectedClassName == grade
+                color: TeacherCubit.get(context).selectedClassName == className
                     ? defaultColor.withOpacity(0.8)
                     : Colors.grey),
             borderRadius: BorderRadiusDirectional.circular(5)),
-        child: Text(grade),
+        child: Text(className),
       ),
     );
   }
@@ -925,7 +961,7 @@ class StudentAttendanceCard extends StatelessWidget {
                         : Colors.red.withOpacity(0.8)
                     : Theme.of(context).scaffoldBackgroundColor)),
         width: double.infinity,
-        height: 120,
+        height: 130,
         child: Card(
             child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -963,31 +999,31 @@ class StudentAttendanceCard extends StatelessWidget {
                     height: 10,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      DefaultButton(
-                        text: 'Present',
-                        color: defaultColor.withOpacity(0.8),
-                        width: 110,
-                        height: 40,
-                        onPressed: () {
-                          TeacherCubit.get(context)
-                              .addtoAttendance(student.id, student.name!, 1);
-                        },
-                      ),
+                      const SizedBox(width: 50),
+                      IconButton(
+                          onPressed: () {
+                            TeacherCubit.get(context)
+                                .addtoAttendance(student.id, student.name!, 1);
+                          },
+                          icon: ImageIcon(
+                              const AssetImage('assets/images/check-mark.png'),
+                              color: defaultColor.withOpacity(0.8),
+                              size: 40)),
                       const SizedBox(
-                        width: 10,
+                        width: 40,
                       ),
-                      DefaultButton(
-                        text: 'Absent',
-                        color: Colors.red.withOpacity(0.8),
-                        width: 110,
-                        height: 40,
-                        onPressed: () {
-                          TeacherCubit.get(context)
-                              .addtoAttendance(student.id, student.name!, 0);
-                        },
-                      )
+                      IconButton(
+                          onPressed: () {
+                            TeacherCubit.get(context)
+                                .addtoAttendance(student.id, student.name!, 0);
+                          },
+                          icon: const ImageIcon(
+                            AssetImage('assets/images/error.png'),
+                            color: Colors.red,
+                            size: 40,
+                          ))
                     ],
                   )
                 ],
@@ -1010,78 +1046,65 @@ class LessonCard extends StatelessWidget {
       onTap: onTap,
       child: SizedBox(
         width: double.infinity,
-        height: 90,
+        height: 120,
         child: Card(
             elevation: 4,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
+              padding: const EdgeInsets.only(
+                  top: 10, bottom: 10, right: 20, left: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500),
-                          ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            SizedBox(
-                              height: 20,
-                              width: 100,
-                              child: Text(lesson.grade,
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500)),
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Text(
-                                getDate(lesson.datetime,
-                                    format: 'MMM, EE, hh:mm a'),
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w500))
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            showDefaultDialog(
+                              context,
+                              title: 'Are you sure?',
+                              content: Text(
+                                "Are you sure you want to delete this lesson's attendance?",
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              buttonText1: 'Cancel',
+                              onPressed1: () => Navigator.pop(context),
+                              buttonText2: 'Delete',
+                              onPressed2: () => TeacherCubit.get(context)
+                                  .deleteLesson(lesson.name),
+                            );
+                          },
+                          icon: const ImageIcon(
+                              AssetImage('assets/images/delete.png')))
+                    ],
                   ),
                   const SizedBox(
-                    width: 10,
+                    height: 15,
                   ),
-                  IconButton(
-                      onPressed: () {
-                        showDefaultDialog(
-                          context,
-                          title: 'Are you sure?',
-                          content: Text(
-                            "Are you sure you want to delete this lesson's attendance?",
-                            style: Theme.of(context)
-                                .textTheme
-                                .caption!
-                                .copyWith(fontSize: 15),
-                          ),
-                          buttonText1: 'Cancel',
-                          onPressed1: () => Navigator.pop(context),
-                          buttonText2: 'Delete',
-                          onPressed2: () => TeacherCubit.get(context)
-                              .deleteLesson(lesson.name),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: defaultColor,
-                      ))
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 20,
+                        width: 100,
+                        child: Text(lesson.grade,
+                            style: Theme.of(context).textTheme.bodyLarge),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      const Spacer(),
+                      Text(getDate(lesson.datetime, format: 'EE, hh:mm a'),
+                          style: Theme.of(context).textTheme.bodySmall)
+                    ],
+                  ),
                 ],
               ),
             )),
@@ -1108,7 +1131,7 @@ class AttendanceDetailsCard extends StatelessWidget {
                 child: Text(
                   studentDetails.studentName,
                   maxLines: 2,
-                  style: const TextStyle(fontSize: 15),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   overflow: TextOverflow.ellipsis,
                 )),
             const SizedBox(
@@ -1120,7 +1143,7 @@ class AttendanceDetailsCard extends StatelessWidget {
                   : Colors.red.withOpacity(0.8),
               AssetImage(studentDetails.isPresent == 1
                   ? 'assets/images/check-mark.png'
-                  : 'assets/images/close.png'),
+                  : 'assets/images/error.png'),
               size: 30,
             )
           ],
@@ -1497,9 +1520,15 @@ Future<Widget?> showDefaultDialog(context,
       actions: [
         TextButton(
           onPressed: onPressed1,
-          child: Text(buttonText1),
+          child: Text(
+            buttonText1,
+            style: const TextStyle(color: defaultColor),
+          ),
         ),
         ElevatedButton(
+          style: ButtonStyle(
+              backgroundColor:
+                  MaterialStateColor.resolveWith((states) => defaultColor)),
           onPressed: onPressed2,
           child: Text(buttonText2),
         )
@@ -1567,18 +1596,18 @@ class DefaultButton2 extends StatelessWidget {
 class FileItem extends StatelessWidget {
   String fileName;
   void Function()? onPressed;
-  String progress;
+  String? progress;
   FileItem(
       {super.key,
       required this.fileName,
       required this.onPressed,
-      required this.progress});
+      this.progress});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(fileName),
-      subtitle: Text(progress),
+      subtitle: progress != null ? Text(progress!) : null,
       trailing: IconButton(
         icon: const Icon(Icons.cancel),
         onPressed: onPressed,
@@ -1589,9 +1618,14 @@ class FileItem extends StatelessWidget {
 
 class NoteItem extends StatelessWidget {
   final void Function()? onTap;
-  final ClassNote note;
-
-  NoteItem({required this.onTap, required this.note});
+  void Function()? teacherOnTap;
+  final NoteModel note;
+  final isTeacher;
+  NoteItem(
+      {required this.onTap,
+      required this.note,
+      this.teacherOnTap,
+      this.isTeacher = false});
 
   @override
   Widget build(BuildContext context) {
@@ -1607,14 +1641,27 @@ class NoteItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                note.title,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
-                ),
+              Row(
+                children: [
+                  Text(
+                    note.title,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  if (isTeacher)
+                    const SizedBox(
+                      width: 20,
+                    ),
+                  if (isTeacher) const Spacer(),
+                  if (isTeacher)
+                    IconButton(
+                        onPressed: teacherOnTap,
+                        icon: const ImageIcon(
+                            AssetImage('assets/images/delete_note.png'))),
+                ],
               ),
               const SizedBox(height: 8.0),
               Row(
@@ -1623,7 +1670,7 @@ class NoteItem extends StatelessWidget {
                     width: 150,
                     child: Text(
                       note.subject,
-                      style: const TextStyle(fontSize: 18.0),
+                      style: Theme.of(context).textTheme.bodyLarge,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -1632,7 +1679,76 @@ class NoteItem extends StatelessWidget {
                   Text(
                     getDate(note.datetime, format: 'EE, hh:mm a'),
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 18.0),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ExamResultItem extends StatelessWidget {
+  final void Function()? onTap;
+  void Function()? teacherOnTap;
+  final ExamResults examResults;
+  ExamResultItem(
+      {required this.onTap, required this.examResults, this.teacherOnTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 2.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    examResults.examType,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                      onPressed: teacherOnTap,
+                      icon: const ImageIcon(
+                          AssetImage('assets/images/delete_note.png'))),
+                ],
+              ),
+              const SizedBox(height: 8.0),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: Text(
+                      examResults.subject,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    getDate(examResults.datetime, format: 'EE, hh:mm a'),
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   )
                 ],
               ),
@@ -1754,15 +1870,86 @@ class DownloadItem extends StatelessWidget {
   }
 }
 
-void showSnackBar(BuildContext context, {required String message, required IconData icon})
-{
+void showSnackBar(BuildContext context,
+    {required String message, required IconData icon}) {
   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  ScaffoldMessenger.of(context)
-                  .showSnackBar( SnackBar(content: Row(
-                    children:  [
-                       Icon(icon, color: Colors.white,),
-                      const SizedBox(width: 5,),
-                      Text(message),
-                    ],
-                  )));
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Row(
+    children: [
+      Icon(
+        icon,
+        color: Colors.white,
+      ),
+      const SizedBox(
+        width: 5,
+      ),
+      Text(message),
+    ],
+  )));
+}
+
+String currencyFormat(dynamic money) {
+  return NumberFormat.currency(decimalDigits: 2, symbol: '').format(money);
+}
+
+class StudentExamResultItem extends StatelessWidget {
+  StudentModel student;
+  Map<String, dynamic> grades;
+
+  StudentExamResultItem({required this.student, required this.grades, super.key, });
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20),
+        child: Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                  width: 220,
+                  child: Text(
+                    student.name!,
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    overflow: TextOverflow.ellipsis,
+                  )),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+           
+           Text(
+              grades.containsKey(student.id) ? grades[student.id].toString() : 'N/A',
+              style: Theme.of(context).textTheme.bodyLarge,
+              overflow: TextOverflow.ellipsis,
+            ) ,const SizedBox(width: 5,),
+                IconButton(onPressed: (){}, icon: grades.containsKey(student.id) ?
+                 grades[student.id].runtimeType != double? const Icon(
+                  Icons.info_outline, color: Colors.amberAccent,
+                ):
+                 Icon(Icons.edit_outlined, color: defaultColor.withOpacity(0.8),)
+                :const Icon(
+                  Icons.info_outline, color: Colors.amberAccent,
+                )),
+
+         const SizedBox(width: 10,) ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> requestLocationPermission() async {
+  final status = await Permission.location.request();
+
+  if (status.isGranted) {
+    // Permission granted, continue with your app logic
+    // You can proceed with getting the user's location
+  } else if (status.isDenied) {
+    // Permission denied, show a message or UI to inform the user
+  } else if (status.isPermanentlyDenied) {
+    // Permission permanently denied, show a message or UI to guide the user to app settings
+  }
 }

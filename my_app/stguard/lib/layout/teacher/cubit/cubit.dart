@@ -7,7 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/country_model.dart';
+import 'package:stguard/models/exam_results_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
@@ -222,31 +224,31 @@ class TeacherCubit extends Cubit<TeacherStates> {
     }
   }
 
-  List<dynamic> grades = [];
+  List<dynamic> classes = [];
 
-  Future<void> getGrades() async {
-    grades = [];
-    emit(GetGradesLoadingState());
+  Future<void> getClasses() async {
+    classes = [];
+    emit(GetClassesLoadingState());
 
     if (teacherPath != null) {
       await teacherPath!.get().then((value) {
         print(value.data());
         if (value.data() != null) {
-          grades = value['classes names'];
-          selectedClassName = grades[0];
-          emit(GetGradesSuccessState());
+          classes = value['classes names'];
+          emit(GetClassesSuccessState());
         }
       }).catchError((error) {
         print(error.toString());
-        emit(GetGradesErrorState());
+        emit(GetClassesErrorState());
       });
     }
   }
 
   String? selectedClassName;
-  void selectGrade(String value) {
+  void selectClass(String? value) async {
     selectedClassName = value;
-    emit(SelectGradeSuccess());
+    emit(SelectClassSuccess());
+    await getStudentsNames();
   }
 
   List<Widget> screens = [
@@ -256,9 +258,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
   int currentIndex = 0;
   void switchScreen(var index) {
     currentIndex = index;
-    if (index == 1) {
-      getGrades();
-    }
     emit(SwitchScreenState());
   }
 
@@ -278,10 +277,9 @@ class TeacherCubit extends Cubit<TeacherStates> {
           value.docs.forEach((element) {
             students.add(StudentModel.fromJson(element.data()));
           });
+
           emit(GetStudentNamesSuccess());
-          if (students.isNotEmpty) {
-            selectedStudentName = students[0].name;
-          }
+
           print(students);
         } else {
           emit(GetStudentNamesError('Something Went Wrong!'));
@@ -350,6 +348,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
         emit(SavetoExcelSuccessState());
       } catch (e) {
         emit(SavetoExcelErrorState());
+        print(e.toString());
       }
     } else {
       requestWritePermission();
@@ -359,14 +358,17 @@ class TeacherCubit extends Cubit<TeacherStates> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   DocumentReference<Map<String, dynamic>>? teacherPath;
   List<dynamic> subjects = [];
+  String? teacherName;
+  bool teacherPathLoading = true;
   Future<void> getTeacherPath() async {
+    teacherPathLoading = true;
     emit(GetTeacherPathLoadingState());
     await db
         .collection('Teachers')
         .doc(userID)
         .collection('Community')
         .get()
-        .then((accountInfo) {
+        .then((accountInfo) async {
       if (accountInfo.docs.isNotEmpty) {
         teacherPath = db
             .collection('Countries')
@@ -375,7 +377,9 @@ class TeacherCubit extends Cubit<TeacherStates> {
             .doc(accountInfo.docs[0]['school']);
 
         emit(GetTeacherPathSuccessState());
-        teacherPath!
+        await getClasses();
+        teacherPathLoading = false;
+        await teacherPath!
             .collection('SchoolStaff')
             .doc(accountInfo.docs[0]['uid'])
             .get()
@@ -384,6 +388,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
           if (value.exists) {
             print(value.data());
             subjects = value['subjects'];
+            if (value.data()!.containsKey('name')) {
+              teacherName = value['name'];
+              print(teacherName);
+            }
             if (subjects.isNotEmpty) {
               selectedSubject = subjects[0];
             }
@@ -393,10 +401,12 @@ class TeacherCubit extends Cubit<TeacherStates> {
         });
       } else {
         emit(NeedtoJoinCommunityState());
+        teacherPathLoading = false;
       }
     }).catchError((error) {
       print(error.toString());
       emit(GetTeacherPathErrorState());
+      teacherPathLoading = false;
     });
     await getTeacherInfo();
   }
@@ -513,16 +523,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
   }
 
   bool sendToAll = true;
-  String? selectedStudentName;
   String? selectedSubject;
   void selectSubject(String? value) {
     selectedSubject = value;
     emit(SelectSubjectSuccessState());
-  }
-
-  void selectStudent(String? value) {
-    selectedStudentName = value;
-    emit(SelectStudentSuccessState());
   }
 
   void changeSendToAll(bool? value) async {
@@ -533,35 +537,16 @@ class TeacherCubit extends Cubit<TeacherStates> {
     emit(ChangeSendToAllStateSuccessState());
   }
 
-  void selectClass(String? value) async {
-    selectedClassName = value;
-    emit(SelectClassSuccessState());
-    await getStudentsNames();
-  }
-
-  Future<String?> pickFile() async {
+  Future<String?> pickFile(
+      {FileType type = FileType.any, List<String>? allowedExtensions}) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        // allowedExtensions: ['xlsx'],
+        type: type,
+        allowedExtensions: allowedExtensions,
       );
 
       if (result != null) {
         String filePath = result.files.single.path!;
-        try {
-          await uploadFile(File(filePath));
-        } on firebase_storage.FirebaseException catch (e) {
-          if (e.code == 'firebase_storage/canceled') {
-            // Handle upload cancellation
-            print('File upload canceled');
-          } else {
-            // Handle other Firebase Storage errors
-            print('Error uploading file: ${e.code}');
-          }
-        } catch (e) {
-          // Handle other errors
-          print('Error uploading file: $e');
-        }
 
         emit(SelectFileSuccessState());
         // Use the file path to access the selected file
@@ -579,83 +564,76 @@ class TeacherCubit extends Cubit<TeacherStates> {
   Map<String, String> filesURLs = {};
   List<UploadFileInfo> uploadFileInfos = [];
 
-  Future<void> uploadFile(File file) async {
-    String fileName = file.path.split('/').last;
-    String uniqueFileName =
-        '${DateTime.now().millisecondsSinceEpoch}_$fileName';
+  Future<void> pickAndUploadFile() async {
+    try {
+      String? filePath = await pickFile();
 
-    String progressText = '0%';
+      String fileName = filePath!.split('/').last;
+      String uniqueFileName =
+          '${DateTime.now().millisecondsSinceEpoch}_$fileName';
 
-    // Upload the file to Firebase Storage
-    firebase_storage.UploadTask uploadTask = firebase_storage
-        .FirebaseStorage.instance
-        .ref()
-        .child('classes_files/$uniqueFileName')
-        .putFile(file);
-    uploadFileInfos.add(UploadFileInfo(
-        fileName: uniqueFileName,
-        progress: progressText,
-        uploadTask: uploadTask));
-    uploadTask.snapshotEvents
-        .listen((firebase_storage.TaskSnapshot snapshot) async {
-      // Calculate the progress percentage
-      double progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-      progressText = '${(progress * 100).toStringAsFixed(2)}%';
-      print(progressText);
-      int index =
-          uploadFileInfos.indexWhere((info) => info.fileName == uniqueFileName);
-      uploadFileInfos[index].progress = progressText;
-      emit(UploadProgressState());
-      // Wait for the upload to complete
+      String progressText = '0%';
 
-      if (progress == 1 &&
-          snapshot.state == firebase_storage.TaskState.success) {
-        // Get the download URL for the uploaded file
-        await snapshot.ref.getDownloadURL().then((url) {
-          filesURLs[uniqueFileName] = url;
-          print(filesURLs);
-          emit(UploadFileSuccessState());
-        }).catchError((error) {
-          print(error.toString());
-          uploadFileInfos[index].progress = 'Failed';
-          emit(UploadFileErrorState());
-        });
-      }
-      // Update your UI with the progress percentage
-      print('Upload progress: $progress%');
-    }).onError((error) {
-      if (error.code == 'canceled') {
+      // Upload the file to Firebase Storage
+      firebase_storage.UploadTask uploadTask = firebase_storage
+          .FirebaseStorage.instance
+          .ref()
+          .child('classes_files/$uniqueFileName')
+          .putFile(File(filePath));
+      uploadFileInfos.add(UploadFileInfo(
+          fileName: uniqueFileName,
+          progress: progressText,
+          uploadTask: uploadTask));
+      uploadTask.snapshotEvents
+          .listen((firebase_storage.TaskSnapshot snapshot) async {
+        // Calculate the progress percentage
+        double progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+        progressText = '${(progress * 100).toStringAsFixed(2)}%';
+        print(progressText);
+        int index = uploadFileInfos
+            .indexWhere((info) => info.fileName == uniqueFileName);
+        uploadFileInfos[index].progress = progressText;
+        emit(UploadProgressState());
+        // Wait for the upload to complete
+
+        if (progress == 1 &&
+            snapshot.state == firebase_storage.TaskState.success) {
+          // Get the download URL for the uploaded file
+          await snapshot.ref.getDownloadURL().then((url) {
+            filesURLs[uniqueFileName] = url;
+            print(filesURLs);
+            emit(UploadFileSuccessState());
+          }).catchError((error) {
+            print(error.toString());
+            uploadFileInfos[index].progress = 'Failed';
+            emit(UploadFileErrorState());
+          });
+        }
+        // Update your UI with the progress percentage
+        print('Upload progress: $progress%');
+      }).onError((error) {
+        if (error.code == 'canceled') {
+          // Handle upload cancellation
+          print('File upload canceled');
+        } else {
+          // Handle other Firebase Storage errors
+          print('Error uploading file: ${error.code}');
+        }
+      });
+    } on firebase_storage.FirebaseException catch (e) {
+      if (e.code == 'firebase_storage/canceled') {
         // Handle upload cancellation
         print('File upload canceled');
       } else {
         // Handle other Firebase Storage errors
-        print('Error uploading file: ${error.code}');
+        print('Error uploading file: ${e.code}');
       }
-    });
+    } catch (e) {
+      // Handle other errors
+      print('Error uploading file: $e');
+    }
   }
 
-/*
-  Future<void> getProgress(file, firebase_storage.UploadTask uploadtask) async {
-    uploadtask.snapshotEvents
-        .listen((firebase_storage.TaskSnapshot snapshot) async {
-      double progress = snapshot.bytesTransferred / snapshot.totalBytes;
-      progressText = '${(progress * 100).toStringAsFixed(2)}%';
-      emit(UploadProgressState());
-      if (progress == 1 &&
-          snapshot.state == firebase_storage.TaskState.success) {
-        await snapshot.ref.getDownloadURL().then((url) {
-          filesURLs[file.path.split('/').last] = url;
-          print(filesURLs);
-          emit(UploadFileSuccessState());
-        }).catchError((error) {
-          print(error.toString());
-          progressText = 'Failed';
-          emit(UploadFileErrorState());
-        });
-      }
-    });
-  }
-*/
   Future<void> cancelFileUpload(int index) async {
     await uploadFileInfos[index].uploadTask.cancel().then((value) {
       uploadFileInfos.removeAt(index);
@@ -692,60 +670,106 @@ class TeacherCubit extends Cubit<TeacherStates> {
     }
   }
 
+  List<String> selectedStudents = [];
+  void getSelectedStudents(List<String> students) {
+    selectedStudents = students;
+    emit(SelectStudentState());
+    print(selectedStudents);
+  }
+
   Future<void> sendNote(String title, String content) async {
     emit(NoteSendLoadingState());
-    try {
-      // Save download URL in Firestore
-      await teacherPath!
-          .collection('classes')
-          .where('name', isEqualTo: selectedClassName)
-          .get()
-          .then(
-        (value) {
-          if (value.docs.isNotEmpty) {
-            teacherPath!
-                .collection('classes')
-                .doc(value.docs[0].id)
-                .collection('notes')
-                .doc()
-                .set({
-              'title': title,
-              'content': content.isEmpty ? null : content,
-              'subject': selectedSubject,
-              'to': sendToAll ? 'All' : selectedStudentName,
-              'files': filesURLs.isEmpty ? null : filesURLs,
-              'datetime': DateTime.now()
-            });
-          }
-        },
-      ).then((value) async {
-        emit(NoteSendSuccessState());
-        if (sendToAll) {
+    if (sendToAll) {
+      try {
+        // Save download URL in Firestore
+        await teacherPath!
+            .collection('classes')
+            .where('name', isEqualTo: selectedClassName)
+            .get()
+            .then(
+          (value) {
+            if (value.docs.isNotEmpty) {
+              teacherPath!
+                  .collection('classes')
+                  .doc(value.docs[0].id)
+                  .collection('notes')
+                  .doc()
+                  .set({
+                'title': title,
+                'content': content.isEmpty ? null : content,
+                'subject': selectedSubject,
+                'to': 'All',
+                'from': teacherName,
+                'files': filesURLs.isEmpty ? null : filesURLs,
+                'datetime': DateTime.now()
+              });
+            }
+          },
+        ).then((value) async {
+          emit(NoteSendSuccessState());
+
           print('send to class');
           NotificationHelper.sendNotification(
               title: 'Class Note',
               body: title,
               receiverToken: '/topics/$selectedClassName');
-        } else {
-          String parentId = students
-              .where((element) => element.name == selectedStudentName)
-              .toList()[0]
-              .parent!;
-          String? deviceToken = await getDeviceToken(parentId);
-          if (deviceToken != null) {
-            NotificationHelper.sendNotification(
-                title: 'Class Note', body: title, receiverToken: deviceToken);
-          }
+
+          filesURLs = {};
+          uploadFileInfos = [];
+        }).catchError((error) {
+          print(error.toString());
+          emit(NoteSendErrorState());
+        });
+      } catch (e) {
+        print(
+            'Error uploading file to Firebase Storage and saving URL in Firestore: $e');
+      }
+    } else {
+      selectedStudents.forEach((studentReceiver) async {
+        try {
+          // Save download URL in Firestore
+          await teacherPath!
+              .collection('classes')
+              .where('name', isEqualTo: selectedClassName)
+              .get()
+              .then(
+            (value) {
+              if (value.docs.isNotEmpty) {
+                value.docs[0].reference.collection('notes').doc().set({
+                  'title': title,
+                  'content': content.isEmpty ? null : content,
+                  'subject': selectedSubject,
+                  'to': studentReceiver,
+                  'from': teacherName,
+                  'files': filesURLs.isEmpty ? null : filesURLs,
+                  'datetime': DateTime.now()
+                });
+              }
+            },
+          ).then((value) async {
+            emit(NoteSendSuccessState());
+
+            String parentId = students
+                .where((element) => element.name == studentReceiver)
+                .toList()[0]
+                .parent!;
+            String? deviceToken = await getDeviceToken(parentId);
+            if (deviceToken != null) {
+              NotificationHelper.sendNotification(
+                  title: 'Class Note', body: title, receiverToken: deviceToken);
+            }
+
+            filesURLs = {};
+            uploadFileInfos = [];
+          }).catchError((error) {
+            print(error.toString());
+            emit(NoteSendErrorState());
+          });
+        } catch (e) {
+          print(
+              'Error uploading file to Firebase Storage and saving URL in Firestore: $e');
         }
-        filesURLs = {};
-        uploadFileInfos = [];
-      }).catchError((error) {
-        print(error.toString());
-        emit(NoteSendErrorState());
       });
-    } catch (e) {
-      print(
-          'Error uploading file to Firebase Storage and saving URL in Firestore: $e');
     }
   }
 
@@ -767,23 +791,315 @@ class TeacherCubit extends Cubit<TeacherStates> {
     return null;
   }
 
+  List<NoteModel>? notes;
+  Future<void> filterNotesByClass(dynamic className) async{
+    try {
+      notes = [];
+      emit(GetNotesByClassLoadingState());
+      selectedClassName = className;
+      await teacherPath!
+          .collection('classes')
+          .where('name', isEqualTo: className)
+          .get()
+          .then((value) async{
+        if (value.docs.isNotEmpty) {
+          await value.docs[0].reference
+              .collection('notes')
+              .where('from', isEqualTo: teacherName)
+              .get()
+              .then((value) {
+            value.docs.forEach((element) {
+              notes!.add(NoteModel.fromMap(element.data(), id: element.id));
+            });
+            print(notes);
+            print(value.docs.length);
+            emit(GetNotesByClassSuccessState());
+          }).catchError((error) {
+            emit(GetNotesByClassErrorState());
+            print(error.toString());
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+      emit(SomethingWentWrong());
+    }
+  }
+
+  void resetSelection() {
+    notes = null;
+    examResults = null;
+    selectedClassName = null;
+    selectedStudents = [];
+    selectedSubject = null;
+  }
+
+  void deleteNote(
+      {required String noteId,
+      required Map<String, dynamic>? noteFiles}) async {
+    emit(DeleteNotesByClassLoadingState());
+    // don't forget to delete files
+    await teacherPath!
+        .collection('classes')
+        .doc(selectedClassName)
+        .collection('notes')
+        .doc(noteId)
+        .delete()
+        .then((value) async {
+      emit(DeleteNotesByClassSuccessState());
+      if (noteFiles != null) {
+        noteFiles.forEach((fileName, fileURL) async {
+          try {
+            await firebase_storage.FirebaseStorage.instanceFor(
+                    bucket: 'smartschool-6aee1.appspot.com')
+                .refFromURL(fileURL)
+                .delete()
+                .then((value) {
+              print('File deleted');
+            }).catchError((error) {
+              print(error.toString());
+            });
+          } on FirebaseException catch (e) {
+            // Handle the Firebase exception
+            print('Firebase error: $e');
+          } catch (e) {
+            // Handle other exceptions
+            print('Error: $e');
+          }
+        });
+      }
+
+      await filterNotesByClass(selectedClassName);
+    }).catchError((error) {
+      emit(DeleteNotesByClassErrorState());
+    });
+  }
+
   void signOut() {
     CacheHelper.removeData(key: 'id').then((value) {
       CacheHelper.removeData(key: 'role');
       userID = null;
       userRole = null;
+      teacherPath = null;
+      teacher = null;
       emit(UserSignOutSuccessState());
       _database.close();
     });
   }
 
+  Future<void> downloadTemplate() async {
+    emit(DownloadGradeTemplateLoadingState());
+    if (await Permission.storage.request().isGranted) {
+      try {
+        // Create an instance of the Excel package
+        if (selectedClassName != null) {
+          var excel = Excel.createExcel();
 
+          // Add a sheet to the excel file
+          var sheet = excel[excel.getDefaultSheet()!];
 
-  void downloadTemplate() {
-    // TODO: Implement download logic
+          // Add headers to the sheet
+          sheet.updateCell(CellIndex.indexByString("A1"), "ID");
+          sheet.updateCell(CellIndex.indexByString("B1"), "Name");
+          sheet.updateCell(CellIndex.indexByString("C1"), "Grades");
+
+          // Add data to the sheet
+          for (var i = 0; i < students.length; i++) {
+            sheet.updateCell(
+                CellIndex.indexByString("A${i + 2}"), students[i].id);
+            sheet.updateCell(
+                CellIndex.indexByString("B${i + 2}"), students[i].name);
+            sheet.updateCell(
+                CellIndex.indexByString("C${i + 2}"), ""); // Empty grade column
+          }
+          const filePath = "/storage/emulated/0/Download";
+          final fileName = '${selectedClassName}_grade_template.xlsx';
+          print("i'm here");
+          File('$filePath/$fileName').writeAsBytesSync(excel.encode()!);
+
+          emit(DownloadGradeTemplateSuccessState());
+        } else {
+          emit(ClassNotSelectedState());
+        }
+      } catch (e) {
+        emit(DownloadGradeTemplateErrorState());
+        print(e.toString());
+      }
+    } else {
+      emit(DownloadGradeTemplateErrorState());
+      await requestWritePermission();
+    }
   }
 
-  void uploadGradesCsv() {
-    // TODO: Implement upload logic
+  String? gradeFilePath;
+  void deleteGradeFile() {
+    gradeFilePath = null;
+    emit(DeleteGradeFileSuccessState());
+  }
+
+  Future<void> selectGradesFile() async {
+    try {
+      gradeFilePath =
+          await pickFile(type: FileType.custom, allowedExtensions: ['xlsx']);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Map<String?, dynamic> grades = {};
+  void checkFileFormatAndUploadGrades(
+      {required String examType, required double maximumAchievableGrade}) {
+    try {
+      if (gradeFilePath != null) {
+        var bytes = File(gradeFilePath!).readAsBytesSync();
+        final excel = Excel.decodeBytes(bytes);
+        excel.tables.forEach((key, value) async{
+          final rows = value.rows;
+          if (rows.isNotEmpty) {
+            final firstRow = rows.first;
+
+            // Check if headers are present and in the correct order
+            if (firstRow.length >= 3 &&
+                firstRow[0]?.value?.toString().toLowerCase() == 'id' &&
+                firstRow[1]?.value?.toString().toLowerCase() == 'name' &&
+                firstRow[2]?.value?.toString().toLowerCase() == 'grades') {
+              // Check if all values under the columns are not empty
+              for (int i = 1; i < rows.length; i++) {
+                final row = rows[i];
+                if (row.length >= 3 &&
+                    row[0]?.value?.toString().isEmpty == false &&
+                    row[1]?.value?.toString().isEmpty == false &&
+                    row[2]?.value?.toString().isEmpty == false) {
+                  grades[row[0]?.value?.toString()] = row[2]?.value;
+                  // Values are not empty, continue processing
+                  // ...
+                } else {
+                  // Handle the case where empty values are found
+                  print(
+                      'Error: Empty values found in ID, Name, or Grades columns.');
+                  return;
+                }
+              }
+              // If all checks pass, proceed with further actions
+              // ...
+              emit(GradeFileValidationSuccess());
+              print(grades);
+              await uploadGrades(
+                  examType: examType,
+                  maximumAchievableGrade: maximumAchievableGrade);
+            } else {
+              // Handle the case where headers are missing or in incorrect order
+              print('Error: Grade template headers do not match.');
+              grades = {};
+              return;
+            }
+          } else {
+            // Handle the case where the sheet is empty
+            print('Error: Grade template is empty.');
+            grades = {};
+            return;
+          }
+        });
+      } else {
+        emit(GradeFileNotSelectedState());
+      }
+    } catch (e) {
+      print(e.toString());
+      grades = {};
+      emit(GradeFileValidationError());
+    }
+  }
+
+  Future<void> uploadGrades(
+      {required String examType,
+      required double maximumAchievableGrade}) async {
+    try {
+      emit(UploadGradesLoadingState());
+      await teacherPath!
+          .collection('classes')
+          .doc(selectedClassName)
+          .collection('exams results')
+          .doc()
+          .set({
+        'teacher': teacherName,
+        'subject': selectedSubject,
+        'exam_type': examType,
+        'datetime': DateTime.now(),
+        'maximum_achievable_grade': maximumAchievableGrade,
+        'grades': grades
+      }).then((value)async {
+        emit(UploadGradesSuccessState());
+        gradeFilePath = null;
+        await NotificationHelper.sendNotification(
+            title: 'New Grades Available',
+            body:
+                "We have just sent your child's grades. Tap to view the latest results.",
+            receiverToken: '/topics/$selectedClassName');
+      }).catchError((error) {
+        emit(UploadGradesErrorState());
+      });
+    } catch (e) {
+      print(e.toString());
+      emit(UploadGradesErrorState());
+    }
+  }
+
+  List<ExamResults>? examResults;
+  Future<void> filterExamResultsByClass(dynamic className)async {
+    try {
+      emit(GetGradesLoadingState());
+      examResults = [];
+      selectedClassName = className;
+
+      await teacherPath!
+          .collection('classes')
+          .where('name', isEqualTo: className)
+          .get()
+          .then((value) async{
+        if (value.docs.isNotEmpty) {
+          await value.docs[0].reference
+              .collection('exams results')
+              .where('teacher', isEqualTo: teacherName)
+              .get()
+              .then((value) async {
+            value.docs.forEach((element) {
+              examResults!
+                  .add(ExamResults.fromMap(element.data(), res_id: element.id));
+            });
+            print(examResults);
+            print(value.docs.length);
+            emit(GetGradesSuccessState());
+            await getStudentsNames();
+          }).catchError((error) {
+            emit(GetGradesErrorState());
+            print(error.toString());
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+      emit(SomethingWentWrong());
+    }
+  }
+
+  void deleteExamResults({required String examResultsId}) async {
+    try {
+      emit(DeleteExamResultsLoadingState());
+      await teacherPath!
+          .collection('classes')
+          .doc(selectedClassName)
+          .collection('exams results')
+          .doc(examResultsId)
+          .delete()
+          .then((value) async{
+        emit(DeleteExamResultsSuccessState());
+        await filterExamResultsByClass(selectedClassName);
+      }).catchError((error) {
+        emit(DeleteExamResultsErrorState());
+      });
+    } catch (e) {
+      print(e.toString());
+      emit(DeleteExamResultsErrorState());
+    }
   }
 }

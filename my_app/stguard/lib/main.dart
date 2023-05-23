@@ -21,7 +21,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
 
@@ -65,20 +65,15 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) =>
-              ParentCubit()
-                ..createDatabase()
-                ..getMyStudents()
-                ..getParentInfo(),
+              ParentCubit(),
         ),
         BlocProvider(
           create: (context) => TeacherCubit()
-            ..initDatabase()
-            ..getTeacherPath(),
+            ,
         ),
         BlocProvider(
             create: (context) => CanteenCubit()
-              ..getCanteenInfo()
-              ..getCanteenPath())
+              )
       ],
       child: MaterialApp(
         home: startScreen,
@@ -86,6 +81,13 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           appBarTheme: const AppBarTheme(color: defaultColor),
           primaryColor: defaultColor,
+          textTheme: TextTheme(
+          titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(fontFamily: 'OpenSans'),
+          titleMedium: Theme.of(context).textTheme.titleMedium!.copyWith(fontFamily: 'OpenSans'),
+          headlineSmall: Theme.of(context).textTheme.headlineSmall!.copyWith(fontFamily: 'OpenSans', fontWeight: FontWeight.w700),
+          headlineMedium: Theme.of(context).textTheme.headlineMedium!.copyWith(fontFamily: 'OpenSans'),
+          bodyLarge:Theme.of(context).textTheme.bodyLarge!.copyWith(fontFamily: 'OpenSans'),
+          bodySmall:Theme.of(context).textTheme.bodySmall!.copyWith(fontFamily: 'OpenSans', fontSize: 15) )
         ),
       ),
     );

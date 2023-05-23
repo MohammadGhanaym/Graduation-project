@@ -27,7 +27,7 @@ class ProcessedScreen extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(20),
-                  height: 200,
+                  height: 210,
                   width: double.infinity,
                   decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(

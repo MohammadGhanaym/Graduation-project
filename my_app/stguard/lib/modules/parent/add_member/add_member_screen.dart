@@ -19,6 +19,7 @@ class AddMember extends StatelessWidget {
           ShowToast(
               message: 'Member is added successfully',
               state: ToastStates.SUCCESS);
+              
           navigateAndFinish(context, ParentHomeScreen());
         } else if (state is FamilyMemberAlreadyExisted) {
           ShowToast(message: state.message!, state: ToastStates.WARNING);

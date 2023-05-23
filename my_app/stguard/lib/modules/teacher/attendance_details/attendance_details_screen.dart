@@ -1,7 +1,6 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
 import 'package:stguard/models/student_attendance.dart';
@@ -20,7 +19,9 @@ class AttendanceDetailsScreen extends StatelessWidget {
         TeacherCubit.get(context).getLessonAttendance(lesson.name);
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Attendance Details'),
+            elevation: 0,
+            title:  Text('Attendance Details',style: Theme.of(context).textTheme.titleLarge!
+              .copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
             centerTitle: true,
           ),
           body: BlocConsumer<TeacherCubit, TeacherStates>(
@@ -47,17 +48,21 @@ class AttendanceDetailsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
+                       Container(
+                          
+                          decoration: const BoxDecoration(
+                            color: defaultColor,
+                            borderRadius: BorderRadiusDirectional.only(bottomEnd: Radius.circular(20), bottomStart: Radius.circular(20))),
+                          child:  Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold, color: Colors.white),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -66,65 +71,41 @@ class AttendanceDetailsScreen extends StatelessWidget {
                               ),
                               Row(
                                 children: [
-                                  SizedBox(
-                                    width: 120,
-                                    child: Text(
-                                      lesson.grade,
-                                      style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
+                                  Text(
+                                    lesson.grade,
+                                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),Spacer(),
                                   const SizedBox(
-                                    width: 10,
+                                    width: 20,
                                   ),
                                   Text(
                                       getDate(lesson.datetime,
-                                          format: 'dd/MM/yyyy, HH:mm a'),
-                                      style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500))
+                                          format: 'd MMM yy, hh:mm a'),
+                                          overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                        fontWeight: FontWeight.bold, color: Colors.white))
                                 ],
                               ),
                               const SizedBox(
                                 height: 30,
                               ),
+                              
                               Center(
                                 child: InkWell(
-                                    child: const Image(
-                                        width: 40,
-                                        height: 40,
-                                        image: AssetImage(
-                                            'assets/images/excel.png')),
+                                    child: const Card(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Image(
+                                            width: 40,
+                                            height: 40,
+                                            image: AssetImage(
+                                                'assets/images/excel.png')),
+                                      ),
+                                    ),
                                     onTap: () async {
-                                      if (await Permission.storage.isDenied) {
-                                        print(Permission.storage.isDenied);
-                                        await showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: const Text(
-                                                "Storage Permission"),
-                                            content: const Text(
-                                                "This app requires storage permission to save files."),
-                                            actions: [
-                                              TextButton(
-                                                child: const Text("OK"),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                              TextButton(
-                                                child:
-                                                    const Text("Open settings"),
-                                                onPressed: () async {
-                                                  // Open the app settings to let the user grant the permission
-                                                  openAppSettings();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      } else {
+                                    
                                         TeacherCubit.get(context)
                                             .getSelectedFolder()
                                             .then((path) {
@@ -197,7 +178,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                           Expanded(
                                                             child: TextButton(
                                                               child: const Text(
-                                                                  "Downloads"),
+                                                                  "Download"),
                                                               onPressed: () {
                                                                 // Save the file to the downloads directory
                                                                 String
@@ -269,36 +250,30 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                             );
                                           }
                                         });
-                                      }
+                                      
                                     }),
                               ),
                             ],
                           ),
                         ),
+                        ),
                         const SizedBox(
                           height: 5,
                         ),
-                        const Divider(
-                          color: defaultColor,
-                          thickness: 2,
-                        ),
-                        SizedBox(
-                          height: 300,
-                          child: ListView.separated(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) =>
-                                  AttendanceDetailsCard(
-                                      studentDetails: TeacherCubit.get(context)
-                                          .lessonAttendance[index]),
-                              separatorBuilder: (context, index) => Divider(
-                                    color: defaultColor.withOpacity(0.8),
-                                    thickness: 1,
-                                  ),
-                              itemCount: TeacherCubit.get(context)
-                                  .lessonAttendance
-                                  .length),
-                        ),
+                    
+                        ListView.separated(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) =>
+                                AttendanceDetailsCard(
+                                    studentDetails: TeacherCubit.get(context)
+                                        .lessonAttendance[index]),
+                            separatorBuilder: (context, index) => const Divider(
+                                  thickness: 1,
+                                ),
+                            itemCount: TeacherCubit.get(context)
+                                .lessonAttendance
+                                .length),
                       ],
                     ),
                   ),

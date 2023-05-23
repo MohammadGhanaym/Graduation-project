@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/credit_card_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -139,18 +140,33 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
+  bool studentDataLoading = true;
+
   Future<void> listentoNewData() async {
     emit(GetStudentDataLoading());
+
     studentsData = {};
-    cancelListeners();
-    if (studentsPaths.isNotEmpty) {
-      studentsPaths.forEach((stId, stDoc) async {
-        await getStudentsData(stId, stDoc);
-        await addNewAttendance(stId, stDoc);
-        await addNewTranscation(stId, stDoc);
-      });
-    } else {
-      emit(GetStudentDataError());
+
+    try {
+      studentDataLoading = true;
+      cancelListeners();
+
+      if (studentsPaths.isNotEmpty) {
+        await Future.forEach(studentsPaths.entries, (entry) async {
+          final stId = entry.key;
+          final stDoc = entry.value;
+
+          await getStudentsData(stId, stDoc);
+          await addNewAttendance(stId, stDoc);
+          await addNewTranscation(stId, stDoc);
+        });
+      } else {
+        emit(GetStudentDataError());
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      studentDataLoading = false;
     }
   }
 
@@ -236,13 +252,14 @@ class ParentCubit extends Cubit<ParentStates> {
                   .doc(id),
               {'country': pickedCountry!.id, 'school': pickedSchool!.id});
           batch.commit().then((value) async {
-            emit(AddFamilyMemberSuccess());
-            await getMyStudents();
             FirebaseMessaging.instance
                 .subscribeToTopic(st.docs[0]['class_name'])
                 .then((value) {
               print('subscribed to ${st.docs[0]['class_name']}');
+            }).catchError((error) {
+              print(error.toString());
             });
+            emit(AddFamilyMemberSuccess());
           }).catchError((error) {
             print(error.toString());
             emit(AddFamilyMemberError());
@@ -349,10 +366,10 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   List<ActivityModel> activities = [];
-
+  bool activityLoading = true;
   Future<void> getDataFromActivityTable() async {
     print('getDataFromActivityTable');
-
+    activityLoading = true;
     emit(ParentGetDataBaseLoadingState());
     if (studentsPaths.isNotEmpty) {
       //SELECT * FROM student_activity ORDER BY date DESC
@@ -374,12 +391,15 @@ class ParentCubit extends Cubit<ParentStates> {
         print(activities);
 
         emit(ParentGeStudentActivitySuccessState());
+        activityLoading = false;
       }).catchError((error) {
         emit(ParentGeStudentActivityErrorState());
+        activityLoading = false;
       });
     } else {
       activities = [];
       emit(ParentGeStudentActivityErrorState());
+      activityLoading = false;
     }
   }
 
@@ -400,25 +420,51 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
   StudentLocationModel? location;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? locationListener;
+  GoogleMapController? mapControllerl;
+  void setMapController(GoogleMapController controller) {
+    mapControllerl = controller;
+  }
+
+
   Future<void> getLocation(String id) async {
+    location = null;
     emit(GetStudentLocationLoadingState());
-    await studentsPaths[id]!.collection('Location').get().then((value) {
-      location = StudentLocationModel.fromJson(value.docs[0].data());
-      emit(GetStudentLocationSuccessState());
-    }).catchError((error) {
-      print(error);
+    locationListener = studentsPaths[id]!
+        .collection('Location')
+        .doc('location')
+        .snapshots()
+        .listen((event) {
+      if (event.exists) {
+        if (event.data() != null) {
+          location = StudentLocationModel.fromJson(event.data()!);
+          if (mapControllerl != null) {
+            mapControllerl!
+                .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+              target: LatLng(location!.lat, location!.long),
+              zoom: 14.4746,
+            )));
+          }
+
+          emit(GetStudentLocationSuccessState());
+        }
+      }
     });
   }
 
   void openMap({required double lat, required double long}) async {
-    final availableMaps = await MapLauncher.installedMaps;
-    print(
-        availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
+    try {
+      final availableMaps = await MapLauncher.installedMaps;
+      print(
+          availableMaps); // [AvailableMap { mapName: Google Maps, mapType: google }, ...]
 
-    await availableMaps.first.showMarker(
-      coords: Coords(lat, long),
-      title: "Location",
-    );
+      await availableMaps.first.showMarker(
+        coords: Coords(lat, long),
+        title: "Location",
+      );
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   List<ActivityModel> attendance_history = [];
@@ -453,6 +499,8 @@ class ParentCubit extends Cubit<ParentStates> {
     active = st.parent;
     await getLocation(st.id);
     await getClassNotes(st);
+    settingsVisibility = true;
+    isPaired = true;
   }
 
   bool isPaired = true; // child settings
@@ -525,8 +573,6 @@ class ParentCubit extends Cubit<ParentStates> {
       print(studentsPaths.keys.toList());
 
       emit(UnpairDigitalIDSuccess());
-      await getMyStudents();
-      //await refreshBackgroundService();
     }).catchError((error) {
       print(error);
       emit(UnpairDigitalIDError());
@@ -729,7 +775,7 @@ class ParentCubit extends Cubit<ParentStates> {
     });
   }
 
-  List<ClassNote> notes = [];
+  List<NoteModel> notes = [];
   Future<void> getClassNotes(StudentModel st) async {
     notes = [];
     emit(GetNotesLoadingState());
@@ -752,10 +798,12 @@ class ParentCubit extends Cubit<ParentStates> {
               if (value.docs.isNotEmpty) {
                 print('note here4');
                 value.docs.forEach((element) {
-                  notes.add(ClassNote.fromMap(element.data()));
+                  notes.add(NoteModel.fromMap(element.data()));
                 });
                 print(notes);
                 emit(GetNotesSuccessState());
+              } else {
+                emit(GetNotesErrorState());
               }
             })
             .catchError((error) {
@@ -860,17 +908,15 @@ class ParentCubit extends Cubit<ParentStates> {
     }
   }
 
-  @override
-  Future<void> close() {
-    // TODO: implement close
-    return super.close();
-  }
-
   void signOut() async {
     await CacheHelper.removeData(key: 'id').then((value) async {
       cancelListeners();
       userID = null;
       userRole = null;
+      parent = null;
+      studentsPaths.clear();
+      schoolPaths.clear();
+      activities.clear();
       await CacheHelper.removeData(key: 'role');
       emit(UserSignOutSuccessState());
       database.close();

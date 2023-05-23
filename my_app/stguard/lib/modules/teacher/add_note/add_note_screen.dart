@@ -1,20 +1,21 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
+import 'package:multiselect/multiselect.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
-import 'package:stguard/layout/teacher/teacher_home_screen.dart';
-import 'package:stguard/modules/teacher/add_new_task/add_new_task.dart';
 import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/styles/themes.dart';
 
 class AddNoteScreen extends StatelessWidget {
+ 
   AddNoteScreen({super.key});
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
+
     return BlocConsumer<TeacherCubit, TeacherStates>(
       listener: (context, state) {
         if (state is NoteSendSuccessState) {
@@ -22,14 +23,17 @@ class AddNoteScreen extends StatelessWidget {
               message: 'Note sent successfully', state: ToastStates.SUCCESS);
           titleController.clear();
           contentController.clear();
-          navigateAndFinish(context, const TeacherHomeScreen());
         }
       },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
             
-            title: const Text('Send Note'),
+            title:  Text('Send Note',
+            style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(color: Colors.white),),
             centerTitle: true,
           ),
           body: SingleChildScrollView(
@@ -40,7 +44,7 @@ class AddNoteScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Title', style: Theme.of(context).textTheme.headline5),
+                    Text('Title', style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(
                       height: 10,
                     ),
@@ -59,7 +63,7 @@ class AddNoteScreen extends StatelessWidget {
                       height: 20,
                     ),
                     Text('Content (optional)',
-                        style: Theme.of(context).textTheme.headline5),
+                        style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(
                       height: 10,
                     ),
@@ -79,8 +83,8 @@ class AddNoteScreen extends StatelessWidget {
                     Column(
                       children: [
                         InkWell(
-                          onTap: TeacherCubit.get(context).pickFile,
-                          child: Container(
+                          onTap: TeacherCubit.get(context).pickAndUploadFile,
+                          child: SizedBox(
                             height: 55,
                             child: Row(
                               children: const [
@@ -120,10 +124,12 @@ class AddNoteScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Subject',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 10),
-                        DropdownButton<String>(
+                        DropdownButtonFormField<String>(
+                          borderRadius: BorderRadius.circular(10),
+                          hint: Text('Select a subject', style: Theme.of(context).textTheme.bodySmall,),
                           value: TeacherCubit.get(context).selectedSubject,
                           onChanged: (value) {
                             TeacherCubit.get(context).selectSubject(value);
@@ -133,33 +139,45 @@ class AddNoteScreen extends StatelessWidget {
                               .map((subjectName) => DropdownMenuItem<String>(
                                   value: subjectName, child: Text(subjectName)))
                               .toList(),
+                              decoration: const InputDecoration.collapsed(
+                            hintText: 'Select a class'),
                           isExpanded: true,
-                          underline: Container(
-                            height: 1,
-                            color: Colors.black54,
-                          ),
+                        validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                            return 'Subject must not be empty';
+                          }
+
+                          return null;
+                        },
                         ),
                         const SizedBox(height: 20),
                         Text(
                           'Class',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 10),
-                        DropdownButton<String>(
+                        DropdownButtonFormField<String>(
+                          borderRadius: BorderRadius.circular(10),
+                          hint: Text('Select a class', style: Theme.of(context).textTheme.bodySmall,),
                           value: TeacherCubit.get(context).selectedClassName,
+                          decoration: const InputDecoration.collapsed(
+                          hintText: 'Select a class'),
                           onChanged: (value) {
                             TeacherCubit.get(context).selectClass(value);
+                          },validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                            return 'Class must not be empty';
+                          }
+
+                          return null;
                           },
                           items: TeacherCubit.get(context)
-                              .grades
+                              .classes
                               .map((className) => DropdownMenuItem<String>(
                                   value: className, child: Text(className)))
                               .toList(),
                           isExpanded: true,
-                          underline: Container(
-                            height: 1,
-                            color: Colors.black54,
-                          ),
+                          
                         ),
                         const SizedBox(height: 20),
                         CheckboxListTile(
@@ -179,32 +197,21 @@ class AddNoteScreen extends StatelessWidget {
                                 const SizedBox(height: 10),
                                 Text(
                                   'Student',
-                                  style: Theme.of(context).textTheme.headline5,
+                                  style: Theme.of(context).textTheme.headlineSmall,
                                 ),
                                 const SizedBox(height: 10),
                                 ConditionalBuilder(
                                   condition: TeacherCubit.get(context)
                                       .students
                                       .isNotEmpty,
-                                  builder: (context) => DropdownButton<String>(
-                                    value: TeacherCubit.get(context)
-                                        .selectedStudentName,
-                                    onChanged: (value) {
-                                      TeacherCubit.get(context)
-                                          .selectStudent(value);
-                                    },
-                                    items: TeacherCubit.get(context)
-                                        .students
-                                        .map((studentName) =>
-                                            DropdownMenuItem<String>(
-                                                value: studentName.name,
-                                                child: Text(studentName.name!)))
-                                        .toList(),
-                                    isExpanded: true,
-                                    underline: Container(
-                                      height: 1,
-                                      color: Colors.black54,
-                                    ),
+                                  builder: (context) => DropDownMultiSelect<String>(
+                                    hint: Text('Select Student', style: Theme.of(context).textTheme.bodySmall,),
+                                    selectedValues: TeacherCubit.get(context)
+                                        .selectedStudents,
+                                    onChanged: TeacherCubit.get(context).getSelectedStudents,
+                                    options: TeacherCubit.get(context).students.map((e) => e.name!).toList(),
+                                        
+                                   
                                   ),
                                   fallback: (context) =>
                                       const Text('No Students Found'),
@@ -222,6 +229,7 @@ class AddNoteScreen extends StatelessWidget {
                     DefaultButton(
                       showCircularProgressIndicator: state is NoteSendLoadingState,
                       text: 'Send',
+                      color: defaultColor.withOpacity(0.8),
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
                           TeacherCubit.get(context).sendNote(

@@ -27,11 +27,11 @@ class GetSchoolsErrorState extends TeacherStates {
   String error;
   GetSchoolsErrorState(this.error);
 }
-class SelectGradeSuccess extends TeacherStates {}
+class SelectClassSuccess extends TeacherStates {}
 
-class GetGradesSuccessState extends TeacherStates {}
+class GetClassesSuccessState extends TeacherStates {}
 
-class GetGradesLoadingState extends TeacherStates {}
+class GetClassesLoadingState extends TeacherStates {}
 class GetSchoolsSucessState extends TeacherStates {}
 
 class AddTeacherLoadingState extends TeacherStates {}
@@ -52,7 +52,7 @@ class GetUserInfoSuccess extends TeacherStates {}
 
 class GetUserInfoError extends TeacherStates {}
 
-class GetGradesErrorState extends TeacherStates {}
+class GetClassesErrorState extends TeacherStates {}
 
 class SwitchScreenState extends TeacherStates {}
 
@@ -118,3 +118,41 @@ class DeleteUploadedFile extends TeacherStates{}
 
 class UserSignOutSuccessState extends TeacherStates{}
 class UserSignOutErrorState extends TeacherStates{}
+
+class SelectStudentState extends TeacherStates{}
+
+class SomethingWentWrong extends TeacherStates{}
+
+class GetNotesByClassLoadingState extends TeacherStates{}
+class GetNotesByClassSuccessState extends TeacherStates{}
+class GetNotesByClassErrorState extends TeacherStates{}
+
+class DeleteNotesByClassLoadingState extends TeacherStates{}
+class DeleteNotesByClassSuccessState extends TeacherStates{}
+class DeleteNotesByClassErrorState extends TeacherStates{}
+
+class DeleteGradeFileSuccessState extends TeacherStates{}
+
+class DownloadGradeTemplateLoadingState extends TeacherStates{}
+class DownloadGradeTemplateSuccessState extends TeacherStates{}
+class DownloadGradeTemplateErrorState extends TeacherStates{}
+
+class ClassNotSelectedState extends TeacherStates{}
+
+class GradeFileValidationSuccess extends TeacherStates{}
+
+class GradeFileValidationError extends TeacherStates{}
+class GradeFileNotSelectedState extends TeacherStates{}
+
+class UploadGradesLoadingState extends TeacherStates{}
+class UploadGradesSuccessState extends TeacherStates{}
+class UploadGradesErrorState extends TeacherStates{}
+
+
+class GetGradesLoadingState extends TeacherStates{}
+class GetGradesSuccessState extends TeacherStates{}
+class GetGradesErrorState extends TeacherStates{}
+
+class DeleteExamResultsLoadingState extends TeacherStates{}
+class DeleteExamResultsSuccessState extends TeacherStates{}
+class DeleteExamResultsErrorState extends TeacherStates{}

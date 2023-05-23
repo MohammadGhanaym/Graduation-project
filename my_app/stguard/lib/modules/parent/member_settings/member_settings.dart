@@ -4,6 +4,7 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/layout/parent/parent_home_screen.dart';
 import 'package:stguard/models/student_model.dart';
+import 'package:stguard/modules/parent/map/map_screen.dart';
 import 'package:stguard/modules/parent/notes_list/notes_list.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
@@ -20,8 +21,6 @@ class MemberSettingsScreen extends StatelessWidget {
       listener: (context, state) {
         if (state is UnpairDigitalIDSuccess) {
           navigateAndFinish(context, ParentHomeScreen());
-          ParentCubit.get(context).showSettings();
-          ParentCubit.get(context).changeSettingsVisibility();
         }
         if (state is UpdateCalorieSuccessState) {
           Navigator.pop(context);
@@ -40,7 +39,14 @@ class MemberSettingsScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              title: Text("${student!.name!.split(' ')[0]}'s settings"),
+              title: Text(
+                "${student!.name!.split(' ')[0]}'s Settings",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge!
+                    .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             bottomSheet: ParentCubit.get(context).isBottomSheetShown
                 ? BottomSheet(
@@ -93,14 +99,18 @@ class MemberSettingsScreen extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.baseline,
                                       children: [
-                                        const SizedBox(
+                                        SizedBox(
                                             width: 160,
                                             child: Text(
                                               'Digital ID Number',
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium!
+                                                  .copyWith(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 18),
                                             )),
                                         const SizedBox(
                                           width: 10,
@@ -131,10 +141,14 @@ class MemberSettingsScreen extends StatelessWidget {
                                                           null
                                                   ? 'Activated'
                                                   : 'Deactivated',
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium!
+                                                  .copyWith(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 18),
                                             )),
                                         const SizedBox(
                                           width: 50,
@@ -187,8 +201,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                 children: [
                                   InkWell(
                                     onTap: () => navigateTo(
-                                        context,
-                                        const NotesListsScreen()),
+                                        context, const NotesListsScreen()),
                                     child: SettingsCard(
                                         condition:
                                             state is! GetNotesLoadingState,
@@ -200,25 +213,28 @@ class MemberSettingsScreen extends StatelessWidget {
                                                     CrossAxisAlignment.center,
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
-                                                children: const [
-                                                  ImageIcon(
+                                                children: [
+                                                  const ImageIcon(
                                                     AssetImage(
                                                         'assets/images/notepad.png'),
                                                     size: 30,
                                                     color: defaultColor,
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
                                                     'Class Notes',
-                                                    style: TextStyle(
-                                                        fontSize: 25,
-                                                        fontWeight:
-                                                            FontWeight.w500),
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleLarge!
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
                                                   ),
-                                                  Spacer(),
-                                                  Icon(
+                                                  const Spacer(),
+                                                  const Icon(
                                                     Icons.arrow_forward_ios,
                                                     color: defaultColor,
                                                   )
@@ -232,14 +248,14 @@ class MemberSettingsScreen extends StatelessWidget {
                                               .isNotEmpty)
                                             Padding(
                                               padding: const EdgeInsets.only(
-                                                  bottom: 8.0),
+                                                  bottom: 8.0, right: 8),
                                               child: Row(
                                                 children: [
                                                   Text(
                                                     'Recent',
                                                     style: Theme.of(context)
                                                         .textTheme
-                                                        .headline6,
+                                                        .titleLarge,
                                                   ),
                                                   const Spacer(),
                                                   Text(
@@ -250,7 +266,8 @@ class MemberSettingsScreen extends StatelessWidget {
                                                         TextOverflow.ellipsis,
                                                     style: Theme.of(context)
                                                         .textTheme
-                                                        .bodyLarge,
+                                                        .bodyLarge!
+                                                        .copyWith(fontSize: 15),
                                                   )
                                                 ],
                                               ),
@@ -272,6 +289,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                             CrossAxisAlignment.center,
                                         children: [
                                           const Image(
+                                              color: defaultColor,
                                               width: 30,
                                               height: 30,
                                               image: AssetImage(
@@ -285,22 +303,23 @@ class MemberSettingsScreen extends StatelessWidget {
                                             textBaseline:
                                                 TextBaseline.alphabetic,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 'Location',
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    fontWeight:
-                                                        FontWeight.w500),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge!
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.bold),
                                               ),
                                               const SizedBox(
                                                 width: 20,
                                               ),
-                                              const Text(
+                                              Text(
                                                 'Last Seen',
-                                                style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.w300),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
                                               ),
                                               const SizedBox(
                                                 width: 5,
@@ -329,23 +348,40 @@ class MemberSettingsScreen extends StatelessWidget {
                                         width: 190,
                                         height: 40,
                                         child: OutlinedButton(
-                                          onPressed: () =>
-                                              ParentCubit.get(context).openMap(
-                                                  lat: ParentCubit.get(context)
-                                                      .location!
-                                                      .lat,
-                                                  long: ParentCubit.get(context)
-                                                      .location!
-                                                      .long),
+                                          onPressed: () {
+                                            /* ParentCubit.get(context).openMap(
+                                                lat: ParentCubit.get(context)
+                                                    .location!
+                                                    .lat,
+                                                long: ParentCubit.get(context)
+                                                    .location!
+                                                    .long);*/
+                                            if (ParentCubit.get(context)
+                                                    .location !=
+                                                null) {
+                                              requestLocationPermission().then((value) 
+                                              {
+                                                navigateTo(context, MapScreen());
+                                              });
+                                              
+                                            }
+                                          },
                                           child: Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'Find ${student!.name!.split(' ')[0]}',
-                                                style: const TextStyle(
-                                                    fontSize: 16,
-                                                    color: defaultColor),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyLarge!
+                                                    .copyWith(
+                                                        color: defaultColor
+                                                            .withOpacity(0.8),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        overflow: TextOverflow
+                                                            .ellipsis),
                                               ),
                                             ],
                                           ),
@@ -375,11 +411,14 @@ class MemberSettingsScreen extends StatelessWidget {
                                             const SizedBox(
                                               width: 5,
                                             ),
-                                            const Text(
+                                            Text(
                                               'Spending Limits',
-                                              style: TextStyle(
-                                                  fontSize: 25,
-                                                  fontWeight: FontWeight.w500),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge!
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                             ),
                                             const SizedBox(
                                               width: 10,
@@ -395,7 +434,10 @@ class MemberSettingsScreen extends StatelessWidget {
                                                       BorderRadiusDirectional
                                                           .circular(15)),
                                               child: Text(
-                                                '${ParentCubit.get(context).pocket_money.toInt()} EGP',
+                                                currencyFormat(
+                                                    ParentCubit.get(context)
+                                                        .pocket_money
+                                                        .toInt()),
                                                 style: const TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 12,
@@ -445,13 +487,15 @@ class MemberSettingsScreen extends StatelessWidget {
                                             const SizedBox(
                                               width: 5,
                                             ),
-                                            const Expanded(
+                                            Expanded(
                                               child: Text(
-                                                'Calorie Limit',
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    fontWeight:
-                                                        FontWeight.w500),
+                                                'Calories Limits',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge!
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.bold),
                                               ),
                                             ),
                                             const SizedBox(
@@ -474,10 +518,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                                             style: Theme.of(
                                                                     context)
                                                                 .textTheme
-                                                                .caption!
-                                                                .copyWith(
-                                                                    fontSize:
-                                                                        15),
+                                                                .bodySmall,
                                                           ),
                                                           const SizedBox(
                                                             height: 20,
@@ -547,7 +588,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                             '${ParentCubit.get(context).calorie} kcal',
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .headline5!
+                                                .headlineSmall!
                                                 .copyWith(color: Colors.white),
                                           ),
                                         )
@@ -562,21 +603,24 @@ class MemberSettingsScreen extends StatelessWidget {
                                       card_height: 180,
                                       children: [
                                         Row(
-                                          children: const [
-                                            ImageIcon(
+                                          children: [
+                                            const ImageIcon(
                                               AssetImage(
                                                   'assets/images/blood-drop.png'),
                                               size: 30,
                                               color: defaultColor,
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               width: 5,
                                             ),
                                             Text(
                                               'Allergens',
-                                              style: TextStyle(
-                                                  fontSize: 25,
-                                                  fontWeight: FontWeight.w500),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge!
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                             )
                                           ],
                                         ),

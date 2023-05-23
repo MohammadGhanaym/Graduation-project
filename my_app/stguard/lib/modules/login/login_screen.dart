@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stguard/layout/canteen/cubit/cubit.dart';
-import 'package:stguard/layout/parent/cubit/cubit.dart';
-import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/modules/login/cubit/cubit.dart';
 import 'package:stguard/modules/login/cubit/states.dart';
 import 'package:stguard/modules/register/register_screen.dart';

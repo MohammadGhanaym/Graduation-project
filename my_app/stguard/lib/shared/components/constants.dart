@@ -7,7 +7,7 @@ import 'package:stguard/layout/teacher/teacher_home_screen.dart';
 
 Map<String, Widget> homeScreens = {
   'parent': ParentHomeScreen(),
-  'teacher': const TeacherHomeScreen(),
+  'teacher':  const TeacherHomeScreen(),
   'canteen worker': const CanteenHomeScreen()
 };
 String? userID;
