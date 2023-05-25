@@ -4,7 +4,7 @@ class ExamResults {
   final String subject;
   final String teacher;
   final DateTime datetime;
-  final Map<String, dynamic> grades;
+  final Map<String?, dynamic> grades;
   final id;
   ExamResults({
     required this.examType,

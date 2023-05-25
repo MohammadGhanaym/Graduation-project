@@ -156,3 +156,13 @@ class GetGradesErrorState extends TeacherStates{}
 class DeleteExamResultsLoadingState extends TeacherStates{}
 class DeleteExamResultsSuccessState extends TeacherStates{}
 class DeleteExamResultsErrorState extends TeacherStates{}
+
+class UpdateExamResultsLoadingState extends TeacherStates{}
+class UpdateExamResultsSuccessState extends TeacherStates{}
+class UpdateExamResultsErrorState extends TeacherStates{}
+
+class CheckGradeTemplateFormatState extends TeacherStates{
+  String error;
+  CheckGradeTemplateFormatState(this.error);
+}
+class ModifyGradeSuccessState extends TeacherStates{}

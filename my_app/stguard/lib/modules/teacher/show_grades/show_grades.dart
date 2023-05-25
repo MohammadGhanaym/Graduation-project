@@ -50,14 +50,14 @@ class ExamResultsListScreen extends StatelessWidget {
             ],
           ),
           body: ConditionalBuilder(
-              condition: TeacherCubit.get(context).examResults != null,
+              condition: TeacherCubit.get(context).ClassExamsResults != null,
               builder: (context) => state is GetGradesLoadingState
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
                   : ConditionalBuilder(
                       condition:
-                          TeacherCubit.get(context).examResults!.isNotEmpty,
+                          TeacherCubit.get(context).ClassExamsResults!.isNotEmpty,
                       builder: (context) => SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
@@ -65,7 +65,7 @@ class ExamResultsListScreen extends StatelessWidget {
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             itemCount:
-                                TeacherCubit.get(context).examResults!.length,
+                                TeacherCubit.get(context).ClassExamsResults!.length,
                             itemBuilder: (context, index) {
                               return ExamResultItem(
                                   teacherOnTap: () {
@@ -85,7 +85,7 @@ class ExamResultsListScreen extends StatelessWidget {
                                         TeacherCubit.get(context)
                                             .deleteExamResults(
                                                 examResultsId: TeacherCubit.get(context)
-                                                    .examResults![index]
+                                                    .ClassExamsResults![index]
                                                     .id);
                                         Navigator.pop(context);
                                       },
@@ -97,10 +97,10 @@ class ExamResultsListScreen extends StatelessWidget {
                                         ExamResultsDetailsScreen(
                                             examResults:
                                                 TeacherCubit.get(context)
-                                                    .examResults![index]));
+                                                    .ClassExamsResults![index]));
                                   },
                                   examResults: TeacherCubit.get(context)
-                                      .examResults![index]);
+                                      .ClassExamsResults![index]);
                             },
                           ),
                         ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/models/exam_results_model.dart';
+import 'package:stguard/modules/teacher/exam_results_details/exam_results_details_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
@@ -17,18 +19,38 @@ class GradeSubmissionPage extends StatelessWidget {
       listener: (context, state) {
         if (state is GradeFileNotSelectedState) {
           ShowToast(
-              message: "Please choose the Excel file containing the students' grades",
+              message:
+                  "Please choose the Excel file containing the students' grades",
               state: ToastStates.WARNING);
-        } 
-        
+        }
+        if (state is CheckGradeTemplateFormatState) {
+          ShowToast(message: state.error, state: ToastStates.ERROR);
+        }
+        if (state is GradeFileValidationSuccess) {
+          navigateTo(
+              context,
+              ExamResultsDetailsScreen(
+                showResult: false,
+                examResults: ExamResults(examType: examController.text, 
+                maximumAchievableGrade: double.parse(maxGradeController.text),
+                 subject: TeacherCubit.get(context).selectedSubject??'',
+                  teacher: TeacherCubit.get(context).teacherName??'', 
+                 grades: TeacherCubit.get(context).grades, 
+                 datetime: DateTime.now())
+     
+              ));
+        }
       },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title:  Text('Grade Report',style: Theme.of(context)
+            title: Text(
+              'Grade Report',
+              style: Theme.of(context)
                   .textTheme
                   .headlineSmall!
-                  .copyWith(color: Colors.white),),
+                  .copyWith(color: Colors.white),
+            ),
           ),
           body: SingleChildScrollView(
             child: Padding(
@@ -39,7 +61,6 @@ class GradeSubmissionPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-  
                       const Text(
                           "You have completed grading and are ready to submit. Please ensure that your Excel file matches the grade template format and proceed with the submission",
                           style: TextStyle(fontSize: 15, color: Colors.grey)),
@@ -48,12 +69,12 @@ class GradeSubmissionPage extends StatelessWidget {
                       ),
                       Text('Exam Type',
                           style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Text('e.g., Quiz, Final, Midterm',
                           style: Theme.of(context).textTheme.bodySmall),
-                          const SizedBox(
+                      const SizedBox(
                         height: 15,
                       ),
                       DefaultFormField(
@@ -72,7 +93,7 @@ class GradeSubmissionPage extends StatelessWidget {
                       ),
                       Text('Maximum Achievable Grade',
                           style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(
+                      const SizedBox(
                         height: 15,
                       ),
                       DefaultFormField(
@@ -81,8 +102,7 @@ class GradeSubmissionPage extends StatelessWidget {
                           validate: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Maximum achievable grade must not be empty';
-                            } else if(double.tryParse(value) == null)
-                            {
+                            } else if (double.tryParse(value) == null) {
                               return 'Please enter a valid number';
                             }
 
@@ -129,15 +149,19 @@ class GradeSubmissionPage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: DefaultButton(
-                          showCircularProgressIndicator: state is UploadGradesLoadingState,
+                          showCircularProgressIndicator:
+                              state is UploadGradesLoadingState,
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
-                              TeacherCubit.get(context).checkFileFormatAndUploadGrades(examType: examController.text,
-                               maximumAchievableGrade: double.parse(maxGradeController.text));
+                              TeacherCubit.get(context)
+                                  .checkFileFormatAndUploadGrades(
+                                      examType: examController.text,
+                                      maximumAchievableGrade: double.parse(
+                                          maxGradeController.text));
                             }
                           },
                           color: defaultColor.withOpacity(0.8),
-                          text: 'Send',
+                          text: 'Check',
                         ),
                       ),
                     ],

@@ -8,7 +8,11 @@ import 'package:stguard/shared/styles/themes.dart';
 
 class ExamResultsDetailsScreen extends StatelessWidget {
   ExamResults examResults;
-  ExamResultsDetailsScreen({required this.examResults, super.key});
+  bool showResult;
+  ExamResultsDetailsScreen(
+      {required this.examResults,
+      this.showResult = true,
+      super.key,});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class ExamResultsDetailsScreen extends StatelessWidget {
       body: BlocConsumer<TeacherCubit, TeacherStates>(
         listener: (context, state) {},
         builder: (context, state) {
-          return  SingleChildScrollView(
+          return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -68,7 +72,7 @@ class ExamResultsDetailsScreen extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white),
                             ),
-                            Spacer(),
+                            const Spacer(),
                             const SizedBox(
                               width: 20,
                             ),
@@ -84,19 +88,44 @@ class ExamResultsDetailsScreen extends StatelessWidget {
                                         color: Colors.white))
                           ],
                         ),
+                        if (!showResult)
+                          Column(
+                            children: [
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              DefaultButton(
+                                text: 'Upload',
+                                onPressed: () {
+                                  TeacherCubit.get(context).uploadGrades(
+                                      examType: examResults.examType,
+                                      maximumAchievableGrade:
+                                         examResults.maximumAchievableGrade);
+                                },
+                                color: Colors.white,
+                                textColor: defaultColor,
+                              ),
+                            ],
+                          ),
                         const SizedBox(
                           height: 20,
                         ),
                         Row(
                           children: [
-                            Expanded(child: const SizedBox(width: 240,)),
+                            const Expanded(
+                                child: SizedBox(
+                              width: 240,
+                            )),
                             Text('${examResults.maximumAchievableGrade}',
-                            style: Theme.of(context)
+                                style: Theme.of(context)
                                     .textTheme
                                     .bodySmall!
                                     .copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white)),SizedBox(width: 40,)
+                                        color: Colors.white)),
+                            const SizedBox(
+                              width: 40,
+                            )
                           ],
                         )
                       ],
@@ -110,15 +139,14 @@ class ExamResultsDetailsScreen extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemBuilder: (context, index) => StudentExamResultItem(
-                          student:
-                              TeacherCubit.get(context).students[index],
-                          grades: examResults.grades,
+                          showResult:showResult,
+                          student: TeacherCubit.get(context).students[index],
+                          examResults: examResults,
                         ),
                     separatorBuilder: (context, index) => const Divider(
                           thickness: 1,
                         ),
-                    itemCount:
-                        TeacherCubit.get(context).students.length),
+                    itemCount: TeacherCubit.get(context).students.length),
               ],
             ),
           );

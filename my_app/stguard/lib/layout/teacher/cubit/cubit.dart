@@ -792,7 +792,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
   }
 
   List<NoteModel>? notes;
-  Future<void> filterNotesByClass(dynamic className) async{
+  Future<void> filterNotesByClass(dynamic className) async {
     try {
       notes = [];
       emit(GetNotesByClassLoadingState());
@@ -801,7 +801,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
           .collection('classes')
           .where('name', isEqualTo: className)
           .get()
-          .then((value) async{
+          .then((value) async {
         if (value.docs.isNotEmpty) {
           await value.docs[0].reference
               .collection('notes')
@@ -828,7 +828,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
 
   void resetSelection() {
     notes = null;
-    examResults = null;
+    ClassExamsResults = null;
     selectedClassName = null;
     selectedStudents = [];
     selectedSubject = null;
@@ -949,11 +949,12 @@ class TeacherCubit extends Cubit<TeacherStates> {
   Map<String?, dynamic> grades = {};
   void checkFileFormatAndUploadGrades(
       {required String examType, required double maximumAchievableGrade}) {
+    print('upload file grade');
     try {
       if (gradeFilePath != null) {
         var bytes = File(gradeFilePath!).readAsBytesSync();
         final excel = Excel.decodeBytes(bytes);
-        excel.tables.forEach((key, value) async{
+        excel.tables.forEach((key, value) async {
           final rows = value.rows;
           if (rows.isNotEmpty) {
             final firstRow = rows.first;
@@ -964,37 +965,57 @@ class TeacherCubit extends Cubit<TeacherStates> {
                 firstRow[1]?.value?.toString().toLowerCase() == 'name' &&
                 firstRow[2]?.value?.toString().toLowerCase() == 'grades') {
               // Check if all values under the columns are not empty
+
               for (int i = 1; i < rows.length; i++) {
                 final row = rows[i];
                 if (row.length >= 3 &&
-                    row[0]?.value?.toString().isEmpty == false &&
-                    row[1]?.value?.toString().isEmpty == false &&
-                    row[2]?.value?.toString().isEmpty == false) {
-                  grades[row[0]?.value?.toString()] = row[2]?.value;
-                  // Values are not empty, continue processing
-                  // ...
+                    row[0]?.value?.toString().isEmpty == true &&
+                    row[1]?.value?.toString().isEmpty == true &&
+                    row[2]?.value?.toString().isEmpty == true) {
+                  continue;
                 } else {
-                  // Handle the case where empty values are found
-                  print(
-                      'Error: Empty values found in ID, Name, or Grades columns.');
-                  return;
+                  if (row.length >= 3 &&
+                      row[0]?.value?.toString().isEmpty == false &&
+                      row[1]?.value?.toString().isEmpty == false) {
+                    if (row[2] != null) {
+                      if (row[2]?.value.runtimeType == double) {
+                        grades[row[0]?.value?.toString()] = row[2]?.value;
+                      } else {
+                        grades[row[0]?.value?.toString()] =
+                            row[2]?.value.toString();
+                      }
+                    }
+
+                    // Values are not empty, continue processing
+                    // ...
+                  } else {
+                    // Handle the case where empty values are found
+                    emit(CheckGradeTemplateFormatState(
+                        'Empty values found in ID, Name, or Grades columns.'));
+                    print(
+                        'Error: Empty values found in ID, Name, or Grades columns.');
+                    return;
+                  }
                 }
               }
               // If all checks pass, proceed with further actions
               // ...
               emit(GradeFileValidationSuccess());
               print(grades);
-              await uploadGrades(
+              /*await uploadGrades(
                   examType: examType,
-                  maximumAchievableGrade: maximumAchievableGrade);
+                  maximumAchievableGrade: maximumAchievableGrade);*/
             } else {
               // Handle the case where headers are missing or in incorrect order
+              emit(CheckGradeTemplateFormatState(
+                  'Grade template headers do not match.'));
               print('Error: Grade template headers do not match.');
               grades = {};
               return;
             }
           } else {
             // Handle the case where the sheet is empty
+            emit(CheckGradeTemplateFormatState('Grade template is empty.'));
             print('Error: Grade template is empty.');
             grades = {};
             return;
@@ -1027,7 +1048,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
         'datetime': DateTime.now(),
         'maximum_achievable_grade': maximumAchievableGrade,
         'grades': grades
-      }).then((value)async {
+      }).then((value) async {
         emit(UploadGradesSuccessState());
         gradeFilePath = null;
         await NotificationHelper.sendNotification(
@@ -1037,6 +1058,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
             receiverToken: '/topics/$selectedClassName');
       }).catchError((error) {
         emit(UploadGradesErrorState());
+        print(error.toString());
       });
     } catch (e) {
       print(e.toString());
@@ -1044,18 +1066,18 @@ class TeacherCubit extends Cubit<TeacherStates> {
     }
   }
 
-  List<ExamResults>? examResults;
-  Future<void> filterExamResultsByClass(dynamic className)async {
+  List<ExamResults>? ClassExamsResults;
+  Future<void> filterExamResultsByClass(dynamic className) async {
     try {
       emit(GetGradesLoadingState());
-      examResults = [];
+      ClassExamsResults = [];
       selectedClassName = className;
 
       await teacherPath!
           .collection('classes')
           .where('name', isEqualTo: className)
           .get()
-          .then((value) async{
+          .then((value) async {
         if (value.docs.isNotEmpty) {
           await value.docs[0].reference
               .collection('exams results')
@@ -1063,10 +1085,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
               .get()
               .then((value) async {
             value.docs.forEach((element) {
-              examResults!
+              ClassExamsResults!
                   .add(ExamResults.fromMap(element.data(), res_id: element.id));
             });
-            print(examResults);
+            print(ClassExamsResults);
             print(value.docs.length);
             emit(GetGradesSuccessState());
             await getStudentsNames();
@@ -1091,7 +1113,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
           .collection('exams results')
           .doc(examResultsId)
           .delete()
-          .then((value) async{
+          .then((value) async {
         emit(DeleteExamResultsSuccessState());
         await filterExamResultsByClass(selectedClassName);
       }).catchError((error) {
@@ -1101,5 +1123,37 @@ class TeacherCubit extends Cubit<TeacherStates> {
       print(e.toString());
       emit(DeleteExamResultsErrorState());
     }
+  }
+
+  Future<void> updateStudentGrade(
+      {required String id,
+      required double grade,
+      required ExamResults examResults}) async {
+    try {
+      print(examResults.id);
+      emit(UpdateExamResultsLoadingState());
+      Map<String?, dynamic> updatedGrades = examResults.grades;
+      updatedGrades[id] = grade;
+      teacherPath!
+          .collection('classes')
+          .doc(selectedClassName)
+          .collection('exams results')
+          .doc(examResults.id)
+          .update({'grades': updatedGrades}).then((value) async {
+        emit(UpdateExamResultsSuccessState());
+        await filterExamResultsByClass(selectedClassName);
+      }).catchError(((error) {
+        print(error.toString());
+        emit(UpdateExamResultsErrorState());
+      }));
+    } catch (e) {
+      print(e.toString());
+      emit(UpdateExamResultsErrorState());
+    }
+  }
+
+  void modifyGrade({required double grade, required String id}) {
+    grades[id] = grade;
+    emit(ModifyGradeSuccessState());
   }
 }

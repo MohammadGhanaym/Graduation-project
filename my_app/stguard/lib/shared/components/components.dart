@@ -20,6 +20,7 @@ import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
 import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:stguard/modules/parent/member_settings/member_settings.dart';
 import 'package:stguard/modules/parent/transaction_details/transaction_details_screen.dart';
+import 'package:stguard/modules/teacher/update_grade/update_grade_screen.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
@@ -1894,9 +1895,14 @@ String currencyFormat(dynamic money) {
 
 class StudentExamResultItem extends StatelessWidget {
   StudentModel student;
-  Map<String, dynamic> grades;
-
-  StudentExamResultItem({required this.student, required this.grades, super.key, });
+  ExamResults examResults;
+  bool showResult;
+  StudentExamResultItem({
+    required this.student,
+    required this.examResults,
+    this.showResult =true,
+    super.key,
+  });
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -1919,22 +1925,41 @@ class StudentExamResultItem extends StatelessWidget {
             const SizedBox(
               width: 20,
             ),
-           
-           Text(
-              grades.containsKey(student.id) ? grades[student.id].toString() : 'N/A',
+            Text(
+              examResults.grades.containsKey(student.id)
+                  ? examResults.grades[student.id].toString()
+                  : 'N/A',
               style: Theme.of(context).textTheme.bodyLarge,
               overflow: TextOverflow.ellipsis,
-            ) ,const SizedBox(width: 5,),
-                IconButton(onPressed: (){}, icon: grades.containsKey(student.id) ?
-                 grades[student.id].runtimeType != double? const Icon(
-                  Icons.info_outline, color: Colors.amberAccent,
-                ):
-                 Icon(Icons.edit_outlined, color: defaultColor.withOpacity(0.8),)
-                :const Icon(
-                  Icons.info_outline, color: Colors.amberAccent,
-                )),
-
-         const SizedBox(width: 10,) ],
+            ),
+            const SizedBox(
+              width: 5,
+            ),
+            IconButton(
+                onPressed: () {
+                  navigateTo(
+                      context,
+                      UpdateGradeScreen(
+                          student: student, examResults: examResults, showResult:showResult));
+                },
+                icon: examResults.grades.containsKey(student.id)
+                    ? examResults.grades[student.id].runtimeType != double
+                        ? const Icon(
+                            Icons.info_outline,
+                            color: Colors.amberAccent,
+                          )
+                        : Icon(
+                            Icons.edit_outlined,
+                            color: defaultColor.withOpacity(0.8),
+                          )
+                    : const Icon(
+                        Icons.info_outline,
+                        color: Colors.amberAccent,
+                      )),
+            const SizedBox(
+              width: 10,
+            )
+          ],
         ),
       ),
     );
