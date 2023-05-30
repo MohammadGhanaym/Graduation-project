@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
 import 'package:stguard/modules/login/login_screen.dart';
+import 'package:stguard/modules/teacher/add_new_task/add_new_task.dart';
+import 'package:stguard/modules/teacher/history/history_screen.dart';
 import 'package:stguard/modules/teacher/join_community/join_community_screen.dart';
 import 'package:stguard/modules/teacher/notes/note_list_screen.dart';
 import 'package:stguard/modules/teacher/show_grades/show_grades.dart';
@@ -16,8 +18,7 @@ class TeacherHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TeacherCubit.get(context)
-      ..initDatabase()
-      ..getTeacherPath();
+      .getTeacherPath();
     return BlocListener<InternetCubit, ConnectionStatus>(
       listener: (context, state) {
         if (state == ConnectionStatus.disconnected) {
@@ -38,10 +39,7 @@ class TeacherHomeScreen extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
               appBar: AppBar(
-                elevation: TeacherCubit.get(context).teacherPath == null ||
-                        TeacherCubit.get(context).currentIndex == 1
-                    ? 0
-                    : 1,
+                elevation: 0,
               ),
               drawer: Drawer(
                   child: Column(
@@ -117,6 +115,22 @@ class TeacherHomeScreen extends StatelessWidget {
                               height: 15,
                             ),
                             DrawerItem(
+                              text: 'Attendance History',
+                              ontap: () {
+                                TeacherCubit.get(context).resetSelection();
+                                navigateTo(context, HistoryScreen());
+                              },
+                              icon: const Image(
+                                  color: defaultColor,
+                                  image: AssetImage(
+                                      'assets/images/attendance_history.png'),
+                                  width: 30,
+                                  height: 30),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            DrawerItem(
                               text: 'Sign Out',
                               icon: const Image(
                                   color: defaultColor,
@@ -151,18 +165,7 @@ class TeacherHomeScreen extends StatelessWidget {
                       ),
                     ),
                   ])),
-              bottomNavigationBar: TeacherCubit.get(context).teacherPath == null
-                  ? null
-                  : BottomNavigationBar(
-                      currentIndex: TeacherCubit.get(context).currentIndex,
-                      onTap: (index) =>
-                          TeacherCubit.get(context).switchScreen(index),
-                      items: const [
-                          BottomNavigationBarItem(
-                              icon: Icon(Icons.history), label: 'History'),
-                          BottomNavigationBarItem(
-                              icon: Icon(Icons.add), label: 'New')
-                        ]),
+             
               body: TeacherCubit.get(context).teacherPathLoading
                   ? const Center(
                       child: CircularProgressIndicator(),
@@ -171,8 +174,7 @@ class TeacherHomeScreen extends StatelessWidget {
                       ? JoinCommunityScreen(
                           image:
                               'assets/images/teacher-and-open-class-door.png')
-                      : TeacherCubit.get(context)
-                          .screens[TeacherCubit.get(context).currentIndex]);
+                      : AddNewTaskScreen());
         },
       ),
     );

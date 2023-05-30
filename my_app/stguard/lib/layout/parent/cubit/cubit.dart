@@ -18,6 +18,7 @@ import 'package:stguard/models/country_model.dart';
 import 'package:stguard/models/download_file.dart';
 import 'package:stguard/models/parent_model.dart';
 import 'package:stguard/models/school_model.dart';
+import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/product_model.dart';
 import 'package:stguard/shared/components/components.dart';
@@ -426,7 +427,6 @@ class ParentCubit extends Cubit<ParentStates> {
     mapControllerl = controller;
   }
 
-
   Future<void> getLocation(String id) async {
     location = null;
     emit(GetStudentLocationLoadingState());
@@ -499,6 +499,9 @@ class ParentCubit extends Cubit<ParentStates> {
     active = st.parent;
     await getLocation(st.id);
     await getClassNotes(st);
+    await getStudentAttendance(st);
+    
+
     settingsVisibility = true;
     isPaired = true;
   }
@@ -907,6 +910,54 @@ class ParentCubit extends Cubit<ParentStates> {
       print('Failed to delete file: $e');
     }
   }
+
+  List<LessonAttendance>? studentAttendance;
+  Future<void> getStudentAttendance(StudentModel st) async {
+    studentAttendance = [];
+    emit(GetAttendanceLoadingState());
+    schoolPaths[st.id]!
+        .collection('classes')
+        .where('name', isEqualTo: st.className)
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        print(value.docs);
+        value.docs[0].reference
+            .collection('attendance')
+            .orderBy('datetime', descending: true)
+            .get()
+            .then((value) {
+              if (value.docs.isNotEmpty) {
+                value.docs.forEach((element) {
+                  studentAttendance!
+                      .add(LessonAttendance.fromMap(element.data()));
+                });
+                print(studentAttendance);
+                emit(GetAttendanceSuccessState());
+              } else {
+                emit(GetAttendanceErrorState());
+              }
+            })
+            .catchError((error) {
+              print(error);
+              emit(GetAttendanceErrorState());
+            });
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetAttendanceErrorState());
+    });
+  }
+
+// Write your code here
+/// *************************************
+  Future<void>getStudentGrades(StudentModel st)async
+  {
+
+  }
+
+ /// *************************************
+
 
   void signOut() async {
     await CacheHelper.removeData(key: 'id').then((value) async {

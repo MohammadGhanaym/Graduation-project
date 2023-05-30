@@ -23,7 +23,7 @@ class ExamResultsListScreen extends StatelessWidget {
                 },
                 icon: const Icon(Icons.arrow_back)),
             title: Text(
-              'Grades',
+              'Class Grades',
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall!

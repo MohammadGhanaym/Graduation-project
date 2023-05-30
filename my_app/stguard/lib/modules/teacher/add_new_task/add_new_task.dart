@@ -38,14 +38,14 @@ class AddNewTaskScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 30),
               child: Column(
                 children: [
-                      DefaultButton2(
-                          width: 140,
-                          height: 140,
+                      DefaultButton3(
+                          width: double.infinity,
+                          height: 120,
                           image: 'assets/images/grade.png',
-                          text: 'Grade',
+                          text: 'Share Grades',
                           imageWidth: 70,
                           imageHeight: 70,
-                          sizedboxHeight: 5,
+                          sizedboxWidth: 10,
                           textStyle: Theme.of(context)
                               .textTheme
                               .titleLarge!
@@ -55,44 +55,38 @@ class AddNewTaskScreen extends StatelessWidget {
                             navigateTo(context, GetTemplateScreen());
                           }),
                   SizedBox(height: 20,), 
-                  Row(   
-                    children: [ 
-                      Expanded(
-                          child: DefaultButton2(
-                              width: 140,
-                              height: 140,
-                              image: 'assets/images/attendance_black.png',
-                              text: 'Attendance',
-                              imageWidth: 70,
-                              imageHeight: 70,
-                              sizedboxHeight: 5,
-                              textStyle: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                              onPressed: () {
-                                TeacherCubit.get(context).resetSelection();
-                                navigateTo(context, AddAttendanceScreen());
-                              })),
-                      Expanded(
-                          child: DefaultButton2(
-                              width: 140,
-                              height: 140,
-                              text: 'Note',
-                              textStyle: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                              image: 'assets/images/reminder.png',
-                              imageHeight: 70,
-                              imageWidth: 70,
-                              sizedboxHeight: 5,
-                              onPressed: () {
-                                TeacherCubit.get(context).resetSelection();
-                                navigateTo(context, AddNoteScreen());
-                              })),
-                    ],
-                  ),
+                  DefaultButton3(
+                      width: double.infinity,
+                      height: 120,
+                      image: 'assets/images/attendance_black.png',
+                      text: 'Record Attendance',
+                      imageWidth: 70,
+                      imageHeight: 70,
+                      sizedboxWidth: 10,
+                      textStyle: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
+                      onPressed: () {
+                        TeacherCubit.get(context).resetSelection();
+                        navigateTo(context, AddAttendanceScreen());
+                      }),
+                  DefaultButton3(
+                      width: double.infinity,
+                      height: 120,
+                      text: 'Share Notes',
+                      textStyle: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
+                      image: 'assets/images/reminder.png',
+                      imageHeight: 70,
+                      imageWidth: 70,
+                      sizedboxWidth: 10,
+                      onPressed: () {
+                        TeacherCubit.get(context).resetSelection();
+                        navigateTo(context, AddNoteScreen());
+                      }),
                 ],
               ),
             ),

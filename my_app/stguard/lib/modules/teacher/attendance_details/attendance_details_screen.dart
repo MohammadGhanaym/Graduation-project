@@ -9,14 +9,13 @@ import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
 class AttendanceDetailsScreen extends StatelessWidget {
-  LessonModel lesson;
-  AttendanceDetailsScreen({required this.lesson, super.key});
+  LessonAttendance lessonAttendance;
+  AttendanceDetailsScreen({required this.lessonAttendance, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
-        TeacherCubit.get(context).getLessonAttendance(lesson.name);
         return Scaffold(
           appBar: AppBar(
             elevation: 0,
@@ -59,7 +58,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
+                                '${lessonAttendance.lessonName.substring(0, 1).toUpperCase()}${lessonAttendance.lessonName.substring(1)}',
                                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold, color: Colors.white),
@@ -72,7 +71,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    lesson.grade,
+                                    TeacherCubit.get(context).selectedClassName!,
                                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold, color: Colors.white),
@@ -81,7 +80,7 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                     width: 20,
                                   ),
                                   Text(
-                                      getDate(lesson.datetime,
+                                      getDate(lessonAttendance.datetime,
                                           format: 'd MMM yy, hh:mm a'),
                                           overflow: TextOverflow.ellipsis,
                                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -111,11 +110,9 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                             .then((path) {
                                           if (path != null) {
                                             TeacherCubit.get(context)
-                                                .saveAttendanceToExcel(
-                                                    lesson,
+                                                .saveAttendanceToExcel(filePath:
                                                     path,
-                                                    TeacherCubit.get(context)
-                                                        .lessonAttendance);
+                                                    lessonAttendance: lessonAttendance);
                                           } else {
                                             showDialog(
                                               context: context,
@@ -150,10 +147,8 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                                 TeacherCubit.get(
                                                                         context)
                                                                     .saveAttendanceToExcel(
-                                                                        lesson,
-                                                                        filePath,
-                                                                        TeacherCubit.get(context)
-                                                                            .lessonAttendance);
+                                                                        filePath:filePath,
+                                                                        lessonAttendance:lessonAttendance);
 
                                                                 if (TeacherCubit
                                                                         .get(
@@ -188,10 +183,8 @@ class AttendanceDetailsScreen extends StatelessWidget {
                                                                 TeacherCubit.get(
                                                                         context)
                                                                     .saveAttendanceToExcel(
-                                                                        lesson,
-                                                                        filePath,
-                                                                        TeacherCubit.get(context)
-                                                                            .lessonAttendance);
+                                                                       filePath: filePath,lessonAttendance:
+                                                                        lessonAttendance);
 
                                                                 if (TeacherCubit
                                                                         .get(
@@ -266,13 +259,14 @@ class AttendanceDetailsScreen extends StatelessWidget {
                             shrinkWrap: true,
                             itemBuilder: (context, index) =>
                                 AttendanceDetailsCard(
-                                    studentDetails: TeacherCubit.get(context)
-                                        .lessonAttendance[index]),
+                                  student: TeacherCubit.get(context)
+                                .students[index],
+                                    lessonAttendance : lessonAttendance),
                             separatorBuilder: (context, index) => const Divider(
                                   thickness: 1,
                                 ),
                             itemCount: TeacherCubit.get(context)
-                                .lessonAttendance
+                                .students
                                 .length),
                       ],
                     ),

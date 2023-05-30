@@ -29,7 +29,7 @@ class NoteListScreen extends StatelessWidget {
                 },
                 icon: const Icon(Icons.arrow_back)),
             title: Text(
-              'Notes',
+              'Class Notes',
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall!

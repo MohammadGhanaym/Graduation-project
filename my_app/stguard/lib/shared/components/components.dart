@@ -18,6 +18,7 @@ import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/product_model.dart';
 import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
 import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
+import 'package:stguard/modules/parent/child_community/child_community.dart';
 import 'package:stguard/modules/parent/member_settings/member_settings.dart';
 import 'package:stguard/modules/parent/transaction_details/transaction_details_screen.dart';
 import 'package:stguard/modules/teacher/update_grade/update_grade_screen.dart';
@@ -71,6 +72,124 @@ class DefaultButton extends StatelessWidget {
           )),
       fallback: (context) => const Center(child: CircularProgressIndicator()),
     );
+  }
+}
+
+class DefaultButton2 extends StatelessWidget {
+  void Function()? onPressed;
+  double width;
+  double height;
+  String text;
+  double sizedboxHeight;
+  TextStyle? textStyle;
+  String image;
+  double imageWidth;
+  double imageHeight;
+
+  DefaultButton2(
+      {super.key,
+      required this.width,
+      required this.height,
+      this.sizedboxHeight = 5,
+      required this.image,
+      required this.text,
+      this.textStyle,
+      required this.imageWidth,
+      required this.imageHeight,
+      required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialButton(
+        onPressed: onPressed,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(
+                      color: defaultColor,
+                      image: AssetImage(image),
+                      width: imageWidth,
+                      height: imageHeight),
+                  SizedBox(
+                    height: sizedboxHeight,
+                  ),
+                  Text(
+                    text,
+                    style: textStyle,
+                  )
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+}
+
+class DefaultButton3 extends StatelessWidget {
+  void Function()? onPressed;
+  double width;
+  double height;
+  String text;
+  double sizedboxWidth;
+  TextStyle? textStyle;
+  String image;
+  double imageWidth;
+  double imageHeight;
+
+  DefaultButton3(
+      {super.key,
+      required this.width,
+      required this.height,
+      this.sizedboxWidth = 5,
+      required this.image,
+      required this.text,
+      this.textStyle,
+      required this.imageWidth,
+      required this.imageHeight,
+      required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialButton(
+        onPressed: onPressed,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(
+                      color: defaultColor,
+                      image: AssetImage(image),
+                      width: imageWidth,
+                      height: imageHeight),
+                  SizedBox(
+                    width: sizedboxWidth,
+                  ),
+                  Text(
+                    text,
+                    style: textStyle,
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: defaultColor,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 }
 
@@ -451,7 +570,7 @@ class FamilyMemberCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         ParentCubit.get(context).getSettingsData(model!).then((value) {
-          navigateTo(context, MemberSettingsScreen(student: model));
+          navigateTo(context, MemberCommunityScreen(student: model!));
         });
       },
       child: Container(
@@ -625,11 +744,13 @@ class SettingsCard extends StatelessWidget {
   List<Widget> children = const <Widget>[];
   double? card_width;
   double? card_height;
+  double elevation;
   bool condition;
   SettingsCard(
       {super.key,
       required this.children,
       required this.condition,
+      this.elevation = 0.0,
       this.card_width,
       this.card_height});
 
@@ -641,7 +762,7 @@ class SettingsCard extends StatelessWidget {
       width: card_width,
       height: card_height,
       child: Card(
-        elevation: 0.0,
+        elevation: elevation,
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: condition
@@ -913,30 +1034,6 @@ class AllergenSelectionItem extends StatelessWidget {
   }
 }
 
-class GradeItem extends StatelessWidget {
-  String className;
-  GradeItem({super.key, required this.className});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => TeacherCubit.get(context).selectClass(className),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        alignment: AlignmentDirectional.center,
-        height: 20,
-        decoration: BoxDecoration(
-            border: Border.all(
-                color: TeacherCubit.get(context).selectedClassName == className
-                    ? defaultColor.withOpacity(0.8)
-                    : Colors.grey),
-            borderRadius: BorderRadiusDirectional.circular(5)),
-        child: Text(className),
-      ),
-    );
-  }
-}
-
 class StudentAttendanceCard extends StatelessWidget {
   StudentModel student;
 
@@ -947,17 +1044,13 @@ class StudentAttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool backgroundError = false;
     return Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadiusDirectional.circular(5),
             border: Border.all(
                 width: 3,
                 color: TeacherCubit.get(context).attendance[student.id] != null
-                    ? TeacherCubit.get(context)
-                                .attendance[student.id]
-                                .isPresent ==
-                            1
+                    ? TeacherCubit.get(context).attendance[student.id] == 1
                         ? defaultColor.withOpacity(0.8)
                         : Colors.red.withOpacity(0.8)
                     : Theme.of(context).scaffoldBackgroundColor)),
@@ -1035,89 +1128,11 @@ class StudentAttendanceCard extends StatelessWidget {
   }
 }
 
-class LessonCard extends StatelessWidget {
-  LessonModel lesson;
-  void Function() onTap;
-
-  LessonCard({required this.lesson, required this.onTap, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        width: double.infinity,
-        height: 120,
-        child: Card(
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  top: 10, bottom: 10, right: 20, left: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${lesson.name.substring(0, 1).toUpperCase()}${lesson.name.substring(1)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                      ),
-                      IconButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () {
-                            showDefaultDialog(
-                              context,
-                              title: 'Are you sure?',
-                              content: Text(
-                                "Are you sure you want to delete this lesson's attendance?",
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              buttonText1: 'Cancel',
-                              onPressed1: () => Navigator.pop(context),
-                              buttonText2: 'Delete',
-                              onPressed2: () => TeacherCubit.get(context)
-                                  .deleteLesson(lesson.name),
-                            );
-                          },
-                          icon: const ImageIcon(
-                              AssetImage('assets/images/delete.png')))
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Row(
-                    children: [
-                      SizedBox(
-                        height: 20,
-                        width: 100,
-                        child: Text(lesson.grade,
-                            style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      const Spacer(),
-                      Text(getDate(lesson.datetime, format: 'EE, hh:mm a'),
-                          style: Theme.of(context).textTheme.bodySmall)
-                    ],
-                  ),
-                ],
-              ),
-            )),
-      ),
-    );
-  }
-}
-
 class AttendanceDetailsCard extends StatelessWidget {
-  StudentAttendanceModel studentDetails;
-
-  AttendanceDetailsCard({required this.studentDetails, super.key});
+  LessonAttendance lessonAttendance;
+  StudentModel student;
+  AttendanceDetailsCard(
+      {required this.lessonAttendance, required this.student, super.key});
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -1130,7 +1145,7 @@ class AttendanceDetailsCard extends StatelessWidget {
             SizedBox(
                 width: 250,
                 child: Text(
-                  studentDetails.studentName,
+                  student.name!,
                   maxLines: 2,
                   style: Theme.of(context).textTheme.bodyLarge,
                   overflow: TextOverflow.ellipsis,
@@ -1138,15 +1153,16 @@ class AttendanceDetailsCard extends StatelessWidget {
             const SizedBox(
               width: 20,
             ),
-            ImageIcon(
-              color: studentDetails.isPresent == 1
-                  ? defaultColor.withOpacity(0.8)
-                  : Colors.red.withOpacity(0.8),
-              AssetImage(studentDetails.isPresent == 1
-                  ? 'assets/images/check-mark.png'
-                  : 'assets/images/error.png'),
-              size: 30,
-            )
+            if (lessonAttendance.attendance.containsKey(student.id))
+              ImageIcon(
+                color: lessonAttendance.attendance[student.id] == 1
+                    ? defaultColor.withOpacity(0.8)
+                    : Colors.red.withOpacity(0.8),
+                AssetImage(lessonAttendance.attendance[student.id] == 1
+                    ? 'assets/images/check-mark.png'
+                    : 'assets/images/error.png'),
+                size: 30,
+              )
           ],
         ),
       ),
@@ -1538,62 +1554,6 @@ Future<Widget?> showDefaultDialog(context,
   );
 }
 
-class DefaultButton2 extends StatelessWidget {
-  void Function()? onPressed;
-  double width;
-  double height;
-  String text;
-  double sizedboxHeight;
-  TextStyle? textStyle;
-  String image;
-  double imageWidth;
-  double imageHeight;
-
-  DefaultButton2(
-      {super.key,
-      required this.width,
-      required this.height,
-      this.sizedboxHeight = 5,
-      required this.image,
-      required this.text,
-      this.textStyle,
-      required this.imageWidth,
-      required this.imageHeight,
-      required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialButton(
-        onPressed: onPressed,
-        child: SizedBox(
-          width: width,
-          height: height,
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image(
-                      color: defaultColor,
-                      image: AssetImage(image),
-                      width: 70,
-                      height: 70),
-                  SizedBox(
-                    height: sizedboxHeight,
-                  ),
-                  Text(
-                    text,
-                    style: textStyle,
-                  )
-                ],
-              ),
-            ),
-          ),
-        ));
-  }
-}
-
 class FileItem extends StatelessWidget {
   String fileName;
   void Function()? onPressed;
@@ -1612,6 +1572,75 @@ class FileItem extends StatelessWidget {
       trailing: IconButton(
         icon: const Icon(Icons.cancel),
         onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class LessonAttendanceItem extends StatelessWidget {
+  final void Function()? onTap;
+  void Function()? teacherOnTap;
+  final LessonAttendance lessonAttendance;
+  LessonAttendanceItem(
+      {required this.onTap, required this.lessonAttendance, this.teacherOnTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 2.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    lessonAttendance.lessonName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                      onPressed: teacherOnTap,
+                      icon: const ImageIcon(
+                          AssetImage('assets/images/delete_note.png'))),
+                ],
+              ),
+              const SizedBox(height: 8.0),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: Text(
+                      lessonAttendance.subject,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    getDate(lessonAttendance.datetime, format: 'EE, hh:mm a'),
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1691,6 +1720,80 @@ class NoteItem extends StatelessWidget {
     );
   }
 }
+
+class AttendanceItem extends StatelessWidget {
+  StudentModel st;
+  final LessonAttendance attendanceDetails;
+  AttendanceItem({
+    required this.attendanceDetails,
+    required this.st
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              attendanceDetails.lessonName,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8.0),
+            Row(
+              children: [
+                SizedBox(
+                  width: 150,
+                  child: Text(
+                    attendanceDetails.subject,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  getDate(attendanceDetails.datetime, format: 'EE, hh:mm a'),
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                )
+              ],
+            ),
+            const SizedBox(height:10),
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ImageIcon(AssetImage(attendanceDetails.attendance.containsKey(st.id)
+                    ?attendanceDetails.attendance[st.id]==1? 'assets/images/check-mark.png':
+                        'assets/images/error.png'
+                    : 'assets/images/error.png'), size: 30,
+                    color: attendanceDetails.attendance.containsKey(st.id)
+                    ?attendanceDetails.attendance[st.id]==1? defaultColor:
+                        Colors.red
+                    : Colors.red,),
+                
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// write your code here
+//-------------------------
+
+//-------------------------
 
 class ExamResultItem extends StatelessWidget {
   final void Function()? onTap;
@@ -1900,7 +2003,7 @@ class StudentExamResultItem extends StatelessWidget {
   StudentExamResultItem({
     required this.student,
     required this.examResults,
-    this.showResult =true,
+    this.showResult = true,
     super.key,
   });
   @override
@@ -1940,7 +2043,9 @@ class StudentExamResultItem extends StatelessWidget {
                   navigateTo(
                       context,
                       UpdateGradeScreen(
-                          student: student, examResults: examResults, showResult:showResult));
+                          student: student,
+                          examResults: examResults,
+                          showResult: showResult));
                 },
                 icon: examResults.grades.containsKey(student.id)
                     ? examResults.grades[student.id].runtimeType != double

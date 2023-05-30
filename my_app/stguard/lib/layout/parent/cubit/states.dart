@@ -211,6 +211,8 @@ class UserSignOutErrorState extends ParentStates{}
 
 class InternetConnectionLostState extends ParentStates{}
 
-class GetGradesLoading extends ParentStates {}
+class GetAttendanceSuccessState extends ParentStates {}
 
-class GetGradeSuccess extends ParentStates {}
+class GetAttendanceLoadingState extends ParentStates {}
+
+class GetAttendanceErrorState extends ParentStates {}

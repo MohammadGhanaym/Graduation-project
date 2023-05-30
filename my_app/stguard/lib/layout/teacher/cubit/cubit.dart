@@ -2,10 +2,8 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
 import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/country_model.dart';
@@ -15,8 +13,7 @@ import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/models/teacher_model.dart';
 import 'package:stguard/models/upload_file_info.dart';
-import 'package:stguard/modules/teacher/add_new_task/add_new_task.dart';
-import 'package:stguard/modules/teacher/history/history_screen.dart';
+
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
@@ -26,183 +23,6 @@ import 'package:stguard/shared/network/remote/notification_helper.dart';
 class TeacherCubit extends Cubit<TeacherStates> {
   TeacherCubit() : super(TeacherInitState());
   static TeacherCubit get(context) => BlocProvider.of(context);
-
-  static const _databaseName = "attendance_db.db";
-  static const _databaseVersion = 1;
-
-  static const tableLesson = 'lesson';
-  static const columnLessonName = 'name';
-  static const columnGrade = 'grade';
-  static const columnDatetime = 'datetime';
-
-  static const tableStAttendLesson = 'st_attend_lesson';
-  static const columnStID = 'st_id';
-  static const columnStName = 'student_name';
-  static const columnLesson = 'lesson';
-  static const columnIsPresent = 'is_present';
-
-  static late Database _database;
-  void initDatabase() async {
-    /* await databaseFactory.deleteDatabase('attendance_db.db').then((value) {
-      print('database deleted');
-    });*/
-    await openDatabase(
-      _databaseName,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-      onOpen: (db) {
-        _database = db;
-        getLessons();
-        print('database opened');
-      },
-    );
-  }
-
-  Future _onCreate(Database db, int version) async {
-    db.transaction((txn) async {
-      await txn.execute('''
-      CREATE TABLE $tableLesson (
-        $columnLessonName TEXT NOT NULL,
-        $columnGrade TEXT NOT NULL,
-        $columnDatetime DATETIME NOT NULL,
-        PRIMARY KEY ($columnLessonName, $columnDatetime)
-        )
-
-      
-    ''');
-      await txn.execute('''
-      CREATE TABLE $tableStAttendLesson (
-        $columnStID TEXT,
-        $columnStName TEXT,
-        $columnLesson TEXT,
-        $columnIsPresent INTEGER,
-        PRIMARY KEY ($columnStID, $columnLesson),
-        FOREIGN KEY ($columnLesson) REFERENCES $tableLesson($columnLessonName) ON DELETE CASCADE
-      )
-    ''');
-    }).then((value) {
-      print('tables created');
-    }).catchError((error) {
-      print(error.toString());
-    });
-  }
-
-  Future<void> insertAttendance() async {
-    if (attendance.isNotEmpty) {
-      _database.transaction((txn) async {
-        await txn.rawInsert('''
-      INSERT INTO $tableLesson (
-        $columnLessonName,
-        $columnDatetime,
-        $columnGrade
-      ) VALUES (?, ?, ?)
-    ''', [
-          lessonName,
-          DateTime.now().toString(),
-          selectedClassName
-        ]).then((value) {
-          print('$value inserted successfully');
-        });
-
-        attendance.values.forEach((element) async {
-          await txn.rawInsert('''
-      INSERT INTO $tableStAttendLesson (
-        $columnStID,
-        $columnStName,
-        $columnLesson,
-        $columnIsPresent
-      ) VALUES (?, ?, ?, ?)
-    ''', [
-            element.stID,
-            element.stName,
-            lessonName,
-            element.isPresent
-          ]).then((value) {
-            print('student attendance');
-            print('$value inserted successfully');
-          });
-        });
-      }).then((value) {
-        emit(AddNewAttendanceSuccessState());
-        getLessons();
-      }).catchError((error) {
-        emit(AddNewAttendanceErrorState(error.toString()));
-      });
-    } else {
-      emit(AttendanceNotTakenState());
-    }
-  }
-
-  List<LessonModel> lessons = [];
-  void getLessons() async {
-    emit(GetLessonsLoadingState());
-    await _database.rawQuery('''
-      SELECT 
-        $columnLessonName, 
-        $columnGrade, 
-        $columnDatetime
-      FROM 
-        $tableLesson
-      ORDER BY $columnDatetime DESC
-    ''').then((value) {
-      print(value);
-      lessons = [];
-      value.forEach((element) {
-        lessons.add(LessonModel.fromMap(element));
-      });
-      emit(GetLessonsSuccessState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(GetLessonsErrorState());
-    });
-  }
-
-  Future<void> deleteLesson(String lesson) async {
-    await _database.delete(
-      tableLesson,
-      where: '$columnLessonName = ?',
-      whereArgs: [lesson],
-    ).then((value) {
-      emit(DeleteLessonAttendanceSuccessState());
-      getLessons();
-    }).catchError((error) {
-      print(error.toString());
-      emit(DeleteLessonAttendanceErrorState());
-    });
-  }
-
-  List<StudentAttendanceModel> lessonAttendance = [];
-  void getLessonAttendance(String lesson_name) async {
-    emit(GetLessonAttendanceLoadingState());
-    await _database.rawQuery('''
-      SELECT 
-        $tableStAttendLesson.$columnStID AS student_id,
-        $tableStAttendLesson.$columnLesson AS lesson,
-        $tableStAttendLesson.$columnStName AS student_name,
-        $tableStAttendLesson.$columnIsPresent AS is_present
-      FROM 
-        $tableStAttendLesson
-        JOIN $tableLesson ON $tableStAttendLesson.$columnLesson = $tableLesson.$columnLessonName
-      WHERE 
-        $tableStAttendLesson.$columnLesson = ?
-    ''', [lesson_name]).then((value) {
-      lessonAttendance = [];
-      value.forEach((element) {
-        lessonAttendance.add(StudentAttendanceModel.fromMap(element));
-      });
-      print(lessonAttendance);
-      emit(GetLessonAttendanceSuccessState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(GetLessonAttendanceErrorState());
-    });
-  }
-
-  String? lessonName;
-  void setLessonName(lesson) {
-    lessonName = lesson;
-    emit(SetLessonNameState());
-  }
 
   TeacherModel? teacher;
   Future<void> getTeacherInfo() async {
@@ -251,16 +71,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
     await getStudentsNames();
   }
 
-  List<Widget> screens = [
-    HistoryScreen(),
-    AddNewTaskScreen(),
-  ];
-  int currentIndex = 0;
-  void switchScreen(var index) {
-    currentIndex = index;
-    emit(SwitchScreenState());
-  }
-
   List<StudentModel> students = [];
 
   Future<void> getStudentsNames() async {
@@ -291,16 +101,16 @@ class TeacherCubit extends Cubit<TeacherStates> {
     }
   }
 
-  Map<String, dynamic> attendance = {};
-  void addtoAttendance(String stID, var stName, int isPresent) {
-    attendance[stID] = Attendance(
-        stID: stID,
-        lesson: lessonName!,
-        grade: selectedClassName!,
-        stName: stName,
-        isPresent: isPresent);
+  String? lessonName;
+  void setLessonName(lesson) {
+    lessonName = lesson;
+    emit(SetLessonNameState());
+  }
 
-    print(attendance[stID].isPresent);
+  Map<String, int> attendance = {};
+  void addtoAttendance(String stID, var stName, int isPresent) {
+    attendance[stID] = isPresent;
+    print(attendance[stID]);
     emit(AddStudenttoAttendanceState());
   }
 
@@ -314,45 +124,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
     dynamic selectedFolder = CacheHelper.getData(key: 'selected_folder');
 
     return Future.value(selectedFolder);
-  }
-
-  Future<void> saveAttendanceToExcel(LessonModel lesson, String filePath,
-      List<StudentAttendanceModel> attendanceData) async {
-    if (await Permission.storage.status == PermissionStatus.granted) {
-      try {
-        // Create an instance of the Excel package
-        var excel = Excel.createExcel();
-        print(await Permission.storage.status == PermissionStatus.granted);
-        // Add a sheet to the excel file
-        var sheet = excel[excel.getDefaultSheet()!];
-
-        // Add headers to the sheet
-        sheet.updateCell(CellIndex.indexByString("A1"), "Student ID");
-        sheet.updateCell(CellIndex.indexByString("B1"), "Student Name");
-        sheet.updateCell(CellIndex.indexByString("C1"), "Lesson");
-        sheet.updateCell(CellIndex.indexByString("D1"), "Is Present");
-
-        // Add data to the sheet
-        for (var i = 0; i < attendanceData.length; i++) {
-          sheet.updateCell(
-              CellIndex.indexByString("A${i + 2}"), attendanceData[i].stID);
-          sheet.updateCell(CellIndex.indexByString("B${i + 2}"),
-              attendanceData[i].studentName);
-          sheet.updateCell(CellIndex.indexByString("C${i + 2}"),
-              attendanceData[i].lessonName);
-          sheet.updateCell(CellIndex.indexByString("D${i + 2}"),
-              attendanceData[i].isPresent);
-        }
-        File('$filePath/${lesson.name}.xlsx').writeAsBytesSync(excel.encode()!);
-
-        emit(SavetoExcelSuccessState());
-      } catch (e) {
-        emit(SavetoExcelErrorState());
-        print(e.toString());
-      }
-    } else {
-      requestWritePermission();
-    }
   }
 
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -520,6 +291,153 @@ class TeacherCubit extends Cubit<TeacherStates> {
   void pickSchool(School school) {
     pickedSchool = school;
     emit(PickSchoolState());
+  }
+
+  Future<void> uploadClassAttendance() async {
+    try {
+      emit(AddNewAttendanceLoadingState());
+      if (attendance.isNotEmpty) {
+        await teacherPath!
+            .collection('classes')
+            .doc(selectedClassName)
+            .collection('attendance')
+            .doc()
+            .set({
+          'lesson': lessonName,
+          'teacher': teacherName,
+          'subject': selectedSubject,
+          'datetime': DateTime.now(),
+          'attendance': attendance
+        }).then((value) async {
+          emit(AddNewAttendanceSuccessState());
+          gradeFilePath = null;
+          await NotificationHelper.sendNotification(
+              title: 'Class Attendance Update',
+              body:
+                  "New attendance recorded for $lessonName, $selectedSubject.",
+              receiverToken: '/topics/$selectedClassName');
+        }).catchError((error) {
+          emit(AddNewAttendanceErrorState(error.toString()));
+          print(error.toString());
+        });
+      } else {
+        emit(AttendanceNotTakenState());
+      }
+    } catch (e) {
+      print(e.toString());
+      emit(AddNewAttendanceErrorState(e.toString()));
+    }
+  }
+
+  List<LessonAttendance>? classLessonAttendace;
+  Future<void> filterAttendanceByClass(dynamic className) async {
+    try {
+      emit(GetLessonAttendanceLoadingState());
+      classLessonAttendace = [];
+      selectedClassName = className;
+
+      await teacherPath!
+          .collection('classes')
+          .where('name', isEqualTo: className)
+          .get()
+          .then((value) async {
+        if (value.docs.isNotEmpty) {
+          await value.docs[0].reference
+              .collection('attendance')
+              .where('teacher', isEqualTo: teacherName)
+              .get()
+              .then((value) async {
+            value.docs.forEach((element) {
+              classLessonAttendace!.add(LessonAttendance.fromMap(element.data(),
+                  attendanceId: element.id));
+            });
+            print(classLessonAttendace);
+            print(value.docs.length);
+            emit(GetLessonAttendanceSuccessState());
+            await getStudentsNames();
+          }).catchError((error) {
+            emit(GetLessonAttendanceErrorState());
+            print(error.toString());
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+      emit(SomethingWentWrong());
+    }
+  }
+
+  Future<void> deleteClassAttendance(String? attendanceId) async {
+    try {
+      emit(DeleteLessonAttendanceLoadingState());
+      await teacherPath!
+          .collection('classes')
+          .doc(selectedClassName)
+          .collection('attendance')
+          .doc(attendanceId)
+          .delete()
+          .then((value) async {
+        emit(DeleteLessonAttendanceSuccessState());
+        await filterAttendanceByClass(selectedClassName);
+      }).catchError((error) {
+        emit(DeleteLessonAttendanceErrorState());
+      });
+    } catch (e) {
+      print(e.toString());
+      emit(DeleteLessonAttendanceErrorState());
+    }
+  }
+
+  Future<void> saveAttendanceToExcel({
+    required LessonAttendance lessonAttendance,
+    required String filePath,
+  }) async {
+    if (await Permission.storage.status == PermissionStatus.granted) {
+      try {
+        // Create an instance of the Excel package
+        var excel = Excel.createExcel();
+        print(await Permission.storage.status == PermissionStatus.granted);
+        // Add a sheet to the excel file
+        var sheet = excel[excel.getDefaultSheet()!];
+
+        // Add headers to the sheet
+        sheet.updateCell(CellIndex.indexByString("A1"), "Student ID");
+        sheet.updateCell(CellIndex.indexByString("B1"), "Student Name");
+        sheet.updateCell(CellIndex.indexByString("C1"), "Lesson");
+        sheet.updateCell(CellIndex.indexByString("D1"), "Is Present");
+
+        // Add data to the sheet
+        for (var i = 0; i < students.length; i++) {
+          if (lessonAttendance.attendance.containsKey(students[i].id)) {
+            sheet.updateCell(
+                CellIndex.indexByString("A${i + 2}"), students[i].id);
+            sheet.updateCell(
+                CellIndex.indexByString("B${i + 2}"), students[i].name);
+            sheet.updateCell(CellIndex.indexByString("C${i + 2}"),
+                lessonAttendance.lessonName);
+            sheet.updateCell(CellIndex.indexByString("D${i + 2}"),
+                lessonAttendance.attendance[students[i].id]);
+          }
+        }
+
+        final directory = Directory(filePath);
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+
+        final fileName =
+            '${lessonAttendance.lessonName}_${DateTime.now().microsecondsSinceEpoch}.xlsx';
+        final file = File('$filePath/$fileName');
+        await file.writeAsBytes(excel.encode()!);
+
+        emit(SavetoExcelSuccessState());
+      } catch (e) {
+        emit(SavetoExcelErrorState());
+        print(e.toString());
+      }
+    } else {
+      requestWritePermission();
+    }
   }
 
   bool sendToAll = true;
@@ -832,6 +750,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
     selectedClassName = null;
     selectedStudents = [];
     selectedSubject = null;
+    classLessonAttendace = null;
   }
 
   void deleteNote(
@@ -883,7 +802,6 @@ class TeacherCubit extends Cubit<TeacherStates> {
       teacherPath = null;
       teacher = null;
       emit(UserSignOutSuccessState());
-      _database.close();
     });
   }
 

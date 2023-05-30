@@ -140,7 +140,7 @@ class AddNoteScreen extends StatelessWidget {
                                   value: subjectName, child: Text(subjectName)))
                               .toList(),
                               decoration: const InputDecoration.collapsed(
-                            hintText: 'Select a class'),
+                            hintText: 'Select a subject'),
                           isExpanded: true,
                         validator: (value) {
                                     if (value == null || value.isEmpty) {

@@ -54,7 +54,6 @@ class GetUserInfoError extends TeacherStates {}
 
 class GetClassesErrorState extends TeacherStates {}
 
-class SwitchScreenState extends TeacherStates {}
 
 class GetStudentNamesSuccess extends TeacherStates {}
 
@@ -69,7 +68,7 @@ class GetStudentNamesError extends TeacherStates
 class GetStudentNamesLoading extends TeacherStates {}
 
 class AddStudenttoAttendanceState extends TeacherStates {}
-
+class AddNewAttendanceLoadingState extends TeacherStates{}
 class AddNewAttendanceSuccessState extends TeacherStates {}
 class AttendanceNotTakenState extends TeacherStates {}
 
@@ -88,6 +87,7 @@ class GetLessonAttendanceSuccessState extends TeacherStates {}
 class GetLessonAttendanceErrorState extends TeacherStates {}
 
 class GetLessonAttendanceLoadingState extends TeacherStates {}
+class DeleteLessonAttendanceLoadingState extends TeacherStates {}
 
 class DeleteLessonAttendanceSuccessState extends TeacherStates {}
 class DeleteLessonAttendanceErrorState extends TeacherStates {}

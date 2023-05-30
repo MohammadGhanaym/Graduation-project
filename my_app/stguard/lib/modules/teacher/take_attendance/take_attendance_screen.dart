@@ -17,8 +17,7 @@ class TakeAttendanceScreen extends StatelessWidget {
     return BlocConsumer<TeacherCubit, TeacherStates>(
       listener: (context, state) {
         if (state is AddNewAttendanceSuccessState) {
-          TeacherCubit.get(context).switchScreen(0);
-          navigateAndFinish(context, const TeacherHomeScreen());
+           navigateAndFinish(context, const TeacherHomeScreen());
         }
         if (state is AttendanceNotTakenState) {
           ShowToast(
@@ -31,7 +30,7 @@ class TakeAttendanceScreen extends StatelessWidget {
               actions: [
                 InkWell(
                   onTap: () {
-                    TeacherCubit.get(context).insertAttendance();
+                    TeacherCubit.get(context).uploadClassAttendance();
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(right: 20),

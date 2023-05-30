@@ -31,135 +31,137 @@ class AddAttendanceScreen extends StatelessWidget {
             child: Center(
               child: Form(
                 key: formKey,
-                child: SizedBox(
-                  height: 600,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: Container(
-                          padding: const EdgeInsets.only(right: 20, left: 20),
-                          alignment: AlignmentDirectional.center,
-                          height: 310,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(30),
-                                  bottomRight: Radius.circular(30)),
-                              color: Theme.of(context).primaryColor),
-                          child: const Image(
-                              width: 200,
-                              color: Colors.white,
-                              image: AssetImage(
-                                  'assets/images/attendance_black.png')),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: DefaultFormField(
-                              controller: lessonController,
-                              type: TextInputType.text,
-                              validate: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Lesson name must not be empty';
-                                }
-                                if (TeacherCubit.get(context)
-                                    .lessons
-                                    .isNotEmpty) {
-                                  if (TeacherCubit.get(context)
-                                      .lessons
-                                      .map((e) => e.name)
-                                      .toList()
-                                      .contains(value)) {
-                                    return 'Lesson name already existed';
-                                  }
-                                }
-                                return null;
-                              },
-                              label: 'Lesson Name'),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 10.0, bottom: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text('Class Name',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6!
-                                            .copyWith(color: Colors.black54)),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              SizedBox(
-                                width: 300,
-                                height: 40,
-                                child: ListView.separated(
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.horizontal,
-                                    itemBuilder: (context, index) => GradeItem(
-                                        className: TeacherCubit.get(context)
-                                            .classes[index]),
-                                    separatorBuilder: (context, index) =>
-                                        SizedBox(width: 10),
-                                    itemCount: TeacherCubit.get(context)
-                                        .classes
-                                        .length),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: DefaultButton(
-                          text: 'Add',
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              if (TeacherCubit.get(context).selectedClassName !=
-                                  null) {
-                                    TeacherCubit.get(context)
-                                  .setLessonName(lessonController.text);
-                              navigateTo(context, TakeAttendanceScreen());
-                              lessonController.clear();
-                              } else {
-                                ShowToast(
-                                    message: 'Please select a class',
-                                    state: ToastStates.WARNING);
-                              }
-                              
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(right: 20, left: 20),
+                      alignment: AlignmentDirectional.center,
+                      height: 310,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30)),
+                          color: Theme.of(context).primaryColor),
+                      child: const Image(
+                          width: 200,
+                          color: Colors.white,
+                          image: AssetImage(
+                              'assets/images/attendance_black.png')),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: DefaultFormField(
+                          controller: lessonController,
+                          type: TextInputType.text,
+                          validate: (value) {
+                            if (value!.isEmpty) {
+                              return 'Lesson name must not be empty';
                             }
+                          
+                            
+                            return null;
                           },
-                          color: defaultColor.withOpacity(0.8),
-                        ),
+                          label: 'Lesson Name'),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Subject',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              borderRadius: BorderRadius.circular(10),
+                              hint: Text('Select a subject', style: Theme.of(context).textTheme.bodySmall,),
+                              value: TeacherCubit.get(context).selectedSubject,
+                              onChanged: (value) {
+                                TeacherCubit.get(context).selectSubject(value);
+                              },
+                              items: TeacherCubit.get(context)
+                                  .subjects
+                                  .map((subjectName) => DropdownMenuItem<String>(
+                                      value: subjectName, child: Text(subjectName)))
+                                  .toList(),
+                                  decoration: const InputDecoration.collapsed(
+                                hintText: 'Select a subject'),
+                              isExpanded: true,
+                            validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                return 'Subject must not be empty';
+                              }
+                    
+                              return null;
+                            },
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Class',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              borderRadius: BorderRadius.circular(10),
+                              hint: Text('Select a class', style: Theme.of(context).textTheme.bodySmall,),
+                              value: TeacherCubit.get(context).selectedClassName,
+                              decoration: const InputDecoration.collapsed(
+                              hintText: 'Select a class'),
+                              onChanged: (value) {
+                                TeacherCubit.get(context).selectClass(value);
+                              },validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                return 'Class must not be empty';
+                              }
+                    
+                              return null;
+                              },
+                              items: TeacherCubit.get(context)
+                                  .classes
+                                  .map((className) => DropdownMenuItem<String>(
+                                      value: className, child: Text(className)))
+                                  .toList(),
+                              isExpanded: true,
+                              
+                            ),
+                            const SizedBox(height: 20),
+                          DefaultButton(
+                            text: 'Add',
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                if (TeacherCubit.get(context).selectedClassName !=
+                                    null) {
+                                      TeacherCubit.get(context)
+                                    .setLessonName(lessonController.text);
+                                navigateTo(context, TakeAttendanceScreen());
+                                lessonController.clear();
+                                } else {
+                                  ShowToast(
+                                      message: 'Please select a class',
+                                      state: ToastStates.WARNING);
+                                }
+                                
+                              }
+                            },
+                            color: defaultColor.withOpacity(0.8),
+                          ),
+                        ],
                       ),
-                      const SizedBox(
-                        height: 10,
-                      )
-                    ],
-                  ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    )
+                  ],
                 ),
               ),
             ),

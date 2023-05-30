@@ -7,6 +7,8 @@ import 'package:stguard/modules/teacher/attendance_details/attendance_details_sc
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
+
+
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
@@ -15,55 +17,147 @@ class HistoryScreen extends StatelessWidget {
     return BlocConsumer<TeacherCubit, TeacherStates>(
       listener: (context, state) {
         if (state is DeleteLessonAttendanceSuccessState) {
-          Navigator.pop(context);
+          ShowToast(
+              message: 'Attendance deleted successfully', state: ToastStates.SUCCESS);
         }
       },
       builder: (context, state) {
         return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  TeacherCubit.get(context).resetSelection();
+                },
+                icon: const Icon(Icons.arrow_back)),
+            title: Text(
+              'Class Attendance',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(color: Colors.white),
+            ),
+            actions: [
+              PopupMenuButton(
+                icon: const ImageIcon(
+                    color: Colors.white,
+                    AssetImage('assets/images/adjust.png')),
+                itemBuilder: (context) => List.generate(
+                    TeacherCubit.get(context).classes.length,
+                    (index) => PopupMenuItem(
+                        value: TeacherCubit.get(context).classes[index],
+                        child: Text(
+                          TeacherCubit.get(context).classes[index],
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ))),
+                onSelected: (className) {
+                  TeacherCubit.get(context).filterAttendanceByClass(className);
+                },
+              )
+            ],
+          ),
           body: ConditionalBuilder(
-            condition: TeacherCubit.get(context).lessons.isNotEmpty,
-            builder: (context) => SingleChildScrollView(
-                child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-              child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) => LessonCard(
-                        lesson: TeacherCubit.get(context).lessons[index],
-                        onTap: () {
-                          navigateTo(
-                              context,
-                              AttendanceDetailsScreen(
-                                  lesson:
-                                      TeacherCubit.get(context).lessons[index]));
-                        }),
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 10),
-                    itemCount: TeacherCubit.get(context).lessons.length),
-              ),
-            ),fallback: (context) =>  Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+              condition: TeacherCubit.get(context).classLessonAttendace != null,
+              builder: (context) => state is GetLessonAttendanceLoadingState
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : ConditionalBuilder(
+                      condition: TeacherCubit.get(context).classLessonAttendace!.isNotEmpty,
+                      builder: (context) => SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: TeacherCubit.get(context).classLessonAttendace!.length,
+                            itemBuilder: (context, index) {
+                              return LessonAttendanceItem(
+                                  teacherOnTap: () {
+                                    showDefaultDialog(
+                                      context,
+                                      title: 'Are you sure?',
+                                      content: Text(
+                                        'Are you sure you want to delete this lesson attendance?',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                      buttonText1: 'Cancel',
+                                      onPressed1: () => Navigator.pop(context),
+                                      buttonText2: 'Yes',
+                                      onPressed2: () {
+                                        TeacherCubit.get(context).deleteClassAttendance(TeacherCubit.get(context)
+                                                .classLessonAttendace![index].id);
+                                        Navigator.pop(context);
+                                      },
+                                    );
+                                  },
+                                  onTap: () {
+                                    navigateTo(
+                                        context,
+                                        AttendanceDetailsScreen(
+                                            lessonAttendance: TeacherCubit.get(context)
+                                                .classLessonAttendace![index]));
+                                  },
+                                  lessonAttendance:
+                                      TeacherCubit.get(context).classLessonAttendace![index]);
+                            },
+                          ),
+                        ),
+                      ),
+                      fallback: (context) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image(
+                              image: const AssetImage(
+                                'assets/images/no_attendance.png',
+                              ),
+                              height: 200,
+                              color: defaultColor.withOpacity(0.3),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              'No attendance has been taken yet',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .copyWith(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+              fallback: (context) => Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image(image: const AssetImage('assets/images/no_attendance.png',
-                    ), height: 200,color: defaultColor.withOpacity(0.3),),
-                      const SizedBox(height: 5,),
-                        const Text(
-                          'No attendance has been taken yet',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey),
+                        Image(
+                          image: const AssetImage(
+                            'assets/images/class_note.png',
+                          ),
+                          height: 200,
+                          color: defaultColor.withOpacity(0.3),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          'Select a class to view its attendance history',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
-                  ),
-                ),
-          ),
+                  )),
         );
       },
     );
