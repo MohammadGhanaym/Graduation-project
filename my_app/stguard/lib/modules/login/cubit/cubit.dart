@@ -3,11 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stguard/layout/canteen/cubit/cubit.dart';
-import 'package:stguard/layout/parent/cubit/cubit.dart';
-import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/modules/login/cubit/states.dart';
-import 'package:stguard/shared/components/constants.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitState());
@@ -42,7 +38,7 @@ class LoginCubit extends Cubit<LoginStates> {
     emit(LoginLoadingState());
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) {
+        .then((value) async{
       if (role == 'parent') {
         checkRole('Parents', value.user!.uid);
       } else if (role == 'teacher') {
@@ -50,6 +46,7 @@ class LoginCubit extends Cubit<LoginStates> {
       } else if (role == 'canteen worker') {
         checkRole('Canteen Workers', value.user!.uid);
       }
+      print(await value.user!.getIdToken());
     }).catchError((error) {
       emit(LoginErrorState(error.toString().split('] ').last));
       print(error.toString().split('] ').last);

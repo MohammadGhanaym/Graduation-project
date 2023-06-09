@@ -5,7 +5,6 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/modules/parent/credit_card/credit_card_screen.dart';
-import 'package:stguard/modules/parent/grades/grades_screen.dart';
 import 'package:stguard/modules/parent/pick_school/pick_school_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/internet_cubit/cubit.dart';
@@ -152,21 +151,7 @@ class ParentHomeScreen extends StatelessWidget {
                                 ontap: () =>
                                     navigateTo(context, CreditCardScreen()),
                               ),
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              DrawerItem(
-                                  text: 'Exam Grades',
-                                  icon: const Image(
-                                    color: defaultColor,
-                                    image:
-                                        AssetImage('assets/images/grades.png'),
-                                    width: 40,
-                                    height: 40,
-                                  ),
-                                  ontap: () {
-                                    navigateTo(context, const GradesScreen());
-                                  }),
+                            
                               const SizedBox(
                                 height: 15,
                               ),
@@ -302,9 +287,8 @@ class ParentHomeScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Family',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold,fontFamily: 'OpenSans')),
+                           Text('Family',
+                              style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(
                             height: 5,
                           ),
@@ -403,9 +387,8 @@ class ParentHomeScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Activity',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold,fontFamily: 'OpenSans')),
+                           Text('Activity',
+                              style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(
                             height: 5,
                           ),

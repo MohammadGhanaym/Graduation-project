@@ -17,7 +17,10 @@ class NoteDetailScreen extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Note Detail'),
+            title:  Text('Note Detail', style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white
+            ),),
           ),
           body: Padding(
             padding: const EdgeInsets.all(20.0),

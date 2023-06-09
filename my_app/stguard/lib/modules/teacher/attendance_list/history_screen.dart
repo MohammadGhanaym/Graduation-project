@@ -7,8 +7,6 @@ import 'package:stguard/modules/teacher/attendance_details/attendance_details_sc
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
-
-
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
@@ -18,7 +16,8 @@ class HistoryScreen extends StatelessWidget {
       listener: (context, state) {
         if (state is DeleteLessonAttendanceSuccessState) {
           ShowToast(
-              message: 'Attendance deleted successfully', state: ToastStates.SUCCESS);
+              message: 'Attendance deleted successfully',
+              state: ToastStates.SUCCESS);
         }
       },
       builder: (context, state) {
@@ -63,17 +62,21 @@ class HistoryScreen extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     )
                   : ConditionalBuilder(
-                      condition: TeacherCubit.get(context).classLessonAttendace!.isNotEmpty,
+                      condition: TeacherCubit.get(context)
+                          .classLessonAttendace!
+                          .isNotEmpty,
                       builder: (context) => SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
-                            itemCount: TeacherCubit.get(context).classLessonAttendace!.length,
+                            itemCount: TeacherCubit.get(context)
+                                .classLessonAttendace!
+                                .length,
                             itemBuilder: (context, index) {
-                              return LessonAttendanceItem(
-                                  teacherOnTap: () {
+                              return DefaultClassListCard(
+                                teacherOnTap: () {
                                     showDefaultDialog(
                                       context,
                                       title: 'Are you sure?',
@@ -87,8 +90,11 @@ class HistoryScreen extends StatelessWidget {
                                       onPressed1: () => Navigator.pop(context),
                                       buttonText2: 'Yes',
                                       onPressed2: () {
-                                        TeacherCubit.get(context).deleteClassAttendance(TeacherCubit.get(context)
-                                                .classLessonAttendace![index].id);
+                                        TeacherCubit.get(context)
+                                            .deleteClassAttendance(TeacherCubit
+                                                    .get(context)
+                                                .classLessonAttendace![index]
+                                                .id);
                                         Navigator.pop(context);
                                       },
                                     );
@@ -97,11 +103,17 @@ class HistoryScreen extends StatelessWidget {
                                     navigateTo(
                                         context,
                                         AttendanceDetailsScreen(
-                                            lessonAttendance: TeacherCubit.get(context)
+                                            lessonAttendance: TeacherCubit.get(
+                                                    context)
                                                 .classLessonAttendace![index]));
                                   },
-                                  lessonAttendance:
-                                      TeacherCubit.get(context).classLessonAttendace![index]);
+                                  title: TeacherCubit.get(context)
+                                      .classLessonAttendace![index].lessonName,
+                                  subtitle: TeacherCubit.get(context)
+                                      .classLessonAttendace![index].subject,
+                                  date: TeacherCubit.get(context)
+                                      .classLessonAttendace![index].datetime);
+                              
                             },
                           ),
                         ),
@@ -110,12 +122,11 @@ class HistoryScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image(
-                              image: const AssetImage(
-                                'assets/images/no_attendance.png',
+                            const Image(
+                              image: AssetImage(
+                                'assets/images/no_activity.png',
                               ),
                               height: 200,
-                              color: defaultColor.withOpacity(0.3),
                             ),
                             const SizedBox(
                               height: 20,

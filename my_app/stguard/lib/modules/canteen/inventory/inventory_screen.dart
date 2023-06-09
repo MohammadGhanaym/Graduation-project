@@ -59,130 +59,118 @@ class CanteenInventoryScreen extends StatelessWidget {
                 }
               },
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: SizedBox(
-                        height: 50,
-                        width: double.infinity,
-                        child: DefaultButton(
-                            color: defaultColor.withOpacity(0.8),
-                            onPressed: (() {
-                              CanteenCubit.get(context).getAllergies();
-                              navigateTo(context, AddProductScreen());
-                            }),
-                            text: 'Add New Item'),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      
+                      Text(
+                        'Categories',
+                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold)
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Divider(),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                      child: Text(
-                        'Delete Category',
-                        style: Theme.of(context).textTheme.headline6,
+                      const SizedBox(
+                        height: 10,
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(
-                      height: 55,
-                      child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) =>
-                              InventoryCategoryCard(
-                                category: CanteenCubit.get(context)
-                                    .categories
-                                    .where((element) => element != 'All')
-                                    .toList()[index],
-                                onPressed: () async {
-                                  await showDefaultDialog(context,
-                                      content: Text(
-                                          'Are you certain that you want to delete this category? Deleting this category will also delete all items within it',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .caption),
-                                      title: 'Are you sure?',
-                                      buttonText1: 'Cancel',
-                                      buttonText2: 'Delete', onPressed1: () {
-                                    Navigator.pop(context);
-                                  }, onPressed2: () {
-                                    CanteenCubit.get(context).deleteCategory(
-                                        CanteenCubit.get(context)
-                                            .categories
-                                            .where(
-                                                (element) => element != 'All')
-                                            .toList()[index]);
-                                  });
-                                },
-                              ),
-                          separatorBuilder: (context, index) => const SizedBox(
-                                width: 5,
-                              ),
-                          itemCount: CanteenCubit.get(context)
-                              .categories
-                              .where((element) => element != 'All')
-                              .toList()
-                              .length),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const Divider(),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                      child: Text('Edit Item',
-                          style: Theme.of(context).textTheme.headline6),
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(right: 20.0, left: 20),
-                        child: SearchTextFormField(
-                            searchController: searchController,
-                            onChanged: (p0) {
-                              CanteenCubit.get(context).getProducts(search: p0);
-                            })),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    state is UpdatePriceLoadingState ||
-                            state is DeleteItemLoadingState ||
-                            state is GetInventorySearchResultssLoadingState
-                        ? const Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: ListView.separated(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) =>
-                                    ProductSearchItem(
-                                        productID: CanteenCubit.get(context)
-                                            .products
-                                            .keys
-                                            .toList()[index],
-                                        product: CanteenCubit.get(context)
-                                            .products
-                                            .values
-                                            .toList()[index]),
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                itemCount:
-                                    CanteenCubit.get(context).products.length),
-                          )
-                  ],
+                      SizedBox(
+                        height: 55,
+                        child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) =>
+                                InventoryCategoryCard(
+                                  category: CanteenCubit.get(context)
+                                      .categories
+                                      .where((element) => element != 'All')
+                                      .toList()[index],
+                                  onPressed: () async {
+                                    await showDefaultDialog(context,
+                                        content: Text(
+                                            'Are you certain that you want to delete this category? Deleting this category will also delete all items within it',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall),
+                                        title: 'Are you sure?',
+                                        buttonText1: 'Cancel',
+                                        buttonText2: 'Delete', onPressed1: () {
+                                      Navigator.pop(context);
+                                    }, onPressed2: () {
+                                      CanteenCubit.get(context).deleteCategory(
+                                          CanteenCubit.get(context)
+                                              .categories
+                                              .where(
+                                                  (element) => element != 'All')
+                                              .toList()[index]);
+                                    });
+                                  },
+                                ),
+                            separatorBuilder: (context, index) => const SizedBox(
+                                  width: 5,
+                                ),
+                            itemCount: CanteenCubit.get(context)
+                                .categories
+                                .where((element) => element != 'All')
+                                .toList()
+                                .length),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Divider(),
+                      Text('Items',
+                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(
+                        height: 20,
+                      ),SearchTextFormField(
+                          searchController: searchController,
+                          onChanged: (p0) {
+                            CanteenCubit.get(context).getProducts(search: p0);
+                          }),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      state is UpdatePriceLoadingState ||
+                              state is DeleteItemLoadingState ||
+                              state is GetInventorySearchResultssLoadingState
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ListView.separated(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) =>
+                                  ProductSearchItem(
+                                      productID: CanteenCubit.get(context)
+                                          .products
+                                          .keys
+                                          .toList()[index],
+                                      product: CanteenCubit.get(context)
+                                          .products
+                                          .values
+                                          .toList()[index]),
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                              itemCount:
+                                  CanteenCubit.get(context).products.length)
+                    ],
+                  ),
                 ),
               ),
-            ));
+            )
+            ,floatingActionButton:SizedBox(
+              width: 70,
+              height: 70,
+              child: FloatingActionButton(
+                child: const Icon(Icons.add, size: 30,),
+                onPressed:() {
+                 CanteenCubit.get(context).getAllergies();
+                                navigateTo(context, AddProductScreen());
+              },),
+            )
+            );
       },
     );
   }

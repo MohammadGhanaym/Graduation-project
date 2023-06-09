@@ -14,6 +14,13 @@ class GetCanteenPathErrorState extends CanteenStates {}
 
 class GetCanteenPathSuccessState extends CanteenStates {}
 
+class GetCanteenTransLoadingState extends CanteenStates {}
+
+class GetCanteenTransErrorState extends CanteenStates {}
+
+class GetCanteenTransSuccessState extends CanteenStates {}
+
+class SetTransDateState extends CanteenStates {}
 class NeedtoJoinCommunityState extends CanteenStates {}
 
 class ResetIDSuccessState extends CanteenStates {}

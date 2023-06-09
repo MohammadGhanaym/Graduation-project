@@ -25,6 +25,8 @@ import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
 
+import '../../../models/exam_results_model.dart';
+
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
   static ParentCubit get(context) => BlocProvider.of(context);
@@ -500,7 +502,7 @@ class ParentCubit extends Cubit<ParentStates> {
     await getLocation(st.id);
     await getClassNotes(st);
     await getStudentAttendance(st);
-    
+    await getStudentGrades(st);
 
     settingsVisibility = true;
     isPaired = true;
@@ -951,8 +953,43 @@ class ParentCubit extends Cubit<ParentStates> {
 
 // Write your code here
 /// *************************************
+List<ExamResults>? studentResults;
   Future<void>getStudentGrades(StudentModel st)async
   {
+    studentResults = [];
+    emit(GetGradesLoadingState());
+   await schoolPaths[st.id]!
+        .collection('classes')
+        .where('name', isEqualTo: st.className)
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        print(value.docs);
+        value.docs[0].reference
+            .collection('exams results')
+            .orderBy('datetime', descending: true)
+            .get()
+            .then((value) {
+              if (value.docs.isNotEmpty) {
+                value.docs.forEach((element) {
+                  studentResults!
+                      .add(ExamResults.fromMap(element.data()));
+                });
+                print(studentResults);
+                emit(GetGradesSuccessState());
+              } else {
+                emit(GetGradesErrorState());
+              }
+            })
+            .catchError((error) {
+              print(error.toString());
+              emit(GetGradesErrorState());
+            });
+      }
+    }).catchError((error) {
+      print(error.toString());
+      emit(GetGradesErrorState());
+    });
 
   }
 

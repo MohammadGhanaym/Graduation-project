@@ -14,10 +14,12 @@ class AttendanceHistoryScreen extends StatelessWidget {
     ParentCubit.get(context).getAttendanceHistory(model.st_id);
     return Scaffold(
         appBar: AppBar(
-          title: const Text(
+          title:  Text(
             'Attendance History',
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white
+            )
           ),
           centerTitle: true,
         ),

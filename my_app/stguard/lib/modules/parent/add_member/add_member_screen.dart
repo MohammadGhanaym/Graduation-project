@@ -36,10 +36,10 @@ class AddMember extends StatelessWidget {
             appBar: AppBar(
               title: Text(
                 'Find your family member',
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6!
-                    .copyWith(color: Colors.white),
+                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white
+            )
               ),
             ),
             body: Center(

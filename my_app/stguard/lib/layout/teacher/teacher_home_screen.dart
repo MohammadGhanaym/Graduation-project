@@ -4,7 +4,7 @@ import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
 import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/modules/teacher/add_new_task/add_new_task.dart';
-import 'package:stguard/modules/teacher/history/history_screen.dart';
+import 'package:stguard/modules/teacher/attendance_list/history_screen.dart';
 import 'package:stguard/modules/teacher/join_community/join_community_screen.dart';
 import 'package:stguard/modules/teacher/notes/note_list_screen.dart';
 import 'package:stguard/modules/teacher/show_grades/show_grades.dart';

@@ -1,33 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stguard/layout/parent/cubit/cubit.dart';
-import 'package:stguard/layout/parent/cubit/states.dart';
-import 'package:stguard/models/activity_model.dart';
+import 'package:stguard/layout/canteen/cubit/cubit.dart';
+import 'package:stguard/layout/canteen/cubit/states.dart';
+import 'package:stguard/models/canteen_product_model.dart';
 import 'package:stguard/shared/components/components.dart';
 
-class TransactionDetailsScreen extends StatelessWidget {
-  ActivityModel trans;
-  TransactionDetailsScreen({required this.trans, super.key});
+
+class CanteeenTransactionDetailsScreen extends StatelessWidget {
+  TransactionModel trans;
+  CanteeenTransactionDetailsScreen({required this.trans, super.key});
 
   @override
   Widget build(BuildContext context) {
-    ParentCubit.get(context).getDataFromTransactionsTable(trans.trans_id);
-
     return Scaffold(
       appBar: AppBar(
-        title:  Text(
+        title: const Text(
           'Transaction Details',
-          style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white
-            )
+          style: TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(top: 30, left: 20),
-          child: BlocBuilder<ParentCubit, ParentStates>(
+          child: BlocBuilder<CanteenCubit, CanteenStates>(
             builder: (context, state) {
               return Column(
                 children: [
@@ -44,7 +41,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                           const SizedBox(
                             width: 20,
                           ),
-                          Text(trans.activity,
+                          Text('${trans.totalPrice}',
                               style: const TextStyle(
                                 fontSize: 18,
                               ))
@@ -128,10 +125,10 @@ class TransactionDetailsScreen extends StatelessWidget {
                           shrinkWrap: true,
                           itemBuilder: (context, index) => ProductItem(
                               product:
-                                  ParentCubit.get(context).products[index]),
+                                  trans.products[index]),
                           separatorBuilder: (context, index) =>
                               const SizedBox(height: 20),
-                          itemCount: ParentCubit.get(context).products.length),
+                          itemCount: trans.products.length),
                     ],
                   )
                 ],

@@ -1,11 +1,11 @@
 class ProductModel {
   late String transId;
-  late String productName;
+  late String name;
   late dynamic price;
   late dynamic quantity;
   ProductModel({
     required this.transId,
-    required this.productName,
+    required this.name,
     required this.price,
     required this.quantity,
   });
@@ -14,7 +14,7 @@ class ProductModel {
     if (json != null) {
       transId = json['trans_id'];
 
-      productName = json['product'];
+      name = json['product'];
 
       price = json['price'];
 

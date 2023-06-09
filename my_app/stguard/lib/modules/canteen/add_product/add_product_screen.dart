@@ -34,15 +34,15 @@ class AddProductScreen extends StatelessWidget {
       body: BlocConsumer<CanteenCubit, CanteenStates>(
           listener: (context, state) {},
           builder: (context, state) {
-            return SingleChildScrollView(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  FocusScopeNode currentFocus = FocusScope.of(context);
-                  if (!currentFocus.hasPrimaryFocus) {
-                    currentFocus.unfocus();
-                  }
-                },
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                FocusScopeNode currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus) {
+                  currentFocus.unfocus();
+                }
+              },
+              child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Form(
@@ -126,11 +126,11 @@ class AddProductScreen extends StatelessWidget {
                                             key: formKeyCategory,
                                             child: Column(
                                               children: [
-                                                Container(
+                                                SizedBox(
                                                   height: 80,
                                                   child: Row(
                                                     children: [
-                                                      Container(
+                                                      SizedBox(
                                                         width: 230,
                                                         child: TextFormField(
                                                           controller:
@@ -207,107 +207,71 @@ class AddProductScreen extends StatelessWidget {
                             },
                             label: 'Calories (kcal)'),
                         const SizedBox(height: 20),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Add Ingredients',
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: MaterialButton(
-                                  elevation: 1,
-                                  color: Colors.white,
-                                  onPressed: (() async {
-                                    await showDefaultDialog(context,
-                                        title: 'Add ingredients',
-                                        content: Form(
-                                          key: formKeyIngredient,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                  'Please ensure to accurately enter the ingredients for each item, as this information will be used to identify allergens for our students. Thank you for helping us provide a safe and enjoyable dining experience.',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .caption),
-                                              const SizedBox(height: 10),
-                                              TypeAheadFormField(
-                                                textFieldConfiguration:
-                                                    TextFieldConfiguration(
-                                                        controller:
-                                                            ingredientController,
-                                                        decoration:
-                                                            const InputDecoration(
-                                                          label: Text(
-                                                              'Ingredient Name'),
-                                                          border:
-                                                              OutlineInputBorder(),
-                                                        )),
-                                                onSuggestionSelected:
-                                                    (suggestion) {
-                                                  ingredientController.text =
-                                                      suggestion;
-                                                },
-                                                itemBuilder:
-                                                    (context, itemData) {
-                                                  return ListTile(
-                                                    title: Text(itemData),
-                                                  );
-                                                },
-                                                suggestionsCallback: (pattern) {
-                                                  print(pattern);
-                                                  return CanteenCubit.get(context)
-                                                  .allergens
-                                                  .where((suggestion) =>
-                                                      suggestion.toLowerCase().contains(pattern.toLowerCase()))
-                                                  .toList();
-                                                },
-                                                validator: (value) {
-                                                  if (value!.isEmpty) {
-                                                    return 'Please enter an ingredient name';
-                                                  }
-                                                  if (CanteenCubit.get(context)
-                                                      .ingredients
-                                                      .contains(value)) {
-                                                    return 'You have already entered this ingredient before';
-                                                  }
-                                                  return null;
-                                                },
-                                              )
-                                    ],
-                                          ),
-                                        ),
-                                        buttonText1: 'Done',
-                                        buttonText2: 'Add', onPressed1: () {
-                                      Navigator.pop(context);
+                         Form(
+                          key: formKeyIngredient,
+                           child: TypeAheadFormField(
+                                              textFieldConfiguration:
+                                                  TextFieldConfiguration(
+                                                    
+                                                      controller:
+                                                          ingredientController,
+                                                      decoration:
+                                                           InputDecoration(
+                                                            
+                                                            suffixIcon: IconButton(
+                                                              padding: EdgeInsets.zero,
+                                                              onPressed:() {
+                                                              if (formKeyIngredient.currentState!
+                                        .validate()) {
+                                      CanteenCubit.get(context).addIngredient(
+                                          ingredientController.text);
                                       ingredientController.clear();
-                                    }, onPressed2: () {
-                                      if (formKeyIngredient.currentState!
-                                          .validate()) {
-                                        CanteenCubit.get(context).addIngredient(
-                                            ingredientController.text);
-                                        ingredientController.clear();
-                                      }
-                                    });
-                                  }),
-                                  child: const Icon(
-                                    Icons.add,
-                                    color: defaultColor,
-                                  )),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
+                                    }
+                                                            }, icon: const Icon(Icons.add)),
+                                                        label: const Text(
+                                                            'Ingredient'),prefixIcon: const Icon(null),
+                                                        border:
+                                                            const OutlineInputBorder(),
+                                                      )),
+                                              onSuggestionSelected:
+                                                  (suggestion) {
+                                                ingredientController.text =
+                                                    suggestion;
+                                              },
+                                              itemBuilder:
+                                                  (context, itemData) {
+                                                return ListTile(
+                                                  title: Text(itemData),
+                                                );
+                                              },
+                                              suggestionsCallback: (pattern) {
+                                                print(pattern);
+                                                return CanteenCubit.get(context)
+                                                .allergens
+                                                .where((suggestion) =>
+                                                    suggestion.toLowerCase().contains(pattern.toLowerCase()))
+                                                .toList();
+                                              },
+                                              validator: (value) {
+                                                if (value==null 
+                                                
+                                                || value.isEmpty) {
+                                                  return 'Please enter an ingredient name';
+                                                }
+                                                if (CanteenCubit.get(context)
+                                                    .ingredients
+                                                    .contains(value)) {
+                                                  return 'You have already entered this ingredient before';
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                         )
+                               ,
+               const SizedBox(
                           height: 10,
                         ),
-                        CanteenCubit.get(context).ingredients.isNotEmpty
-                            ? Wrap(
+                         Wrap(
                                 spacing: 8.0,
                                 runSpacing:
                                     8.0, // sets the space between the blocks
@@ -315,7 +279,6 @@ class AddProductScreen extends StatelessWidget {
                                     .ingredients
                                     .map((ingredient) {
                                   return Container(
-                                    height: 40,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 8.0, horizontal: 8.0),
                                     decoration: BoxDecoration(
@@ -329,7 +292,9 @@ class AddProductScreen extends StatelessWidget {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(ingredient),
+                                          SizedBox(
+                                            width: 100,
+                                            child: Text(ingredient, overflow: TextOverflow.ellipsis,maxLines: 1,)),
                                           const SizedBox(
                                             width: 10,
                                           ),
@@ -342,11 +307,9 @@ class AddProductScreen extends StatelessWidget {
                                   );
                                 }).toList(),
                               )
-                            : Container(
-                                height: 40,
-                              ),
+                          ,
                         const SizedBox(
-                          height: 30,
+                          height: 20,
                         ),
                         DefaultButton(
                               showCircularProgressIndicator: state is UploadItemDataLoadingState,

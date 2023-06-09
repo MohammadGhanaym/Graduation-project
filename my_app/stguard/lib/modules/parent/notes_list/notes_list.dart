@@ -5,7 +5,6 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/modules/parent/note_details/note_details_screen.dart';
 import 'package:stguard/shared/components/components.dart';
-import 'package:stguard/shared/styles/themes.dart';
 
 class NotesListsScreen extends StatelessWidget {
   const NotesListsScreen({super.key});
@@ -34,13 +33,14 @@ class NotesListsScreen extends StatelessWidget {
                   ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) => NoteItem(
-                            note: ParentCubit.get(context).notes[index],
-                            onTap: () => navigateTo(
+                      itemBuilder: (context, index) => 
+                      DefaultClassListCard(onTap: () => navigateTo(
                                 context,
                                 NoteDetailScreen(
                                     note: ParentCubit.get(context).notes[index])),
-                          ),
+                       title: ParentCubit.get(context).notes[index].title,
+                       subtitle: ParentCubit.get(context).notes[index].subject, 
+                       date: ParentCubit.get(context).notes[index].datetime),
                       separatorBuilder: (context, index) => const SizedBox(
                             height: 10,
                           ),
@@ -52,8 +52,8 @@ class NotesListsScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children:  [
-                    Image(image: const AssetImage('assets/images/no-message.png',
-                  ), height: 200,color: defaultColor.withOpacity(0.3),),
+                    const Image(image: AssetImage('assets/images/no_activity.png',
+                  ), height: 200,),
                     const SizedBox(height: 20,),
                     Text('No Notes Available', style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 15, fontWeight: FontWeight.bold),),
                   ],

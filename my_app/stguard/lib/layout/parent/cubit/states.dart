@@ -216,3 +216,10 @@ class GetAttendanceSuccessState extends ParentStates {}
 class GetAttendanceLoadingState extends ParentStates {}
 
 class GetAttendanceErrorState extends ParentStates {}
+
+class GetGradesLoadingState extends ParentStates {}
+
+class GetGradesSuccessState extends ParentStates {}
+
+class GetGradesErrorState extends ParentStates {}
+

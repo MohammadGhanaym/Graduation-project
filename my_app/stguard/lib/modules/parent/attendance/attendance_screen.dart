@@ -5,7 +5,6 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/shared/components/components.dart';
-import 'package:stguard/shared/styles/themes.dart';
 
 class ClassAttendanceScreen extends StatelessWidget {
   StudentModel st;
@@ -37,7 +36,7 @@ class ClassAttendanceScreen extends StatelessWidget {
                   child: ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) => AttendanceItem(
+                      itemBuilder: (context, index) => ParentAttendanceItem(
                         st:st,
                             attendanceDetails: ParentCubit.get(context)
                                 .studentAttendance![index],
@@ -55,12 +54,11 @@ class ClassAttendanceScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image(
-                        image: const AssetImage(
-                          'assets/images/no-message.png',
+                      const Image(
+                        image: AssetImage(
+                          'assets/images/no_activity.png',
                         ),
                         height: 200,
-                        color: defaultColor.withOpacity(0.3),
                       ),
                       const SizedBox(
                         height: 20,
@@ -81,12 +79,11 @@ class ClassAttendanceScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image(
-                      image: const AssetImage(
-                        'assets/images/no-message.png',
+                    const Image(
+                      image: AssetImage(
+                        'assets/images/no_activity.png',
                       ),
                       height: 200,
-                      color: defaultColor.withOpacity(0.3),
                     ),
                     const SizedBox(
                       height: 20,

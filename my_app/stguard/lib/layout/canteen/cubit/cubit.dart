@@ -47,11 +47,11 @@ class CanteenCubit extends Cubit<CanteenStates> {
 
   DocumentReference<Map<String, dynamic>>? schoolCanteenPath;
   bool canteenPathLoading = true;
-  void getCanteenPath() {
+  Future<void> getCanteenPath() async {
     canteenPathLoading = true;
     schoolCanteenPath = null;
     emit(GetCanteenPathLoadingState());
-    db
+    await db
         .collection('Canteen Workers')
         .doc(userID)
         .collection('Community')
@@ -67,6 +67,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
         emit(GetCanteenPathSuccessState());
         await getCategories();
         await getCanteenDetails();
+        await getTrans();
         canteenPathLoading = false;
       } else {
         emit(NeedtoJoinCommunityState());
@@ -79,68 +80,62 @@ class CanteenCubit extends Cubit<CanteenStates> {
     });
   }
 
-  void resetId() {
-    db.runTransaction((transaction) async {
-      db
-          .collection('Canteen Workers')
-          .doc(userID)
-          .collection('Community')
-          .get()
-          .then((value) {
-        if (value.docs.isNotEmpty) {
-          value.docs[0].reference.delete().then((value) {
-            emit(ResetIDSuccessState());
-            getCanteenPath();
-          });
-        }
-      });
-    }).catchError((error) {
-      print(error.toString());
-      emit(ResetIDErrorState());
+  Future<void> resetId() async {
+    await db
+        .collection('Canteen Workers')
+        .doc(userID)
+        .collection('Community')
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty) {
+        value.docs[0].reference.delete().then((value) async {
+          emit(ResetIDSuccessState());
+          await getCanteenPath();
+        }).catchError((error) {
+          print(error.toString());
+          emit(ResetIDErrorState());
+        });
+      }
     });
   }
 
   void addCanteen(String id) {
     emit(AddCanteenLoadingState());
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    db.runTransaction((transaction) async {
-      db
-          .collection('Countries')
-          .doc(pickedCountry!.id)
-          .collection('Schools')
-          .doc(pickedSchool!.id)
-          .collection('SchoolStaff')
-          .where('id', isEqualTo: id)
-          .get()
-          .then((value) {
-        if (value.docs.isNotEmpty &&
-            value.docs[0]['role'] == 'canteen worker') {
-          db
-              .collection('Canteen Workers')
-              .doc(userID)
-              .collection('Community')
-              .doc(id)
-              .set({
-            'uid': value.docs[0].id,
-            'country': pickedCountry!.id,
-            'school': pickedSchool!.id
-          }).then((value) {
-            emit(AddCanteenSucessState());
-            getCanteenPath();
-          });
-        }
-      });
-    }).catchError((error) {
-      print(error.toString());
-      emit(AddCanteenErrorState(error.toString()));
+    db
+        .collection('Countries')
+        .doc(pickedCountry!.id)
+        .collection('Schools')
+        .doc(pickedSchool!.id)
+        .collection('SchoolStaff')
+        .where('id', isEqualTo: id)
+        .get()
+        .then((value) {
+      if (value.docs.isNotEmpty && value.docs[0]['role'] == 'canteen worker') {
+        db
+            .collection('Canteen Workers')
+            .doc(userID)
+            .collection('Community')
+            .doc(id)
+            .set({
+          'uid': value.docs[0].id,
+          'country': pickedCountry!.id,
+          'school': pickedSchool!.id
+        }).then((value) async {
+          emit(AddCanteenSucessState());
+          await getCanteenPath();
+        }).catchError((error) {
+          print(error.toString());
+          emit(AddCanteenErrorState(error.toString()));
+        });
+      }
     });
   }
 
   List<Country> countries = [];
-  void getCountries() {
+  Future<void> getCountries() async {
     countries = [];
     emit(GetCountriesLoadingState());
-    db.collection('Countries').get().then((value) {
+    await db.collection('Countries').get().then((value) {
       if (value.docs.isNotEmpty) {
         value.docs.forEach((country) {
           countries.add(Country(name: country['name'], id: country.id));
@@ -162,11 +157,11 @@ class CanteenCubit extends Cubit<CanteenStates> {
   }
 
   List<School> schools = [];
-  void getSchools() {
+  Future<void> getSchools() async {
     schools = [];
     emit(GetSchoolsLoadingState());
 
-    db
+    await db
         .collection('Countries')
         .doc(pickedCountry!.id)
         .collection('Schools')
@@ -449,9 +444,12 @@ class CanteenCubit extends Cubit<CanteenStates> {
       required String image,
       required List<String> itemAllergies}) async {
     emit(UploadItemDataLoadingState());
-    await schoolCanteenPath!.collection('Canteen').get().then((canteenData) {
+    await schoolCanteenPath!
+        .collection('Canteen')
+        .get()
+        .then((canteenData) async {
       if (!categories.contains(category)) {
-        db.runTransaction((transaction) async {
+        await db.runTransaction((transaction) async {
           transaction.set(
               canteenData.docs[0].reference
                   .collection('categories')
@@ -467,6 +465,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
               {
                 'name': name,
                 'price': price,
+                'ingredients': ingredients,
                 'calories': calories,
                 'image': image,
                 'allergies': itemAllergies
@@ -482,7 +481,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
           emit(UploadItemDataErrorState());
         });
       } else {
-        schoolCanteenPath!
+        await schoolCanteenPath!
             .collection('Canteen')
             .doc(canteenData.docs[0].id)
             .collection('categories')
@@ -493,6 +492,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
           'name': name,
           'price': price,
           'calories': calories,
+          'ingredients': ingredients,
           'image': image,
           'allergies': itemAllergies
         }).then((value) async {
@@ -616,46 +616,52 @@ class CanteenCubit extends Cubit<CanteenStates> {
   String? result;
   Future<void> analyzeBuyerData() async {
     result = null;
-
-    if (buyer!.parent == null) {
-      print('ID is Deactivated');
-      result = 'ID is Deactivated';
-    } else if (totalPrice > buyer!.pocketMoney!) {
-      print('Daily spending limit exceeded1');
-      result = 'Daily spending limit exceeded';
-    } else if (buyer!.dailySpending['value'] + totalPrice >
-        buyer!.pocketMoney) {
-      print('Daily spending limit exceeded');
-      result = 'Daily spending limit exceeded';
-    } else if (totalCalories > buyer!.calorieLimit) {
-      result = 'Daily calorie limit exceeded';
-      print('Daily calorie limit exceeded1');
-    } else if (buyer!.dailyCalorie['value'] + totalCalories >
-        buyer!.calorieLimit) {
-      result = 'Daily calorie limit exceeded';
-      print('Daily calorie limit exceeded2');
-    } else if (buyer!.allergies != null) {
-      print('One or more products contain allergens');
-      print('checkallergies');
-      bool hasAllergen = false;
-      for (CanteenProductModel product in selectedProducts.values) {
-        if (product.allergies != null) {
-          for (String allergy in product.allergies!) {
-            if (buyer!.allergies!.contains(allergy)) {
-              result = 'One or more products contain allergens';
-              hasAllergen = true;
-              break;
+    try {
+      if (buyer!.parent == null) {
+        print('ID is Deactivated');
+        result = 'ID is Deactivated';
+      } else if (totalPrice > buyer!.pocketMoney!) {
+        print('Daily spending limit exceeded1');
+        result = 'Daily spending limit exceeded';
+      } else if (buyer!.dailySpending['value'] + totalPrice >
+          buyer!.pocketMoney) {
+        print('Daily spending limit exceeded');
+        result = 'Daily spending limit exceeded';
+      } else if (totalCalories > buyer!.calorieLimit) {
+        result = 'Daily calorie limit exceeded';
+        print('Daily calorie limit exceeded1');
+      } else if (buyer!.dailyCalorie['value'] + totalCalories >
+          buyer!.calorieLimit) {
+        result = 'Daily calorie limit exceeded';
+        print('Daily calorie limit exceeded2');
+      } else if (buyer!.allergies != null) {
+        print('One or more products contain allergens');
+        print('checkallergies');
+        bool hasAllergen = false;
+        for (CanteenProductModel product in selectedProducts.values) {
+          if (product.allergies != null) {
+            for (String allergy in product.allergies!) {
+              if (buyer!.allergies!.contains(allergy)) {
+                result = 'One or more products contain allergens';
+                hasAllergen = true;
+                break;
+              }
             }
           }
         }
       }
-    }
-    if (result == null) {
-      completePayment(buyer!.parent!);
-    } else {
+      if (result == null) {
+        completePayment(buyer!.parent!);
+      } else {
+        cancelBuyerListener();
+        cancelBuyer();
+        emit(PaymentErrorState());
+      }
+    } catch (e) {
       cancelBuyerListener();
       cancelBuyer();
       emit(PaymentErrorState());
+      print(e.toString());
     }
   }
 
@@ -757,7 +763,8 @@ class CanteenCubit extends Cubit<CanteenStates> {
     return {
       'date': DateTime.now(),
       'products': purchasedProducts,
-      'total_price': totalPrice
+      'total_price': totalPrice,
+      'buyer': {'name': buyer!.name, 'id': buyer!.id}
     };
   }
 
@@ -769,66 +776,72 @@ class CanteenCubit extends Cubit<CanteenStates> {
         .then((value) async {
       if (value.docs.isNotEmpty) {
         // update daily spending
-        if (value.docs[0].data().containsKey('dailySpending')) {
-          batch.update(value.docs[0].reference, {
-            'dailySpending': {
-              'value':
-                  totalPrice + value.docs[0].data()['dailySpending']['value'],
-              'updateTime': DateTime.now()
-            }
-          });
-        } else {
-          batch.update(value.docs[0].reference, {
-            'dailySpending': {'value': totalPrice, 'updateTime': DateTime.now()}
-          });
-        }
+        batch.update(value.docs[0].reference, {
+          'dailySpending': {
+            'value': value.docs[0].data().containsKey('dailySpending')
+                ? totalPrice + value.docs[0].data()['dailySpending']['value']
+                : totalPrice,
+            'updateTime': DateTime.now()
+          }
+        });
 
         // update calorie
-        if (value.docs[0].data().containsKey('dailyCalorie')) {
-          batch.update(value.docs[0].reference, {
-            'dailyCalorie': {
-              'value':
-                  totalCalories + value.docs[0].data()['dailyCalorie']['value'],
-              'updateTime': DateTime.now()
-            }
-          });
-        } else {
-          batch.update(value.docs[0].reference, {
-            'dailyCalorie': {
-              'value': totalCalories,
-              'updateTime': DateTime.now()
-            }
-          });
-        }
+        batch.update(value.docs[0].reference, {
+          'dailyCalorie': {
+            'value': value.docs[0].data().containsKey('dailyCalorie')
+                ? totalCalories + value.docs[0].data()['dailyCalorie']['value']
+                : totalCalories,
+            'updateTime': DateTime.now()
+          }
+        });
+
         batch.set(
             value.docs[0].reference.collection('CanteenTransactions').doc(),
             createTranscation());
+        schoolCanteenPath!.collection('Canteen').get().then((value) async {
+          if (value.docs.isNotEmpty) {
+            batch.set(value.docs[0].reference.collection('Transactions').doc(),
+                createTranscation());
+            await batch.commit().then((value) async {
+              cancelBuyerListener();
+              cancelBuyer();
+              emit(PaymentSuccessState());
 
-        await batch.commit().then((value) {
-          cancelBuyerListener();
-          cancelBuyer();
-          emit(PaymentSuccessState());
-          print('device token');
-          print(parent!.deviceToken);
-          if (parent!.deviceToken != null) {
-            NotificationHelper.sendNotification(
-                    title: '${buyer!.name!.split(' ')[0]} Purchased',
-                    body:
-                        '-$totalPrice\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}',
-                    receiverToken: parent!.deviceToken!)
-                .then((value) {
-              print(value.body);
+              print('device token');
+              print(parent!.deviceToken);
+              if (parent!.deviceToken != null) {
+                NotificationHelper.sendNotification(
+                        title: '${buyer!.name!.split(' ')[0]} Purchased',
+                        body:
+                            '-$totalPrice\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}',
+                        receiverToken: parent!.deviceToken!)
+                    .then((value) {
+                  print(value.body);
+                }).catchError((error) {
+                  print(error.toString());
+                });
+              }
             }).catchError((error) {
+              cancelBuyerListener();
+              cancelBuyer();
+              print('batch commit error');
               print(error.toString());
+              emit(PaymentErrorState());
             });
+          } else {
+            cancelBuyerListener();
+            cancelBuyer();
+            emit(PaymentErrorState());
           }
         }).catchError((error) {
           cancelBuyerListener();
           cancelBuyer();
-          print('batch commit error');
-          print(error.toString());
           emit(PaymentErrorState());
         });
+      } else {
+        cancelBuyerListener();
+        cancelBuyer();
+        emit(PaymentErrorState());
       }
     }).catchError((error) {
       cancelBuyerListener();
@@ -969,5 +982,54 @@ class CanteenCubit extends Cubit<CanteenStates> {
       schoolCanteenPath = null;
       emit(UserSignOutSuccessState());
     });
+  }
+
+  List<TransactionModel>? transactions;
+  DateTime getTransBy = DateTime.now();
+  Future<void> setTransDate({required DateTime? date}) async {
+    if (date != null) {
+      getTransBy = date;
+      emit(SetTransDateState());
+      await getTrans();
+    }
+  }
+
+  bool getTransLoading = false;
+  Future<void> getTrans() async {
+    try {
+      getTransLoading = true;
+      emit(GetCanteenTransLoadingState());
+      transactions = [];
+      await schoolCanteenPath!.collection('Canteen').get().then((value) async {
+        await value.docs[0].reference
+            .collection('Transactions')
+            .where('date',
+                isGreaterThanOrEqualTo:
+                    DateTime(getTransBy.year, getTransBy.month, getTransBy.day))
+            .where('date',
+                isLessThan: DateTime(
+                    getTransBy.year, getTransBy.month, getTransBy.day + 1))
+            .orderBy('date', descending: true)
+            .get()
+            .then((value) {
+          value.docs.forEach((element) {
+            transactions!.add(TransactionModel.fromMap(element.data()));
+          });
+          emit(GetCanteenTransSuccessState());
+          print(transactions);
+        }).catchError((error) {
+          print(error.toString());
+          emit(GetCanteenTransErrorState());
+        });
+      }).catchError((error) {
+        print(error.toString());
+        emit(GetCanteenTransErrorState());
+      });
+      getTransLoading = false;
+    } catch (e) {
+      print(e.toString());
+      getTransLoading = false;
+      emit(GetCanteenTransErrorState());
+    }
   }
 }

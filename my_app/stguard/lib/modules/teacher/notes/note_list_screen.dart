@@ -70,8 +70,14 @@ class NoteListScreen extends StatelessWidget {
                             shrinkWrap: true,
                             itemCount: TeacherCubit.get(context).notes!.length,
                             itemBuilder: (context, index) {
-                              return NoteItem(
-                                  isTeacher: true,
+                              return DefaultClassListCard(
+                                  onTap: () {
+                                    navigateTo(
+                                        context,
+                                        NoteDetailScreen(
+                                            note: TeacherCubit.get(context)
+                                                .notes![index]));
+                                  },
                                   teacherOnTap: () {
                                     showDefaultDialog(
                                       context,
@@ -86,25 +92,27 @@ class NoteListScreen extends StatelessWidget {
                                       onPressed1: () => Navigator.pop(context),
                                       buttonText2: 'Yes',
                                       onPressed2: () {
-                                        TeacherCubit.get(context).deleteNote(noteId:
-                                            TeacherCubit.get(context)
+                                        TeacherCubit.get(context).deleteNote(
+                                            noteId: TeacherCubit.get(context)
                                                 .notes![index]
-                                                .id!,noteFiles: TeacherCubit.get(context)
-                                                .notes![index].files);
+                                                .id!,
+                                            noteFiles: TeacherCubit.get(context)
+                                                .notes![index]
+                                                .files);
                                         Navigator.pop(context);
                                       },
                                     );
                                   },
-                                  onTap: () {
-                                    navigateTo(
-                                        context,
-                                        NoteDetailScreen(
-                                            note: TeacherCubit.get(context)
-                                                .notes![index]));
-                                  },
-                                  note:
-                                      TeacherCubit.get(context).notes![index]);
-                            },
+                                  title: TeacherCubit.get(context)
+                                      .notes![index]
+                                      .title,
+                                  subtitle: TeacherCubit.get(context)
+                                      .notes![index]
+                                      .subject,
+                                  date: TeacherCubit.get(context)
+                                      .notes![index]
+                                      .datetime);
+                  },
                           ),
                         ),
                       ),
@@ -112,12 +120,11 @@ class NoteListScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image(
-                              image: const AssetImage(
-                                'assets/images/no-message.png',
+                            const Image(
+                              image: AssetImage(
+                                'assets/images/no_activity.png',
                               ),
                               height: 200,
-                              color: defaultColor.withOpacity(0.3),
                             ),
                             const SizedBox(
                               height: 20,

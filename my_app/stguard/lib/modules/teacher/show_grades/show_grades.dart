@@ -67,8 +67,15 @@ class ExamResultsListScreen extends StatelessWidget {
                             itemCount:
                                 TeacherCubit.get(context).ClassExamsResults!.length,
                             itemBuilder: (context, index) {
-                              return ExamResultItem(
-                                  teacherOnTap: () {
+                              return DefaultClassListCard(onTap: () {
+                                    navigateTo(
+                                        context,
+                                        ExamResultsDetailsScreen(
+                                            examResults:
+                                                TeacherCubit.get(context)
+                                                    .ClassExamsResults![index]));
+                                  },
+                              teacherOnTap: () {
                                     showDefaultDialog(
                                       context,
                                       title: 'Are you sure?',
@@ -91,16 +98,12 @@ class ExamResultsListScreen extends StatelessWidget {
                                       },
                                     );
                                   },
-                                  onTap: () {
-                                    navigateTo(
-                                        context,
-                                        ExamResultsDetailsScreen(
-                                            examResults:
-                                                TeacherCubit.get(context)
-                                                    .ClassExamsResults![index]));
-                                  },
-                                  examResults: TeacherCubit.get(context)
-                                      .ClassExamsResults![index]);
+                               title: TeacherCubit.get(context)
+                                      .ClassExamsResults![index].examType, 
+                               subtitle: TeacherCubit.get(context)
+                                      .ClassExamsResults![index].subject, 
+                               date: TeacherCubit.get(context)
+                                      .ClassExamsResults![index].datetime);
                             },
                           ),
                         ),
@@ -109,12 +112,11 @@ class ExamResultsListScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image(
-                              image: const AssetImage(
-                                'assets/images/no-message.png',
+                            const Image(
+                              image: AssetImage(
+                                'assets/images/no_activity.png',
                               ),
                               height: 200,
-                              color: defaultColor.withOpacity(0.3),
                             ),
                             const SizedBox(
                               height: 20,
@@ -147,7 +149,7 @@ class ExamResultsListScreen extends StatelessWidget {
                           height: 20,
                         ),
                         Text(
-                          'Select a class to view its exam results',
+                          'Select a class to view its exams results',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall!
