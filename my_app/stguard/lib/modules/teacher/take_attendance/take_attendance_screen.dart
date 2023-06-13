@@ -34,9 +34,7 @@ class TakeAttendanceScreen extends StatelessWidget {
                   },
                   child: const Padding(
                     padding: EdgeInsets.only(right: 20),
-                    child: Icon(
-                      Icons.save,
-                    ),
+                    child: ImageIcon(AssetImage('assets/images/save_attendance.png'), size: 30,)
                   ),
                 )
               ],

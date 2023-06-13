@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/states.dart';
+import 'package:stguard/layout/teacher/teacher_home_screen.dart';
 import 'package:stguard/models/exam_results_model.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
@@ -9,10 +10,11 @@ import 'package:stguard/shared/styles/themes.dart';
 class ExamResultsDetailsScreen extends StatelessWidget {
   ExamResults examResults;
   bool showResult;
-  ExamResultsDetailsScreen(
-      {required this.examResults,
-      this.showResult = true,
-      super.key,});
+  ExamResultsDetailsScreen({
+    required this.examResults,
+    this.showResult = true,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,12 @@ class ExamResultsDetailsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: BlocConsumer<TeacherCubit, TeacherStates>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is UploadGradesSuccessState) {
+            ShowToast(message: 'Success', state: ToastStates.SUCCESS);
+            navigateAndFinish(context, TeacherHomeScreen());
+          }
+        },
         builder: (context, state) {
           return SingleChildScrollView(
             child: Column(
@@ -100,7 +107,7 @@ class ExamResultsDetailsScreen extends StatelessWidget {
                                   TeacherCubit.get(context).uploadGrades(
                                       examType: examResults.examType,
                                       maximumAchievableGrade:
-                                         examResults.maximumAchievableGrade);
+                                          examResults.maximumAchievableGrade);
                                 },
                                 color: Colors.white,
                                 textColor: defaultColor,
@@ -139,7 +146,7 @@ class ExamResultsDetailsScreen extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemBuilder: (context, index) => StudentExamResultItem(
-                          showResult:showResult,
+                          showResult: showResult,
                           student: TeacherCubit.get(context).students[index],
                           examResults: examResults,
                         ),

@@ -5,14 +5,13 @@ import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/layout/parent/parent_home_screen.dart';
 import 'package:stguard/models/student_model.dart';
 import 'package:stguard/modules/parent/map/map_screen.dart';
-import 'package:stguard/modules/parent/notes_list/notes_list.dart';
+import 'package:stguard/modules/parent/set_calories_limit/set_calories_limit_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
 class MemberSettingsScreen extends StatelessWidget {
   StudentModel? student;
-  TextEditingController calorieController = TextEditingController();
-  GlobalKey<FormState> formKey = GlobalKey();
+
   MemberSettingsScreen({required this.student, super.key});
 
   @override
@@ -23,7 +22,9 @@ class MemberSettingsScreen extends StatelessWidget {
           navigateAndFinish(context, ParentHomeScreen());
         }
         if (state is UpdateCalorieSuccessState) {
-          Navigator.pop(context);
+          ShowToast(
+              message: 'Calorie Limit Updated Successfully',
+              state: ToastStates.SUCCESS);
         }
       },
       builder: (context, state) {
@@ -199,7 +200,7 @@ class MemberSettingsScreen extends StatelessWidget {
                               duration: const Duration(milliseconds: 500),
                               child: Column(
                                 children: [
-                              const SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                   // location
                                   SettingsCard(
                                     condition: state
@@ -274,21 +275,14 @@ class MemberSettingsScreen extends StatelessWidget {
                                         height: 40,
                                         child: OutlinedButton(
                                           onPressed: () {
-                                            /* ParentCubit.get(context).openMap(
-                                                lat: ParentCubit.get(context)
-                                                    .location!
-                                                    .lat,
-                                                long: ParentCubit.get(context)
-                                                    .location!
-                                                    .long);*/
                                             if (ParentCubit.get(context)
                                                     .location !=
                                                 null) {
-                                              requestLocationPermission().then((value) 
-                                              {
-                                                navigateTo(context, MapScreen());
+                                              requestLocationPermission()
+                                                  .then((value) {
+                                                navigateTo(
+                                                    context, MapScreen());
                                               });
-                                              
                                             }
                                           },
                                           child: Row(
@@ -428,66 +422,10 @@ class MemberSettingsScreen extends StatelessWidget {
                                             ),
                                             IconButton(
                                                 onPressed: () {
-                                                  showDefaultDialog(
-                                                    context,
-                                                    title:
-                                                        'Update Calorie Limit',
-                                                    content: Form(
-                                                      key: formKey,
-                                                      child: Column(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          Text(
-                                                            'Set a realistic calorie limit for your child based on their age, gender, height, weight, and activity level. Consult with a doctor if needed',
-                                                            style: Theme.of(
-                                                                    context)
-                                                                .textTheme
-                                                                .bodySmall,
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
-                                                          DefaultFormField(
-                                                              controller:
-                                                                  calorieController,
-                                                              type:
-                                                                  TextInputType
-                                                                      .number,
-                                                              validate:
-                                                                  (value) {
-                                                                if (value!
-                                                                    .isEmpty) {
-                                                                  return 'Calories must not be empty';
-                                                                }
-                                                                if (double.tryParse(
-                                                                        value) ==
-                                                                    null) {
-                                                                  return 'Please enter a valid number';
-                                                                }
-                                                                return null;
-                                                              },
-                                                              label:
-                                                                  'Calorie Limit')
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    buttonText1: 'Cancel',
-                                                    onPressed1: () =>
-                                                        Navigator.pop(context),
-                                                    buttonText2: 'Update',
-                                                    onPressed2: () {
-                                                      if (formKey.currentState!
-                                                          .validate()) {
-                                                        ParentCubit.get(context)
-                                                            .updateCalorie(
-                                                                id: student!.id,
-                                                                value: double.parse(
-                                                                    calorieController
-                                                                        .text));
-                                                      }
-                                                    },
-                                                  );
+                                                  navigateTo(
+                                                      context,
+                                                      CaloriesLimitScreen(
+                                                          stId: student!.id));
                                                 },
                                                 icon: const ImageIcon(
                                                   AssetImage(

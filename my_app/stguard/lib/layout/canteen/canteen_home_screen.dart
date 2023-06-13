@@ -401,7 +401,7 @@ class CanteenHomeScreen extends StatelessWidget {
                                                       height: 150,
                                                       width: 150,
                                                       image: AssetImage(
-                                                          'assets/images/no_activity1.png')),
+                                                          'assets/images/no_activity.png')),
                                                   const SizedBox(
                                                     height: 10,
                                                   ),

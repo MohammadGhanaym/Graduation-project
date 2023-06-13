@@ -330,6 +330,31 @@ class TeacherCubit extends Cubit<TeacherStates> {
   }
 
   List<LessonAttendance>? classLessonAttendace;
+  DateTime filterByDate = DateTime.now();
+  Future<void> updateDate({required DateTime? date}) async {
+    allTime = false;
+    if (date != null) {
+      filterByDate = date;
+      emit(UpdateDateState());
+      if (selectedClassName != null) {
+        await filterNotesByClass(selectedClassName);
+        await filterExamResultsByClass(selectedClassName);
+        await filterAttendanceByClass(selectedClassName);
+      }
+    }
+  }
+
+  bool allTime = false;
+  void changeAllTime(bool value) async {
+    allTime = value;
+    emit(ChangeAllTimeState());
+    if (selectedClassName != null) {
+      await filterNotesByClass(selectedClassName);
+      await filterExamResultsByClass(selectedClassName);
+      await filterAttendanceByClass(selectedClassName);
+    }
+  }
+
   Future<void> filterAttendanceByClass(dynamic className) async {
     try {
       emit(GetLessonAttendanceLoadingState());
@@ -342,11 +367,19 @@ class TeacherCubit extends Cubit<TeacherStates> {
           .get()
           .then((value) async {
         if (value.docs.isNotEmpty) {
-          await value.docs[0].reference
+          Query<Map<String, dynamic>> query = value.docs[0].reference
               .collection('attendance')
-              .where('teacher', isEqualTo: teacherName)
-              .get()
-              .then((value) async {
+              .where('teacher', isEqualTo: teacherName);
+          if (!allTime) {
+            query = query
+                .where('datetime',
+                    isGreaterThanOrEqualTo: DateTime(filterByDate.year,
+                        filterByDate.month, filterByDate.day))
+                .where('datetime',
+                    isLessThan: DateTime(filterByDate.year, filterByDate.month,
+                        filterByDate.day + 1));
+          }
+          await query.orderBy('datetime', descending: true).get().then((value) async {
             value.docs.forEach((element) {
               classLessonAttendace!.add(LessonAttendance.fromMap(element.data(),
                   attendanceId: element.id));
@@ -721,11 +754,20 @@ class TeacherCubit extends Cubit<TeacherStates> {
           .get()
           .then((value) async {
         if (value.docs.isNotEmpty) {
-          await value.docs[0].reference
+          Query<Map<String, dynamic>> query = value.docs[0].reference
               .collection('notes')
-              .where('from', isEqualTo: teacherName)
-              .get()
-              .then((value) {
+              .where('from', isEqualTo: teacherName);
+          if (!allTime) {
+            query = query
+                .where('datetime',
+                    isGreaterThanOrEqualTo: DateTime(filterByDate.year,
+                        filterByDate.month, filterByDate.day))
+                .where('datetime',
+                    isLessThan: DateTime(filterByDate.year, filterByDate.month,
+                        filterByDate.day + 1));
+          }
+          await query.orderBy('datetime', descending: true)
+          .get().then((value) {
             value.docs.forEach((element) {
               notes!.add(NoteModel.fromMap(element.data(), id: element.id));
             });
@@ -747,10 +789,10 @@ class TeacherCubit extends Cubit<TeacherStates> {
   void resetSelection() {
     notes = null;
     ClassExamsResults = null;
+    classLessonAttendace = null;
     selectedClassName = null;
     selectedStudents = [];
     selectedSubject = null;
-    classLessonAttendace = null;
   }
 
   void deleteNote(
@@ -831,7 +873,11 @@ class TeacherCubit extends Cubit<TeacherStates> {
                 CellIndex.indexByString("C${i + 2}"), ""); // Empty grade column
           }
           const filePath = "/storage/emulated/0/Download";
-          final fileName = '${selectedClassName}_grade_template.xlsx';
+          final directory = Directory(filePath);
+          if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+          final fileName = '${selectedClassName}_grade_template_${DateTime.now().microsecondsSinceEpoch}.xlsx';
           print("i'm here");
           File('$filePath/$fileName').writeAsBytesSync(excel.encode()!);
 
@@ -972,7 +1018,7 @@ class TeacherCubit extends Cubit<TeacherStates> {
         await NotificationHelper.sendNotification(
             title: 'New Grades Available',
             body:
-                "We have just sent your child's grades. Tap to view the latest results.",
+                "We have just sent your child's grades.",
             receiverToken: '/topics/$selectedClassName');
       }).catchError((error) {
         emit(UploadGradesErrorState());
@@ -997,11 +1043,19 @@ class TeacherCubit extends Cubit<TeacherStates> {
           .get()
           .then((value) async {
         if (value.docs.isNotEmpty) {
-          await value.docs[0].reference
+          Query<Map<String, dynamic>> query = value.docs[0].reference
               .collection('exams results')
-              .where('teacher', isEqualTo: teacherName)
-              .get()
-              .then((value) async {
+              .where('teacher', isEqualTo: teacherName);
+          if (!allTime) {
+            query = query
+                .where('datetime',
+                    isGreaterThanOrEqualTo: DateTime(filterByDate.year,
+                        filterByDate.month, filterByDate.day))
+                .where('datetime',
+                    isLessThan: DateTime(filterByDate.year, filterByDate.month,
+                        filterByDate.day + 1));
+          }
+          await query.orderBy('datetime', descending: true).get().then((value) async {
             value.docs.forEach((element) {
               ClassExamsResults!
                   .add(ExamResults.fromMap(element.data(), res_id: element.id));

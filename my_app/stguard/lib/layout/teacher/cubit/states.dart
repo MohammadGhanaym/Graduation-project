@@ -166,3 +166,6 @@ class CheckGradeTemplateFormatState extends TeacherStates{
   CheckGradeTemplateFormatState(this.error);
 }
 class ModifyGradeSuccessState extends TeacherStates{}
+
+class UpdateDateState extends TeacherStates{}
+class ChangeAllTimeState extends TeacherStates{}

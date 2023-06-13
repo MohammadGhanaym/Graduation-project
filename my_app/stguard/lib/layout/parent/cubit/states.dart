@@ -223,3 +223,19 @@ class GetGradesSuccessState extends ParentStates {}
 
 class GetGradesErrorState extends ParentStates {}
 
+class NewNotificationState extends ParentStates {}
+
+class GetNotificationsSuccessState extends ParentStates {}
+class GetNotificationsLoadingState extends ParentStates {}
+class GetNotificationsErrorState extends ParentStates {}
+
+class InsertNotificationsSuccessState extends ParentStates {}
+class InsertNotificationsLoadingState extends ParentStates {}
+class InsertNotificationsErrorState extends ParentStates {}
+
+class DeleteNotificationLoadingState extends ParentStates {}
+class DeleteNotificationSuccessState extends ParentStates {}
+class DeleteNotificationErrorState extends ParentStates {}
+
+class UpdateNotificationCountState extends ParentStates {}
+class ResetNotificationCountState extends ParentStates {}

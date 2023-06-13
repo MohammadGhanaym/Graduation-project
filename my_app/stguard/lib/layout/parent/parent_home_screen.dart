@@ -5,6 +5,7 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/parent/cubit/states.dart';
 import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/modules/parent/credit_card/credit_card_screen.dart';
+import 'package:stguard/modules/parent/notifications/notifications_screen.dart';
 import 'package:stguard/modules/parent/pick_school/pick_school_screen.dart';
 import 'package:stguard/shared/components/components.dart';
 import 'package:stguard/shared/internet_cubit/cubit.dart';
@@ -14,7 +15,10 @@ class ParentHomeScreen extends StatelessWidget {
   ParentHomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    ParentCubit.get(context)..createDatabase()..getMyStudents()..getParentInfo();
+    ParentCubit.get(context)
+      ..createDatabase()
+      ..getMyStudents()
+      ..getParentInfo();
     return BlocListener<InternetCubit, ConnectionStatus>(
       listener: (context, state) {
         if (state == ConnectionStatus.disconnected) {
@@ -92,6 +96,25 @@ class ParentHomeScreen extends StatelessWidget {
           return Scaffold(
               appBar: AppBar(
                 elevation: 0.0,
+                actions: [
+                  IconButton(
+                      onPressed: () {
+                        ParentCubit.get(context).getNotifications();
+                        navigateTo(context, NotificationsScreen());
+                        ParentCubit.get(context).resetNotificationCount();
+                      },
+                      icon: Badge(
+                          isLabelVisible:
+                              ParentCubit.get(context).notificationCount == null
+                                  ? false
+                                  : true,
+                          label: ParentCubit.get(context).notificationCount ==
+                                  null
+                              ? null
+                              : Text(
+                                  '${ParentCubit.get(context).notificationCount}'),
+                          child: const ImageIcon(AssetImage('assets/images/notification.png'))))
+                ],
               ),
               drawer: Drawer(
                   child: Column(
@@ -100,8 +123,8 @@ class ParentHomeScreen extends StatelessWidget {
                     Expanded(
                       flex: 1,
                       child: DrawerHeader(
-                        padding: const EdgeInsets.only(
-                            top: 20, left: 20, right: 20),
+                        padding:
+                            const EdgeInsets.only(top: 20, left: 20, right: 20),
                         child: ParentCubit.get(context).parent != null
                             ? UserInfo(
                                 userModel: ParentCubit.get(context).parent!,
@@ -120,7 +143,10 @@ class ParentHomeScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Settings',
-                                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: defaultColor)),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium!
+                                      .copyWith(color: defaultColor)),
                               const SizedBox(
                                 height: 20,
                               ),
@@ -151,7 +177,6 @@ class ParentHomeScreen extends StatelessWidget {
                                 ontap: () =>
                                     navigateTo(context, CreditCardScreen()),
                               ),
-                            
                               const SizedBox(
                                 height: 15,
                               ),
@@ -240,19 +265,21 @@ class ParentHomeScreen extends StatelessWidget {
                                             'Balance',
                                             style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 40, fontFamily: 'OpenSans'),
+                                                fontSize: 40,
+                                                fontFamily: 'OpenSans'),
                                           ),
                                           const SizedBox(
                                             height: 5,
                                           ),
-                                          Text(currencyFormat(ParentCubit.get(context).parent !=
-                                                    null
-                                                ? ParentCubit.get(context)
-                                                    .parent!
-                                                    .balance
-                                                   
-                                                : 0)
-                                            ,
+                                          Text(
+                                            currencyFormat(
+                                                ParentCubit.get(context)
+                                                            .parent !=
+                                                        null
+                                                    ? ParentCubit.get(context)
+                                                        .parent!
+                                                        .balance
+                                                    : 0),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
@@ -287,13 +314,14 @@ class ParentHomeScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                           Text('Family',
+                          Text('Family',
                               style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(
                             height: 5,
                           ),
                           ConditionalBuilder(
-                              condition: !ParentCubit.get(context).studentDataLoading,
+                              condition:
+                                  !ParentCubit.get(context).studentDataLoading,
                               builder: (context) => ParentCubit.get(context)
                                       .studentsData
                                       .isNotEmpty
@@ -357,13 +385,17 @@ class ParentHomeScreen extends StatelessWidget {
                                                     const SizedBox(
                                                       height: 10,
                                                     ),
-                                                     SizedBox(
-                                                        width: 80,
-                                                        child: Text(
-                                                          
-                                                            'Add Family Member', 
-                                                            style: Theme.of(context).textTheme.bodyLarge,textAlign: TextAlign.center,),
-                                                            )
+                                                    SizedBox(
+                                                      width: 80,
+                                                      child: Text(
+                                                        'Add Family Member',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .bodyLarge,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                    )
                                                   ]),
                                             ),
                                           ),
@@ -387,14 +419,15 @@ class ParentHomeScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                           Text('Activity',
+                          Text('Activity',
                               style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(
                             height: 5,
                           ),
                           //activity
                           ConditionalBuilder(
-                            condition: !ParentCubit.get(context).activityLoading,
+                            condition:
+                                !ParentCubit.get(context).activityLoading,
                             builder: (context) => ParentCubit.get(context)
                                         .activities
                                         .isNotEmpty &&
@@ -451,7 +484,7 @@ class ParentHomeScreen extends StatelessWidget {
                                     ),
                                   ),
                             fallback: (context) => const Padding(
-                              padding: EdgeInsets.only(top:50.0),
+                              padding: EdgeInsets.only(top: 50.0),
                               child: Center(child: CircularProgressIndicator()),
                             ),
                           )

@@ -69,7 +69,10 @@ class GetTemplateScreen extends StatelessWidget {
                           items: TeacherCubit.get(context)
                               .subjects
                               .map((subjectName) => DropdownMenuItem<String>(
-                                  value: subjectName, child: Text(subjectName)))
+                                  value: subjectName, child: SizedBox(
+                                    width: 250,
+                                    child: Text(subjectName,
+                                    overflow: TextOverflow.ellipsis,))))
                               .toList(),
                           isExpanded: true,
                         ),
@@ -90,10 +93,14 @@ class GetTemplateScreen extends StatelessWidget {
                             hintText: 'Select a class'),
                         value: TeacherCubit.get(context).selectedClassName,
                         hint: const Text('Select a class'),
+                        
                         items: TeacherCubit.get(context)
                             .classes
                             .map((className) => DropdownMenuItem<String>(
-                                value: className, child: Text(className)))
+                                value: className, child: SizedBox(width: 250,
+                                  child: Text(className,
+                                  overflow: TextOverflow.ellipsis,),
+                                )))
                             .toList(),
                         onChanged: (value) =>
                             TeacherCubit.get(context).selectClass(value!),

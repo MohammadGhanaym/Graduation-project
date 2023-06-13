@@ -813,7 +813,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
                 NotificationHelper.sendNotification(
                         title: '${buyer!.name!.split(' ')[0]} Purchased',
                         body:
-                            '-$totalPrice\t\t\t\t${DateFormat('EE, hh:mm a').format(DateTime.now())}',
+                            '-$totalPrice',
                         receiverToken: parent!.deviceToken!)
                     .then((value) {
                   print(value.body);

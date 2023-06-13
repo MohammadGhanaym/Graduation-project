@@ -16,6 +16,7 @@ import 'package:stguard/models/activity_model.dart';
 import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/country_model.dart';
 import 'package:stguard/models/download_file.dart';
+import 'package:stguard/models/notification_model.dart';
 import 'package:stguard/models/parent_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
@@ -33,17 +34,18 @@ class ParentCubit extends Cubit<ParentStates> {
   late Database database;
 
   void createDatabase() async {
-    /*await databaseFactory.deleteDatabase('activities.db').then((value) {
-      print('database deleted');
-    });*/
-    database = await openDatabase(
-      'activities.db',
-      version: 1,
-      onCreate: (db, version) async {
-        print('db created');
-        await db.transaction((txn) async {
-          // create student_activity table
-          await txn.execute('''
+    try {
+      /*await databaseFactory.deleteDatabase('activities.db').then((value) {
+        print('database deleted');
+      });*/
+      database = await openDatabase(
+        'activities.db',
+        version: 1,
+        onCreate: (db, version) async {
+          print('db created');
+          await db.transaction((txn) async {
+            // create student_activity table
+            await txn.execute('''
                     CREATE TABLE student_activity(
                       id TEXT NOT NULL,
                       activity TEXT,
@@ -51,13 +53,12 @@ class ParentCubit extends Cubit<ParentStates> {
                       trans_id TEXT
                       )
                   ''').then((value) {
-            print('Table Created');
-          }).catchError((error) {
-            print(error.toString());
-            return error;
-          });
-          // create canteenTransactions table
-          await txn.execute('''
+              print('Table Created');
+            }).catchError((error) {
+              print(error.toString());
+            });
+            // create canteenTransactions table
+            await txn.execute('''
                 CREATE TABLE products(
                     trans_id TEXT NOT NULL,
                     product TEXT NOT NULL,
@@ -65,25 +66,144 @@ class ParentCubit extends Cubit<ParentStates> {
                     quantity INT NOT NULL
                     )
                   ''').then((value) {
-            print('Table Created');
-          }).catchError((error) {
-            print(error.toString());
-            return error;
+              print('Table Created');
+            }).catchError((error) {
+              print(error.toString());
+            });
+            // create notification table
+            await txn.execute('''
+                CREATE TABLE notification(
+                      id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      title TEXT,
+                      date DATETIME,
+                      body TEXT
+                    )
+                  ''').then((value) {
+              print('notification Table Created');
+            }).catchError((error) {
+              print(error.toString());
+              return error;
+            });
           });
+        },
+        onOpen: (db) async {
+          database = db;
+          print('db opened');
+          await listenToNotification();
+        },
+      );
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  int? notificationCount = 0;
+  Future<void> listenToNotification() async {
+    await getNotificationCount();
+    FirebaseMessaging.onMessage.listen((event) async {
+      print('onMessage');
+      try {
+        notificationCount = CacheHelper.getData(key: 'notificationCount');
+        notificationCount ??= 0;
+        notificationCount = notificationCount! + 1;
+        await CacheHelper.saveData(
+            key: 'notificationCount', value: notificationCount);
+        emit(NewNotificationState());
+        Map<String, dynamic> notification = event.toMap()['notification'];
+        print(notification);
+        print(notification['title']);
+        if (notification.containsKey('title') &&
+            notification.containsKey('body')) {
+          await insertNotification(notification['title'], notification['body']);
+        }
+      } catch (e) {
+        print(e.toString());
+      }
+    });
+  }
+
+  Future<void> getNotificationCount() async {
+    notificationCount = CacheHelper.getData(key: 'notificationCount');
+    emit(UpdateNotificationCountState());
+  }
+
+  Future<void> resetNotificationCount() async {
+    notificationCount = null;
+    await CacheHelper.removeData(key: 'notificationCount');
+    emit(ResetNotificationCountState());
+  }
+
+  List<NotificationModel>? notifications;
+  Future<void> getNotifications() async {
+    emit(GetNotificationsLoadingState());
+    notifications = [];
+
+    try {
+      await database.transaction((txn) async {
+        final results = await txn.query('notification', orderBy: 'date DESC');
+        for (final result in results) {
+          final NotificationModel notification =
+              NotificationModel.fromMap(result);
+          notifications!.add(notification);
+        }
+      });
+
+      print(notifications);
+      emit(GetNotificationsSuccessState());
+    } catch (error) {
+      print('Error when getting notifications: $error');
+      emit(GetNotificationsErrorState());
+    }
+  }
+
+  Future<void> insertNotification(String title, String body) async {
+    try {
+      emit(InsertNotificationsLoadingState());
+      final DateTime now = DateTime.now();
+        await database.transaction((txn) async {
+          await txn.rawInsert(
+            'INSERT INTO notification(title, date, body) VALUES(?, ?, ?)',
+            [title, now.toIso8601String(), body],
+          );
+        }).then((value) async {
+          print('Notification inserted successfully');
+          emit(InsertNotificationsSuccessState());
+          await getNotifications();
         });
-      },
-      onOpen: (db) async {
-        database = db;
-        print('db opened');
-      },
-    );
+    
+    } catch (error) {
+      emit(InsertNotificationsErrorState());
+      print('Error when inserting notification: $error');
+    }
   }
 
   Future<void> clearHistory() async {
     await database.rawDelete('DELETE FROM student_activity');
     await database.rawDelete('DELETE FROM products');
+    await database.rawDelete('DELETE FROM notification');
 
     await getDataFromActivityTable();
+  }
+
+  bool deleteLoading = false;
+  Future<void> deleteNotification(int notificationId) async {
+    deleteLoading = true;
+    emit(DeleteNotificationLoadingState());
+
+    try {
+      await database.delete(
+        'notification',
+        where: 'id = ?',
+        whereArgs: [notificationId],
+      ).then((value) async {
+        await getNotifications(); // Refresh the notifications list after deletion
+        emit(DeleteNotificationSuccessState());
+      });
+    } catch (error) {
+      print('Error when deleting notification: $error');
+      emit(DeleteNotificationErrorState());
+    }
+    deleteLoading = false;
   }
 
   Map<String, DocumentReference<Map<String, dynamic>>> studentsPaths = {};
@@ -929,21 +1049,19 @@ class ParentCubit extends Cubit<ParentStates> {
             .orderBy('datetime', descending: true)
             .get()
             .then((value) {
-              if (value.docs.isNotEmpty) {
-                value.docs.forEach((element) {
-                  studentAttendance!
-                      .add(LessonAttendance.fromMap(element.data()));
-                });
-                print(studentAttendance);
-                emit(GetAttendanceSuccessState());
-              } else {
-                emit(GetAttendanceErrorState());
-              }
-            })
-            .catchError((error) {
-              print(error);
-              emit(GetAttendanceErrorState());
+          if (value.docs.isNotEmpty) {
+            value.docs.forEach((element) {
+              studentAttendance!.add(LessonAttendance.fromMap(element.data()));
             });
+            print(studentAttendance);
+            emit(GetAttendanceSuccessState());
+          } else {
+            emit(GetAttendanceErrorState());
+          }
+        }).catchError((error) {
+          print(error);
+          emit(GetAttendanceErrorState());
+        });
       }
     }).catchError((error) {
       print(error.toString());
@@ -952,13 +1070,12 @@ class ParentCubit extends Cubit<ParentStates> {
   }
 
 // Write your code here
-/// *************************************
-List<ExamResults>? studentResults;
-  Future<void>getStudentGrades(StudentModel st)async
-  {
+  /// *************************************
+  List<ExamResults>? studentResults;
+  Future<void> getStudentGrades(StudentModel st) async {
     studentResults = [];
     emit(GetGradesLoadingState());
-   await schoolPaths[st.id]!
+    await schoolPaths[st.id]!
         .collection('classes')
         .where('name', isEqualTo: st.className)
         .get()
@@ -970,31 +1087,27 @@ List<ExamResults>? studentResults;
             .orderBy('datetime', descending: true)
             .get()
             .then((value) {
-              if (value.docs.isNotEmpty) {
-                value.docs.forEach((element) {
-                  studentResults!
-                      .add(ExamResults.fromMap(element.data()));
-                });
-                print(studentResults);
-                emit(GetGradesSuccessState());
-              } else {
-                emit(GetGradesErrorState());
-              }
-            })
-            .catchError((error) {
-              print(error.toString());
-              emit(GetGradesErrorState());
+          if (value.docs.isNotEmpty) {
+            value.docs.forEach((element) {
+              studentResults!.add(ExamResults.fromMap(element.data()));
             });
+            print(studentResults);
+            emit(GetGradesSuccessState());
+          } else {
+            emit(GetGradesErrorState());
+          }
+        }).catchError((error) {
+          print(error.toString());
+          emit(GetGradesErrorState());
+        });
       }
     }).catchError((error) {
       print(error.toString());
       emit(GetGradesErrorState());
     });
-
   }
 
- /// *************************************
-
+  /// *************************************
 
   void signOut() async {
     await CacheHelper.removeData(key: 'id').then((value) async {

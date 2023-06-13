@@ -11,16 +11,17 @@ import 'package:stguard/layout/parent/cubit/cubit.dart';
 import 'package:stguard/layout/teacher/cubit/cubit.dart';
 import 'package:stguard/models/activity_model.dart';
 import 'package:stguard/models/canteen_product_model.dart';
-import 'package:stguard/models/class_note.dart';
 import 'package:stguard/models/exam_results_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
-import 'package:stguard/models/product_model.dart';
 import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
 import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:stguard/modules/parent/child_community/child_community.dart';
+import 'package:stguard/modules/parent/note_details/note_details_screen.dart';
 import 'package:stguard/modules/parent/transaction_details/transaction_details_screen.dart';
+import 'package:stguard/modules/teacher/attendance_details/attendance_details_screen.dart';
+import 'package:stguard/modules/teacher/exam_results_details/exam_results_details_screen.dart';
 import 'package:stguard/modules/teacher/update_grade/update_grade_screen.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/styles/themes.dart';
@@ -1529,7 +1530,13 @@ Future<Widget?> showDefaultDialog(context,
   return showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(title),
+      title: Text(
+        title,
+        style: Theme.of(context)
+            .textTheme
+            .titleLarge!
+            .copyWith(fontWeight: FontWeight.bold),
+      ),
       content: content,
       actions: [
         TextButton(
@@ -1573,8 +1580,6 @@ class FileItem extends StatelessWidget {
     );
   }
 }
-
-
 
 class ParentAttendanceItem extends StatelessWidget {
   StudentModel st;
@@ -1735,15 +1740,18 @@ class ParentGradeItem extends StatelessWidget {
   }
 }
 
-
 class DefaultClassListCard extends StatelessWidget {
   final void Function()? onTap;
   void Function()? teacherOnTap;
   String title;
   String subtitle;
-  DateTime  date;
+  DateTime date;
   DefaultClassListCard(
-      {required this.onTap,required this.title, required this.subtitle, required this.date , this.teacherOnTap});
+      {required this.onTap,
+      required this.title,
+      required this.subtitle,
+      required this.date,
+      this.teacherOnTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1769,20 +1777,17 @@ class DefaultClassListCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  
-                    if(teacherOnTap != null)
-                
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      if(teacherOnTap != null)
-                      const Spacer(),
-                      if(teacherOnTap != null)
-                      IconButton(
-                          onPressed: teacherOnTap,
-                          icon: const ImageIcon(
-                              AssetImage('assets/images/delete_note.png'))),
-               
+                  if (teacherOnTap != null)
+                    const SizedBox(
+                      width: 20,
+                    ),
+                  if (teacherOnTap != null) const Spacer(),
+                  if (teacherOnTap != null)
+                    IconButton(
+                        onPressed: teacherOnTap,
+                        icon: const ImageIcon(
+                            AssetImage('assets/images/delete_note.png'),
+                            color: defaultColor)),
                 ],
               ),
               const SizedBox(height: 8.0),
@@ -2096,4 +2101,335 @@ String? checkToday(DateTime date) {
     return 'Today';
   }
   return null;
+}
+
+class NoteList extends StatelessWidget {
+  bool loadingCondition;
+  NoteList({super.key, required this.loadingCondition});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConditionalBuilder(
+        condition: TeacherCubit.get(context).notes != null,
+        builder: (context) => loadingCondition
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : ConditionalBuilder(
+                condition: TeacherCubit.get(context).notes!.isNotEmpty,
+                builder: (context) => ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: TeacherCubit.get(context).notes!.length,
+                  itemBuilder: (context, index) {
+                    return DefaultClassListCard(
+                        onTap: () {
+                          navigateTo(
+                              context,
+                              NoteDetailScreen(
+                                  note:
+                                      TeacherCubit.get(context).notes![index]));
+                        },
+                        teacherOnTap: () {
+                          showDefaultDialog(
+                            context,
+                            title: 'Are you sure?',
+                            content: Text(
+                              'Are you sure you want to delete this note?',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            buttonText1: 'Cancel',
+                            onPressed1: () => Navigator.pop(context),
+                            buttonText2: 'Yes',
+                            onPressed2: () {
+                              TeacherCubit.get(context).deleteNote(
+                                  noteId: TeacherCubit.get(context)
+                                      .notes![index]
+                                      .id!,
+                                  noteFiles: TeacherCubit.get(context)
+                                      .notes![index]
+                                      .files);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                        title: TeacherCubit.get(context).notes![index].title,
+                        subtitle:
+                            TeacherCubit.get(context).notes![index].subject,
+                        date: TeacherCubit.get(context).notes![index].datetime);
+                  },
+                ),
+                fallback: (context) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Image(
+                        image: AssetImage(
+                          'assets/images/no_activity.png',
+                        ),
+                        height: 200,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'No Notes Available',
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        fallback: (context) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Image(
+                    image: AssetImage(
+                      'assets/images/class_note.png',
+                    ),
+                    height: 300,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Select a class to view its notes',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ));
+  }
+}
+
+class AttendanceList extends StatelessWidget {
+  bool loadingCondition;
+  AttendanceList({super.key, required this.loadingCondition});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConditionalBuilder(
+        condition: TeacherCubit.get(context).classLessonAttendace != null,
+        builder: (context) => loadingCondition
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : ConditionalBuilder(
+                condition:
+                    TeacherCubit.get(context).classLessonAttendace!.isNotEmpty,
+                builder: (context) => SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: TeacherCubit.get(context)
+                          .classLessonAttendace!
+                          .length,
+                      itemBuilder: (context, index) {
+                        return DefaultClassListCard(
+                            teacherOnTap: () {
+                              showDefaultDialog(
+                                context,
+                                title: 'Are you sure?',
+                                content: Text(
+                                  'Are you sure you want to delete this lesson attendance?',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                buttonText1: 'Cancel',
+                                onPressed1: () => Navigator.pop(context),
+                                buttonText2: 'Yes',
+                                onPressed2: () {
+                                  TeacherCubit.get(context)
+                                      .deleteClassAttendance(
+                                          TeacherCubit.get(context)
+                                              .classLessonAttendace![index]
+                                              .id);
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                            onTap: () {
+                              navigateTo(
+                                  context,
+                                  AttendanceDetailsScreen(
+                                      lessonAttendance:
+                                          TeacherCubit.get(context)
+                                              .classLessonAttendace![index]));
+                            },
+                            title: TeacherCubit.get(context)
+                                .classLessonAttendace![index]
+                                .lessonName,
+                            subtitle: TeacherCubit.get(context)
+                                .classLessonAttendace![index]
+                                .subject,
+                            date: TeacherCubit.get(context)
+                                .classLessonAttendace![index]
+                                .datetime);
+                      },
+                    ),
+                  ),
+                ),
+                fallback: (context) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Image(
+                        image: AssetImage(
+                          'assets/images/no_activity.png',
+                        ),
+                        height: 200,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'No attendance has been taken yet',
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        fallback: (context) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Image(
+                    image: AssetImage(
+                      'assets/images/class_note.png',
+                    ),
+                    height: 300,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Select a class to view its attendance history',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ));
+  }
+}
+
+class GradesList extends StatelessWidget {
+  GradesList({super.key, required this.loadingCondition});
+  bool loadingCondition;
+  @override
+  Widget build(BuildContext context) {
+    return ConditionalBuilder(
+        condition: TeacherCubit.get(context).ClassExamsResults != null,
+        builder: (context) => loadingCondition
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : ConditionalBuilder(
+                condition:
+                    TeacherCubit.get(context).ClassExamsResults!.isNotEmpty,
+                builder: (context) => SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount:
+                          TeacherCubit.get(context).ClassExamsResults!.length,
+                      itemBuilder: (context, index) {
+                        return DefaultClassListCard(
+                            onTap: () {
+                              navigateTo(
+                                  context,
+                                  ExamResultsDetailsScreen(
+                                      examResults: TeacherCubit.get(context)
+                                          .ClassExamsResults![index]));
+                            },
+                            teacherOnTap: () {
+                              showDefaultDialog(
+                                context,
+                                title: 'Are you sure?',
+                                content: Text(
+                                  'Are you sure you want to delete these exam results?',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                buttonText1: 'Cancel',
+                                onPressed1: () => Navigator.pop(context),
+                                buttonText2: 'Yes',
+                                onPressed2: () {
+                                  TeacherCubit.get(context).deleteExamResults(
+                                      examResultsId: TeacherCubit.get(context)
+                                          .ClassExamsResults![index]
+                                          .id);
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                            title: TeacherCubit.get(context)
+                                .ClassExamsResults![index]
+                                .examType,
+                            subtitle: TeacherCubit.get(context)
+                                .ClassExamsResults![index]
+                                .subject,
+                            date: TeacherCubit.get(context)
+                                .ClassExamsResults![index]
+                                .datetime);
+                      },
+                    ),
+                  ),
+                ),
+                fallback: (context) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Image(
+                        image: AssetImage(
+                          'assets/images/no_activity.png',
+                        ),
+                        height: 200,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'No Grades Available',
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        fallback: (context) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Image(
+                    image: AssetImage(
+                      'assets/images/class_note.png',
+                    ),
+                    height: 300,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Select a class to view its exams results',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ));
+  }
 }

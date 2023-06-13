@@ -21,7 +21,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
 
@@ -29,21 +29,15 @@ void main() async {
   userRole = CacheHelper.getData(key: 'role');
   Widget startScreen = LoginScreen();
   if (userID != null) {
-    if (userRole == 'parent') {
-      FirebaseMessaging.instance.getToken();
-      FirebaseMessaging.onMessage.listen((event) {
-        print(event.data.toString());
-        print('onMessage');
-      });
+    await FirebaseMessaging.instance.getToken();
 
-      FirebaseMessaging.onMessageOpenedApp.listen((event) {
-        print(event.data.toString());
-        print('onMessageOpenedApp');
-      });
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print(event.data.toString());
+      print('onMessageOpenedApp');
+    });
 
-      FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler);
-    }
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     startScreen = homeScreens[userRole]!;
   }
 
@@ -60,35 +54,48 @@ class MyApp extends StatelessWidget {
   MyApp({super.key, required this.startScreen});
   @override
   Widget build(BuildContext context) {
-    
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              ParentCubit(),
+          create: (context) => ParentCubit(),
         ),
         BlocProvider(
-          create: (context) => TeacherCubit()
-            ,
+          create: (context) => TeacherCubit(),
         ),
-        BlocProvider(
-            create: (context) => CanteenCubit()
-              )
+        BlocProvider(create: (context) => CanteenCubit())
       ],
       child: MaterialApp(
         home: startScreen,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          appBarTheme: const AppBarTheme(color: defaultColor),
-          primaryColor: defaultColor,
-          textTheme: TextTheme(
-          titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(fontFamily: 'OpenSans'),
-          titleMedium: Theme.of(context).textTheme.titleMedium!.copyWith(fontFamily: 'OpenSans'),
-          headlineSmall: Theme.of(context).textTheme.headlineSmall!.copyWith(fontFamily: 'OpenSans', fontWeight: FontWeight.w700),
-          headlineMedium: Theme.of(context).textTheme.headlineMedium!.copyWith(fontFamily: 'OpenSans'),
-          bodyLarge:Theme.of(context).textTheme.bodyLarge!.copyWith(fontFamily: 'OpenSans'),
-          bodySmall:Theme.of(context).textTheme.bodySmall!.copyWith(fontFamily: 'OpenSans', fontSize: 15) )
-        ),
+            appBarTheme: const AppBarTheme(color: defaultColor),
+            primaryColor: defaultColor,
+            textTheme: TextTheme(
+                titleLarge: Theme.of(context)
+                    .textTheme
+                    .titleLarge!
+                    .copyWith(fontFamily: 'OpenSans'),
+                titleMedium: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(fontFamily: 'OpenSans'),
+                headlineSmall: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(
+                        fontFamily: 'OpenSans', fontWeight: FontWeight.w700),
+                headlineMedium: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(fontFamily: 'OpenSans'),
+                bodyLarge: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(fontFamily: 'OpenSans'),
+                bodySmall: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(fontFamily: 'OpenSans', fontSize: 15))),
       ),
     );
   }

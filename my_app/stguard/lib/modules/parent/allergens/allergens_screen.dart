@@ -44,7 +44,7 @@ class AllergensScreen extends StatelessWidget {
       body: BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {
           if (state is UpdateAllergiesSuccessState) {
-            Navigator.pop(context);
+            ShowToast(message: 'Allergens Updated Successfully', state: ToastStates.SUCCESS);
           }
         },
         builder: (context, state) {
@@ -89,18 +89,18 @@ class AllergensScreen extends StatelessWidget {
                   height: 30,
                 ),
                 DefaultButton(
-                        onPressed: () async {
-                          ParentCubit.get(context)
-                              .changeAllergiesSelectionState(state: true);
-                          await ParentCubit.get(context)
-                              .updateAllergens(student_id);
-                        },
-                        showCircularProgressIndicator: state is UpdateAllergiesLoadingState,
-                        text: 'Confirm',
-                        height: 55,
-                        color: defaultColor.withOpacity(0.8),
-                        width: double.infinity,
-                      )
+                  onPressed: () async {
+                    ParentCubit.get(context)
+                        .changeAllergiesSelectionState(state: true);
+                    await ParentCubit.get(context).updateAllergens(student_id);
+                  },
+                  showCircularProgressIndicator:
+                      state is UpdateAllergiesLoadingState,
+                  text: 'Confirm',
+                  height: 55,
+                  color: defaultColor.withOpacity(0.8),
+                  width: double.infinity,
+                )
               ],
             ),
           );
