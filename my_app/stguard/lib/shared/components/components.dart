@@ -15,6 +15,7 @@ import 'package:stguard/models/exam_results_model.dart';
 import 'package:stguard/models/school_model.dart';
 import 'package:stguard/models/student_attendance.dart';
 import 'package:stguard/models/student_model.dart';
+import 'package:stguard/modules/canteen/product_details/product_details_screen.dart';
 import 'package:stguard/modules/parent/allergens/allergens_screen.dart';
 import 'package:stguard/modules/parent/attendance_history/attendance_history_screen.dart';
 import 'package:stguard/modules/parent/child_community/child_community.dart';
@@ -1196,6 +1197,9 @@ class CanteenProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onLongPress: () {
+        navigateTo(context, ProductDetailsScreen(product:product));
+      },
       onTap: onTap,
       child: Container(
         child: Card(
