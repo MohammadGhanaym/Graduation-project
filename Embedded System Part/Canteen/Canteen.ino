@@ -4,7 +4,7 @@
 
 #include "PN53.h"
 #include "Network.h"
-const int BUZZER = 2;
+
 String studentUID = "";
 
 
@@ -36,9 +36,5 @@ void loop()
    if(studentUID)
    {
      network.FirestoreDataUpdate(studentUID);
-     tone(BUZZER, 2000); 
-     delay(200);        
-     noTone(BUZZER);
-     delay(200);
    }
 }

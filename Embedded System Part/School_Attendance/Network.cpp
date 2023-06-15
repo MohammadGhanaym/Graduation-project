@@ -1,15 +1,17 @@
 #include "Network.h"
 
-#define WIFI_SSID "WE_9D74BF"
-#define WIFI_PASSWORD "k7222558"
+//#define WIFI_SSID "POCO F3"
+//#define WIFI_PASSWORD "123456789"
+#define WIFI_SSID "Khater"
+#define WIFI_PASSWORD "#khater#12"
 
 #define API_KEY "AIzaSyAzxeW0A5HnyOQ_gnLI0wVySnVm30RTjpc"
 #define FIREBASE_PROJECT_ID "smartschool-6aee1"
 #define USER_EMAIL "admin01@smartschool.com"
 #define USER_PASSWORD "123123@smartschool"
-
 #define FIREBASE_FCM_SERVER_KEY "AAAArAAgmhg:APA91bFj5XE1LoBN9ZdzthL9rh77pFIDSfeSlv7xEiAkBpuMNymcLh4RkFNOdOoid9EYClLMdTRKCFIqOKZlnzKxIoVfBX4UBGrsf94Su0K0qQd8xkapt7xvzohfX6B0VO8c4K54rAOV"
 
+//const int BUZZER = 25;
 
 void Network::initWiFi(){
  
@@ -56,7 +58,7 @@ void Network::FirestoreDataUpdate(String studentUID, String actionType)
     
      /* Path to save data of uid and student status */
     String documentPath = "Countries/RBH9GduunnyuyMqZ3kcz/Schools/EsiA0KfrRPBTJM2WBd87/Students/" + studentUID + "/SchoolAttendance/" + actionType;         
-   
+    //String documentPath = "Mohamed/HDK2CnBhPBxPygo3zkG/l_collection/" + studentUID;
     std::vector<struct fb_esp_firestore_document_write_t> writes;      
     struct fb_esp_firestore_document_write_t update_write;
     update_write.type = fb_esp_firestore_document_write_type_update;
@@ -93,7 +95,10 @@ void Network::FirestoreDataUpdate(String studentUID, String actionType)
       {
         Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
         sendNotification("Countries/RBH9GduunnyuyMqZ3kcz/Schools/EsiA0KfrRPBTJM2WBd87/Students/" + studentUID, "parent,name", actionType);
-        
+        tone(BUZZER, 2000); 
+        delay(200);        
+        noTone(BUZZER);
+        delay(200);
       }
     else
       Serial.println(fbdo.errorReason());

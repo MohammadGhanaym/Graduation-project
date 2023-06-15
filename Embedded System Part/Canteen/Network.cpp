@@ -1,7 +1,7 @@
 #include "Network.h"
 
-#define WIFI_SSID "WE_9D74BF"
-#define WIFI_PASSWORD "k7222558"
+#define WIFI_SSID "POCO F3"
+#define WIFI_PASSWORD "123456789"
 
 #define API_KEY "AIzaSyAzxeW0A5HnyOQ_gnLI0wVySnVm30RTjpc"
 #define FIREBASE_PROJECT_ID "smartschool-6aee1"
@@ -62,7 +62,13 @@ void Network::FirestoreDataUpdate(String studentUID)
          */
 
 if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), updateData.raw(), "CurrentBuyer" /* updateMask */))
-      Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+     {
+       Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+       tone(BUZZER, 2000); 
+       delay(200);        
+       noTone(BUZZER);
+       delay(200);
+     } 
     else
       Serial.println(fbdo.errorReason());
   

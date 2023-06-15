@@ -4,9 +4,9 @@
 
 #include "PN53.h"
 #include "Network.h"
-const int redled = 4;
-const int button = 15;
-const int BUZZER = 2;
+const int redled = 27;
+const int button = 12;
+
 String studentUID = "";
 String actionType = "";
 
@@ -53,27 +53,22 @@ void loop()
    if(studentUID)
    {
     network.FirestoreDataUpdate(studentUID, actionType);
-    tone(BUZZER, 2000); 
-    delay(200);        
-    noTone(BUZZER);
-    delay(200);
+    
    }
+   
 }
 
 void changeMode()
 {
-  Serial.println("Interrupt Code");
       delayMicroseconds(200000);
       digitalWrite(redled,!digitalRead(redled));
       
-      if(digitalRead(redled)==HIGH)
+      if(digitalRead(redled) == HIGH)
         {
-          actionType ="Left";
+          actionType = "Left";
         }else
         {
           actionType = "Arrived";
         }
-        Serial.println(actionType);
-        Serial.println("-----------");
-    
+        Serial.println(actionType);    
 }
