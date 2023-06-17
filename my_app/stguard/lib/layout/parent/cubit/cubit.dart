@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,6 +32,7 @@ import '../../../models/exam_results_model.dart';
 class ParentCubit extends Cubit<ParentStates> {
   ParentCubit() : super(ParentInitState());
   static ParentCubit get(context) => BlocProvider.of(context);
+
   late Database database;
 
   void createDatabase() async {
@@ -160,17 +162,16 @@ class ParentCubit extends Cubit<ParentStates> {
     try {
       emit(InsertNotificationsLoadingState());
       final DateTime now = DateTime.now();
-        await database.transaction((txn) async {
-          await txn.rawInsert(
-            'INSERT INTO notification(title, date, body) VALUES(?, ?, ?)',
-            [title, now.toIso8601String(), body],
-          );
-        }).then((value) async {
-          print('Notification inserted successfully');
-          emit(InsertNotificationsSuccessState());
-          await getNotifications();
-        });
-    
+      await database.transaction((txn) async {
+        await txn.rawInsert(
+          'INSERT INTO notification(title, date, body) VALUES(?, ?, ?)',
+          [title, now.toIso8601String(), body],
+        );
+      }).then((value) async {
+        print('Notification inserted successfully');
+        emit(InsertNotificationsSuccessState());
+        await getNotifications();
+      });
     } catch (error) {
       emit(InsertNotificationsErrorState());
       print('Error when inserting notification: $error');

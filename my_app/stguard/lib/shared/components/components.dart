@@ -1198,7 +1198,7 @@ class CanteenProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onLongPress: () {
-        navigateTo(context, ProductDetailsScreen(product:product));
+        navigateTo(context, ProductDetailsScreen(product: product));
       },
       onTap: onTap,
       child: Container(
@@ -2435,5 +2435,45 @@ class GradesList extends StatelessWidget {
                 ],
               ),
             ));
+  }
+}
+
+class EmailVerificationMessage extends StatelessWidget {
+  EmailVerificationMessage({super.key, required this.onPressed, required this.reload});
+  bool reload;
+  void Function()? onPressed;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 55,
+      color: Colors.yellowAccent,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          children: [
+            const Icon(Icons.info_outline),
+            const SizedBox(
+              width: 10,
+            ),
+            Text(
+              'Please verify your email',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            TextButton(
+                onPressed: onPressed,
+                child: Text(reload? 'Refresh':'Send',
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontWeight: FontWeight.w900, color: defaultColor))),
+            const SizedBox(
+              width: 10,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

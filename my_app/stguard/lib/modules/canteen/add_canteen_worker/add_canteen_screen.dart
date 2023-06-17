@@ -20,8 +20,17 @@ class AddCanteenScreen extends StatelessWidget {
       ),
       body: BlocConsumer<CanteenCubit, CanteenStates>(
         listener: (context, state) {
-          if (state is GetCanteenPathSuccessState) {
+          if (state is AddCanteenSucessState) {
             navigateAndFinish(context, const CanteenHomeScreen());
+            ShowToast(message: 'Success', state: ToastStates.SUCCESS);
+          }
+
+          if (state is AddCanteenErrorState) {
+            ShowToast(message: state.error, state: ToastStates.ERROR);
+          }
+
+          if (state is AddCanteenSucessState) {
+            
           }
         },
         builder: (context, state) {

@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:stguard/modules/login/login_screen.dart';
 import 'package:stguard/shared/bloc_observer.dart';
 import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/internet_cubit/cubit.dart';
+import 'package:stguard/shared/main_cubit/main_cubit.dart';
 import 'package:stguard/shared/network/local/cache_helper.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
@@ -29,6 +31,7 @@ void main() async {
   userRole = CacheHelper.getData(key: 'role');
   Widget startScreen = LoginScreen();
   if (userID != null) {
+    emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
     await FirebaseMessaging.instance.getToken();
 
     FirebaseMessaging.onMessageOpenedApp.listen((event) {
@@ -56,13 +59,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (context) => MainCubit()),
         BlocProvider(
           create: (context) => ParentCubit(),
         ),
         BlocProvider(
           create: (context) => TeacherCubit(),
         ),
-        BlocProvider(create: (context) => CanteenCubit())
+        BlocProvider(create: (context) => CanteenCubit()),
       ],
       child: MaterialApp(
         home: startScreen,

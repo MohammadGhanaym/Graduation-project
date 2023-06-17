@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stguard/modules/login/cubit/states.dart';
+import 'package:stguard/shared/components/constants.dart';
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitState());
@@ -38,7 +39,7 @@ class LoginCubit extends Cubit<LoginStates> {
     emit(LoginLoadingState());
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) async{
+        .then((value) async {
       if (role == 'parent') {
         checkRole('Parents', value.user!.uid);
       } else if (role == 'teacher') {
@@ -68,12 +69,14 @@ class LoginCubit extends Cubit<LoginStates> {
             'device_token': await FirebaseMessaging.instance.getToken()
           }).then((value) {
             emit(LoginSuccessState(uid, role));
+            emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
           }).catchError((error) {
             print(error.toString());
             emit(LoginErrorState('Connection Error!'));
           });
         } else {
           emit(LoginSuccessState(uid, role));
+          emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
         }
       } else {
         emit(LoginErrorState('You are not a $role'));

@@ -8,7 +8,10 @@ import 'package:stguard/modules/parent/credit_card/credit_card_screen.dart';
 import 'package:stguard/modules/parent/notifications/notifications_screen.dart';
 import 'package:stguard/modules/parent/pick_school/pick_school_screen.dart';
 import 'package:stguard/shared/components/components.dart';
+import 'package:stguard/shared/components/constants.dart';
 import 'package:stguard/shared/internet_cubit/cubit.dart';
+import 'package:stguard/shared/main_cubit/main_cubit.dart';
+import 'package:stguard/shared/main_cubit/states.dart';
 import 'package:stguard/shared/styles/themes.dart';
 
 class ParentHomeScreen extends StatelessWidget {
@@ -113,7 +116,8 @@ class ParentHomeScreen extends StatelessWidget {
                               ? null
                               : Text(
                                   '${ParentCubit.get(context).notificationCount}'),
-                          child: const ImageIcon(AssetImage('assets/images/notification.png'))))
+                          child: const ImageIcon(
+                              AssetImage('assets/images/notification.png'))))
                 ],
               ),
               drawer: Drawer(
@@ -231,268 +235,301 @@ class ParentHomeScreen extends StatelessWidget {
                         )),
                   ])),
               body: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // balance
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      alignment: AlignmentDirectional.topStart,
-                      height: 150,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(30),
-                              bottomRight: Radius.circular(30)),
-                          color: Theme.of(context).primaryColor),
-                      child: state is GetUserInfoLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
+                child: BlocConsumer<MainCubit, MainStates>(
+                  listener: (context, state) {
+                    if (state is EmailVerificationSuccessState) {
+                      ShowToast(
+                          message: 'Email Verification Link Sent to Inbox',
+                          state: ToastStates.SUCCESS);
+                    }
+
+                    if (state is EmailVerificationChangeState) {
+                      ShowToast(
+                          message: 'Email Verified Successfully',
+                          state: ToastStates.SUCCESS);
+                    }
+                  },
+                  builder: (context, state) {
+                    return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (emailVerified == false)
+                        EmailVerificationMessage(
+                          reload: MainCubit.get(context).reload,
+                          onPressed: MainCubit.get(context).reload
+                              ? MainCubit.get(context).refreshUser
+                              : MainCubit.get(context).verifyEmail,
+                        ),
+                      // balance
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        alignment: AlignmentDirectional.topStart,
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(30),
+                                bottomRight: Radius.circular(30)),
+                            color: Theme.of(context).primaryColor),
+                        child: state is GetUserInfoLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 170,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Balance',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 40,
+                                                  fontFamily: 'OpenSans'),
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(
+                                              currencyFormat(
+                                                  ParentCubit.get(context)
+                                                              .parent !=
+                                                          null
+                                                      ? ParentCubit.get(context)
+                                                          .parent!
+                                                          .balance
+                                                      : 0),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 25),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 40,
+                                      ),
+                                      const Image(
+                                        color: Colors.white,
+                                        image: AssetImage(
+                                            'assets/images/purse.png'),
+                                        width: 100,
+                                        height: 100,
+                                      )
+                                    ],
+                                  ),
+                                ],
                               ),
-                            )
-                          : Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 170,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      // family
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Family',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            ConditionalBuilder(
+                                condition: !ParentCubit.get(context)
+                                    .studentDataLoading,
+                                builder: (context) => ParentCubit.get(context)
+                                        .studentsData
+                                        .isNotEmpty
+                                    ? SizedBox(
+                                        height: 140,
+                                        width: double.infinity,
+                                        child: ListView.separated(
+                                            scrollDirection: Axis.horizontal,
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) =>
+                                                FamilyMemberCard(
+                                                  ParentCubit.get(context)
+                                                      .studentsData
+                                                      .values
+                                                      .toList()[index],
+                                                ),
+                                            separatorBuilder:
+                                                (context, index) =>
+                                                    const SizedBox(
+                                                      width: 5,
+                                                    ),
+                                            itemCount: ParentCubit.get(context)
+                                                .studentsData
+                                                .length),
+                                      )
+                                    : Row(
                                         children: [
-                                          const Text(
-                                            'Balance',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 40,
-                                                fontFamily: 'OpenSans'),
+                                          Container(
+                                            padding: EdgeInsets.zero,
+                                            height: 140,
+                                            width: 130,
+                                            child: Card(
+                                              child: SizedBox(
+                                                width: double.infinity,
+                                                child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      CircleAvatar(
+                                                        radius: 36,
+                                                        backgroundColor:
+                                                            Theme.of(context)
+                                                                .primaryColor,
+                                                        child: CircleAvatar(
+                                                            radius: 35,
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            child: IconButton(
+                                                                onPressed:
+                                                                    () async {
+                                                                  await ParentCubit
+                                                                          .get(
+                                                                              context)
+                                                                      .getCountries();
+                                                                },
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .add))),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 80,
+                                                        child: Text(
+                                                          'Add Family Member',
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyLarge,
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                      )
+                                                    ]),
+                                              ),
+                                            ),
                                           ),
+                                        ],
+                                      ),
+                                fallback: (context) => const SizedBox(
+                                      height: 140,
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    )),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Activity',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            //activity
+                            ConditionalBuilder(
+                              condition:
+                                  !ParentCubit.get(context).activityLoading,
+                              builder: (context) => ParentCubit.get(context)
+                                          .activities
+                                          .isNotEmpty &&
+                                      ParentCubit.get(context)
+                                          .studentsData
+                                          .isNotEmpty
+                                  ? ListView.separated(
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) =>
+                                          ActivityItem(
+                                              model:
+                                                  ParentCubit.get(context)
+                                                      .activities[index],
+                                              studentsData:
+                                                  ParentCubit.get(context)
+                                                      .studentsData
+                                                      .values
+                                                      .toList()),
+                                      separatorBuilder: (context, index) =>
                                           const SizedBox(
                                             height: 5,
                                           ),
-                                          Text(
-                                            currencyFormat(
-                                                ParentCubit.get(context)
-                                                            .parent !=
-                                                        null
-                                                    ? ParentCubit.get(context)
-                                                        .parent!
-                                                        .balance
-                                                    : 0),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 25),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 40,
-                                    ),
-                                    const Image(
-                                      color: Colors.white,
-                                      image:
-                                          AssetImage('assets/images/purse.png'),
-                                      width: 100,
-                                      height: 100,
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    // family
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Family',
-                              style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          ConditionalBuilder(
-                              condition:
-                                  !ParentCubit.get(context).studentDataLoading,
-                              builder: (context) => ParentCubit.get(context)
-                                      .studentsData
-                                      .isNotEmpty
-                                  ? SizedBox(
-                                      height: 140,
-                                      width: double.infinity,
-                                      child: ListView.separated(
-                                          scrollDirection: Axis.horizontal,
-                                          shrinkWrap: true,
-                                          itemBuilder: (context, index) =>
-                                              FamilyMemberCard(
-                                                ParentCubit.get(context)
-                                                    .studentsData
-                                                    .values
-                                                    .toList()[index],
-                                              ),
-                                          separatorBuilder: (context, index) =>
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                          itemCount: ParentCubit.get(context)
-                                              .studentsData
-                                              .length),
-                                    )
-                                  : Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.zero,
-                                          height: 140,
-                                          width: 130,
-                                          child: Card(
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    CircleAvatar(
-                                                      radius: 36,
-                                                      backgroundColor:
-                                                          Theme.of(context)
-                                                              .primaryColor,
-                                                      child: CircleAvatar(
-                                                          radius: 35,
-                                                          backgroundColor:
-                                                              Colors.white,
-                                                          child: IconButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                await ParentCubit
-                                                                        .get(
-                                                                            context)
-                                                                    .getCountries();
-                                                              },
-                                                              icon: const Icon(
-                                                                  Icons.add))),
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 80,
-                                                      child: Text(
-                                                        'Add Family Member',
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .bodyLarge,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    )
-                                                  ]),
+                                      itemCount: ParentCubit.get(context)
+                                          .activities
+                                          .length)
+                                  : Center(
+                                      child: SizedBox(
+                                        width: 200,
+                                        height: 230,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: const [
+                                            Image(
+                                              height: 130,
+                                              width: 130,
+                                              image: AssetImage(
+                                                  'assets/images/no_activity.png'),
+                                              fit: BoxFit.cover,
                                             ),
-                                          ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              'No activity Found',
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                              fallback: (context) => const SizedBox(
-                                    height: 140,
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Activity',
-                              style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          //activity
-                          ConditionalBuilder(
-                            condition:
-                                !ParentCubit.get(context).activityLoading,
-                            builder: (context) => ParentCubit.get(context)
-                                        .activities
-                                        .isNotEmpty &&
-                                    ParentCubit.get(context)
-                                        .studentsData
-                                        .isNotEmpty
-                                ? ListView.separated(
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemBuilder: (context, index) =>
-                                        ActivityItem(
-                                            model: ParentCubit.get(context)
-                                                .activities[index],
-                                            studentsData:
-                                                ParentCubit.get(context)
-                                                    .studentsData
-                                                    .values
-                                                    .toList()),
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
-                                    itemCount: ParentCubit.get(context)
-                                        .activities
-                                        .length)
-                                : Center(
-                                    child: SizedBox(
-                                      width: 200,
-                                      height: 230,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Image(
-                                            height: 130,
-                                            width: 130,
-                                            image: AssetImage(
-                                                'assets/images/no_activity.png'),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            'No activity Found',
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                color: Colors.black54,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ],
                                       ),
                                     ),
-                                  ),
-                            fallback: (context) => const Padding(
-                              padding: EdgeInsets.only(top: 50.0),
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
+                              fallback: (context) => const Padding(
+                                padding: EdgeInsets.only(top: 50.0),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )
+              ;
+                  },
+                    ),
               ));
         },
       ),

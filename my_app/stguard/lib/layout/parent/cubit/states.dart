@@ -239,3 +239,4 @@ class DeleteNotificationErrorState extends ParentStates {}
 
 class UpdateNotificationCountState extends ParentStates {}
 class ResetNotificationCountState extends ParentStates {}
+

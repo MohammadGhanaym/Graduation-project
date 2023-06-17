@@ -121,11 +121,12 @@ class CanteenCubit extends Cubit<CanteenStates> {
           'school': pickedSchool!.id
         }).then((value) async {
           emit(AddCanteenSucessState());
-          await getCanteenPath();
         }).catchError((error) {
           print(error.toString());
           emit(AddCanteenErrorState(error.toString()));
         });
+      } else {
+        emit(AddCanteenErrorState('Something Went Wrong!'));
       }
     });
   }
@@ -811,8 +812,7 @@ class CanteenCubit extends Cubit<CanteenStates> {
               if (parent!.deviceToken != null) {
                 NotificationHelper.sendNotification(
                         title: '${buyer!.name!.split(' ')[0]} Purchased',
-                        body:
-                            '-$totalPrice',
+                        body: '-$totalPrice',
                         receiverToken: parent!.deviceToken!)
                     .then((value) {
                   print(value.body);

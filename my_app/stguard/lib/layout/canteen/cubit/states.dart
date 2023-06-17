@@ -150,3 +150,4 @@ class DeleteCategoryErrorState extends CanteenStates {}
 
 class UserSignOutSuccessState extends CanteenStates{}
 class UserSignOutErrorState extends CanteenStates{}
+
