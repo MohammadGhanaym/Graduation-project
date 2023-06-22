@@ -799,7 +799,7 @@ class SliderBuilder extends StatelessWidget {
       child: Row(
         children: [
           SliderSideLabel(
-            value: 0,
+            value: 10,
             type: 'min',
           ),
           SliderTheme(
@@ -811,8 +811,8 @@ class SliderBuilder extends StatelessWidget {
             child: Expanded(
               child: Slider(
                 value: value,
-                min: 0,
-                max: max,
+                min: 10,
+                max: max.toDouble(),
                 label: '$value',
                 divisions: max ~/ 5,
                 onChanged: onChanged,
@@ -841,11 +841,11 @@ class SliderSideLabel extends StatelessWidget {
         alignment: type == 'min'
             ? AlignmentDirectional.centerEnd
             : AlignmentDirectional.centerStart,
-        width: 35,
+        width: type == 'min'? 35: 50,
         child: Text(
           '${value.round()}',
           style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),overflow: TextOverflow.ellipsis,
         ));
   }
 }
@@ -1624,7 +1624,7 @@ class ParentAttendanceItem extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  getDate(attendanceDetails.datetime, format: 'EE, hh:mm a'),
+                  getDate(attendanceDetails.datetime, format: 'MMM dd, hh:mm a'),
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyLarge,
                 )
@@ -1698,7 +1698,7 @@ class ParentGradeItem extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  getDate(result.datetime),
+                  getDate(result.datetime, format:'MMM dd, hh:mm a'),
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyLarge,
                 )
@@ -1773,13 +1773,16 @@ class DefaultClassListCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(
-                    title,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                  SizedBox(
+                    width: 250,
+                    child: Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                   ),
                   if (teacherOnTap != null)
                     const SizedBox(

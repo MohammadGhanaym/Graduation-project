@@ -31,6 +31,7 @@ void main() async {
   userRole = CacheHelper.getData(key: 'role');
   Widget startScreen = LoginScreen();
   if (userID != null) {
+    await FirebaseAuth.instance.currentUser!.reload();
     emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
     await FirebaseMessaging.instance.getToken();
 

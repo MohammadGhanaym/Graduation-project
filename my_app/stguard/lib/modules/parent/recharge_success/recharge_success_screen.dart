@@ -29,9 +29,7 @@ class RechargeStatusScreen extends StatelessWidget {
               preferredSize: Size(double.infinity, 1), child: Divider())),
       body: BlocConsumer<ParentCubit, ParentStates>(
         listener: (context, state) {
-          if (state is GetUserInfoSuccess) {
-            navigateAndFinish(context, ParentHomeScreen());
-          }
+ 
         },
         builder: (context, state) {
           return Center(
@@ -87,7 +85,7 @@ class RechargeStatusScreen extends StatelessWidget {
                       text: 'Okay',
                       color: defaultColor.withOpacity(0.8),
                       onPressed: () {
-                        ParentCubit.get(context).getParentInfo();
+                        navigateAndFinish(context, ParentHomeScreen());
                       }),
                 ],
               ),

@@ -73,20 +73,26 @@ class ClassUpdatesScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0, right: 8),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
                               children: [
                                 Text(
                                   'Recent',
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 const Spacer(),
-                                Text(
-                                  ParentCubit.get(context).notes.isNotEmpty?
-                                  ParentCubit.get(context).notes[0].title: 'No Data',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .copyWith(fontSize: 15),
+                                const SizedBox(width: 10,),
+                                SizedBox(
+                                  width: 180,
+                                  child: Text(
+                                    ParentCubit.get(context).notes.isNotEmpty?
+                                    ParentCubit.get(context).notes[0].title: 'No Data',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontSize: 15),
+                                  ),
                                 )
                               ],
                             ),
@@ -138,14 +144,18 @@ class ClassUpdatesScreen extends StatelessWidget {
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 const Spacer(),
-                                Text(
-                                  ParentCubit.get(context).studentAttendance!.isNotEmpty?
-                                  ParentCubit.get(context).studentAttendance![0].lessonName:'No Data',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .copyWith(fontSize: 15),
+                                const SizedBox(width: 10,),
+                                SizedBox(
+                                  width: 180,
+                                  child: Text(
+                                    ParentCubit.get(context).studentAttendance!.isNotEmpty?
+                                    ParentCubit.get(context).studentAttendance![0].lessonName:'No Data',
+                                    overflow: TextOverflow.ellipsis,textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontSize: 15),
+                                  ),
                                 )
                               ],
                             ),
@@ -196,15 +206,21 @@ class ClassUpdatesScreen extends StatelessWidget {
                                   'Recent',
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
+                                
+                                const SizedBox(width: 10,),
                                 const Spacer(),
-                                Text(
-                                  ParentCubit.get(context).studentResults!.isNotEmpty?
-                                  ParentCubit.get(context).studentResults![0].examType:'No Data',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .copyWith(fontSize: 15),
+                                SizedBox(
+                                  width: 180,
+                                  child: Text(
+                                    ParentCubit.get(context).studentResults!.isNotEmpty?
+                                    ParentCubit.get(context).studentResults![0].examType:'No Data',
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontSize: 15),
+                                  ),
                                 )
                               ],
                             ),

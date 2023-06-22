@@ -13,6 +13,14 @@ class MainCubit extends Cubit<MainStates> {
         .sendEmailVerification()
         .then((value) {
       emit(EmailVerificationSuccessState());
+      FirebaseAuth.instance.authStateChanges().listen((user) async {
+        await user!.reload();
+        await user.reload();
+        if (user.emailVerified) {
+          emailVerified = user.emailVerified;
+          emit(EmailVerificationChangeState());
+        }
+      });
       reload = true;
     }).catchError((error) {
       emit(EmailVerificationErrorState());

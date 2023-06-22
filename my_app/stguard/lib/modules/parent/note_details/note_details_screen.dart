@@ -20,7 +20,7 @@ class NoteDetailScreen extends StatelessWidget {
             title:  Text('Note Detail', style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.white
-            ),),
+            ),overflow: TextOverflow.ellipsis,),
           ),
           body: Padding(
             padding: const EdgeInsets.all(20.0),

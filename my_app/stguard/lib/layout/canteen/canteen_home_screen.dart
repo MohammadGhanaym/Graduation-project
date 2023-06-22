@@ -39,8 +39,6 @@ class CanteenHomeScreen extends StatelessWidget {
           if (state is UserSignOutSuccessState) {
             navigateAndFinish(context, LoginScreen());
           }
-
-      
         },
         builder: (context, state) {
           return Scaffold(

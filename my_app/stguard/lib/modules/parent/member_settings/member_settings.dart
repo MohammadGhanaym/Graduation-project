@@ -370,7 +370,7 @@ class MemberSettingsScreen extends StatelessWidget {
                                           height: 10,
                                         ),
                                         SliderBuilder(
-                                          max: 500.0,
+                                          max: ParentCubit.get(context).parent!.balance,
                                           value: ParentCubit.get(context)
                                               .pocket_money,
                                           onChanged: (value) {
