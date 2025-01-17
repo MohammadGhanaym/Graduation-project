@@ -22,23 +22,24 @@ The Smart School System revolutionizes school management by improving student sa
 
 ## 📱 App Walkthrough
 ### Parents UI
-![parent1.png](Nexus_UI_Screenshots/parent1.png)
-![parent1.png](Nexus_UI_Screenshots/parent2.png)
+<img src="Nexus_UI_Screenshots/parent1.png" style="max-width: 800px; width: 100%; height: auto;" alt="parent1">
+<img src="Nexus_UI_Screenshots/parent2.png" style="max-width: 800px; width: 100%; height: auto;" alt="parent1">
+
 ### Teachers UI
-![parent1.png](Nexus_UI_Screenshots/t1.jpg)
-![parent1.png](Nexus_UI_Screenshots/t2.jpg)
-![parent1.png](Nexus_UI_Screenshots/t3.jpg)
-![parent1.png](Nexus_UI_Screenshots/t4.jpg)
-![parent1.png](Nexus_UI_Screenshots/t5.jpg)
-![parent1.png](Nexus_UI_Screenshots/t6.jpg)
+<img src="Nexus_UI_Screenshots/t1.jpg" width="360" height="800" alt="t1">
+<img src="Nexus_UI_Screenshots/t2.jpg" width="360" height="800" alt="t2">
+<img src="Nexus_UI_Screenshots/t3.jpg" width="360" height="800" alt="t3">
+<img src="Nexus_UI_Screenshots/t4.jpg" width="360" height="800" alt="t4">
+<img src="Nexus_UI_Screenshots/t5.jpg" width="360" height="800" alt="t5">
+<img src="Nexus_UI_Screenshots/t6.jpg" width="360" height="800" alt="t6">
 
 ### Canteen Workers UI
-![parent1.png](Nexus_UI_Screenshots/c1.jpg)
-![parent1.png](Nexus_UI_Screenshots/c2.jpg)
-![parent1.png](Nexus_UI_Screenshots/c3.jpg)
-![parent1.png](Nexus_UI_Screenshots/c4.jpg)
-![parent1.png](Nexus_UI_Screenshots/c5.jpg)
-![parent1.png](Nexus_UI_Screenshots/c6.jpg)
+<img src="Nexus_UI_Screenshots/c1.jpg" width="360" height="800" alt="t1">
+<img src="Nexus_UI_Screenshots/c2.jpg" width="360" height="800" alt="t2">
+<img src="Nexus_UI_Screenshots/c3.jpg" width="360" height="800" alt="t3">
+<img src="Nexus_UI_Screenshots/c4.jpg" width="360" height="800" alt="t4">
+<img src="Nexus_UI_Screenshots/c5.jpg" width="360" height="800" alt="t5">
+<img src="Nexus_UI_Screenshots/c6.jpg" width="360" height="800" alt="t6">
 
 ---
 
